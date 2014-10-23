@@ -1,0 +1,6 @@
+<div>
+	<div class="form-group" ng-show = "show">
+		<select class = "form-control" id = "time" ng-init = "timeValue = timeOptions[defaultOption]"  ng-model="timeValue" ng-options="item.label for item in timeOptions" ng-change = "onChangeTimeValue()" style = "width : 100%"></select>
+	</div>
+	<div ui-view></div>
+</div>

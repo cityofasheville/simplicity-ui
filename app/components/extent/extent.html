@@ -1,0 +1,6 @@
+<div>
+	<div class="form-group" ng-show = "show">
+		<select class = "form-control" id = "extent" ng-init = "extentValue = extentOptions[defaultOption]"  ng-model="extentValue" ng-options="item.label for item in extentOptions" ng-change = "onChangeExtentValue()" style = "width : 100%"></select>
+	</div>
+	<div ui-view></div>
+</div>

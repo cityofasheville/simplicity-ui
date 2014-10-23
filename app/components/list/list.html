@@ -1,0 +1,32 @@
+<div class = "col-xs-12">
+	<div class="list-group" >
+		<a class="list-group-item list-item-panel">
+			<address class = "pull-left">
+			  <strong>{{locationProperties.address}}</strong><br>
+			  {{locationProperties.city}}, {{locationProperties.state}} {{locationProperties.zip}}
+			</address>
+			<div ng-if = "locationProperties.inTheCity" class="pull-right hidden-xs">
+				<i class="fa fa-check-circle fa-2x text-success pull-left" style = "margin-top : 10px"></i> 
+				<h2 class="pull-left" style = "margin-top : 7px">It's in the city!</h3>
+			</div>
+			<div ng-if = "!locationProperties.inTheCity" class="pull-right hidden-xs">
+				<i class="fa fa-times-circle fa-2x text-danger pull-left" style = "margin-top : 10px"></i> 
+				<h2 class="pull-left" style = "margin-top : 7px" >It's not in the city!</h3>
+			</div>
+		</a>
+		<a ng-if = "locationProperties.inTheCity" class="list-group-item list-item-panel visible-xs">
+			<i class="fa fa-check-circle fa-2x text-success pull-left" style = "margin-top : 10px"></i> 
+			<h2 class="pull-left" style = "margin-top : 7px" >It's in the city!</h3>
+		</a>
+		<a ng-if = "!locationProperties.inTheCity" class="list-group-item list-item-panel visible-xs">
+			<i class="fa fa-times-circle fa-2x text-danger pull-left" style = "margin-top : 10px"></i> 
+			<h2 class="pull-left" style = "margin-top : 7px">It's not in the city!</h3>
+		</a>
+		<a class="list-group-item list-item-panel" ng-click = 'getAnswer()' ng-repeat = "question in questions" tabindex='{{$index + 1}}'>
+			<h4>{{question.question}}<i class="fa fa-chevron-right pull-right text-primary" style = "margin-top: 8px"></i> </h4>
+		</a>
+		<a class="list-group-item list-item-panel" ng-show = 'more.show' ng-click = 'more.get()' tabindex='{{questions.length + 2}}'>
+			<h3 class = "text-primary" style = "text-align : center">More</h3>
+		</a>
+	</div>
+</div>

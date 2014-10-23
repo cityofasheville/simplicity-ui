@@ -1,0 +1,101 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node',
+1 verbose cli   '/usr/local/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   'karma-chai-as-promised',
+1 verbose cli   '--save-dev' ]
+2 info using npm@2.0.2
+3 info using node@v0.10.32
+4 warn package.json simplicity@0.0.1 No repository field.
+5 warn package.json simplicity@0.0.1 No README data
+6 verbose readDependencies using package.json deps
+7 verbose cache add [ 'karma-chai-as-promised', null ]
+8 verbose cache add spec="karma-chai-as-promised" args=["karma-chai-as-promised",null]
+9 verbose parsed spec { raw: 'karma-chai-as-promised',
+9 verbose parsed spec   scope: null,
+9 verbose parsed spec   name: 'karma-chai-as-promised',
+9 verbose parsed spec   rawSpec: '',
+9 verbose parsed spec   spec: '*',
+9 verbose parsed spec   type: 'range' }
+10 verbose parsed spec { raw: 'karma-chai-as-promised',
+10 verbose parsed spec   scope: null,
+10 verbose parsed spec   name: 'karma-chai-as-promised',
+10 verbose parsed spec   rawSpec: '',
+10 verbose parsed spec   spec: '*',
+10 verbose parsed spec   type: 'range' }
+11 verbose addNamed [ 'karma-chai-as-promised', '*' ]
+12 verbose addNamed [ null, '*' ]
+13 silly lockFile 5ff93472-karma-chai-as-promised karma-chai-as-promised@*
+14 verbose lock karma-chai-as-promised@* /Users/cam/.npm/5ff93472-karma-chai-as-promised.lock
+15 silly addNameRange { name: 'karma-chai-as-promised', range: '*', hasData: false }
+16 verbose mapToRegistry name karma-chai-as-promised
+17 verbose mapToRegistry uri https://registry.npmjs.org/karma-chai-as-promised
+18 verbose request on initialization, where is /karma-chai-as-promised
+19 verbose request after pass 1, where is /karma-chai-as-promised
+20 verbose request url raw /karma-chai-as-promised
+21 verbose request resolving registry [ 'https://registry.npmjs.org/', './karma-chai-as-promised' ]
+22 verbose request after pass 2, where is https://registry.npmjs.org/karma-chai-as-promised
+23 verbose request no auth needed
+24 info attempt registry request try #1 at 11:14:32
+25 verbose request id 1ad6f34acf76cef0
+26 http request GET https://registry.npmjs.org/karma-chai-as-promised
+27 http 404 https://registry.npmjs.org/karma-chai-as-promised
+28 verbose headers { date: 'Thu, 23 Oct 2014 15:14:32 GMT',
+28 verbose headers   server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+28 verbose headers   'content-type': 'application/json',
+28 verbose headers   'cache-control': 'max-age=0',
+28 verbose headers   'content-length': '52',
+28 verbose headers   'accept-ranges': 'bytes',
+28 verbose headers   via: '1.1 varnish',
+28 verbose headers   age: '0',
+28 verbose headers   'x-served-by': 'cache-dfw1821-DFW',
+28 verbose headers   'x-cache': 'MISS',
+28 verbose headers   'x-cache-hits': '0',
+28 verbose headers   'x-timer': 'S1414077272.166785,VS0,VE61',
+28 verbose headers   'keep-alive': 'timeout=10, max=50',
+28 verbose headers   connection: 'Keep-Alive' }
+29 silly registry.get cb [ 404,
+29 silly registry.get   { date: 'Thu, 23 Oct 2014 15:14:32 GMT',
+29 silly registry.get     server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+29 silly registry.get     'content-type': 'application/json',
+29 silly registry.get     'cache-control': 'max-age=0',
+29 silly registry.get     'content-length': '52',
+29 silly registry.get     'accept-ranges': 'bytes',
+29 silly registry.get     via: '1.1 varnish',
+29 silly registry.get     age: '0',
+29 silly registry.get     'x-served-by': 'cache-dfw1821-DFW',
+29 silly registry.get     'x-cache': 'MISS',
+29 silly registry.get     'x-cache-hits': '0',
+29 silly registry.get     'x-timer': 'S1414077272.166785,VS0,VE61',
+29 silly registry.get     'keep-alive': 'timeout=10, max=50',
+29 silly registry.get     connection: 'Keep-Alive' } ]
+30 silly lockFile 5ff93472-karma-chai-as-promised karma-chai-as-promised@*
+31 silly lockFile 5ff93472-karma-chai-as-promised karma-chai-as-promised@*
+32 verbose stack Error: 404 Not Found: karma-chai-as-promised
+32 verbose stack     at RegClient.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:258:14)
+32 verbose stack     at Request._callback (/usr/local/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:197:65)
+32 verbose stack     at Request.self.callback (/usr/local/lib/node_modules/npm/node_modules/request/request.js:237:22)
+32 verbose stack     at Request.emit (events.js:98:17)
+32 verbose stack     at Request.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/request/request.js:1146:14)
+32 verbose stack     at Request.emit (events.js:117:20)
+32 verbose stack     at IncomingMessage.<anonymous> (/usr/local/lib/node_modules/npm/node_modules/request/request.js:1097:12)
+32 verbose stack     at IncomingMessage.emit (events.js:117:20)
+32 verbose stack     at _stream_readable.js:943:16
+32 verbose stack     at process._tickCallback (node.js:419:13)
+33 verbose statusCode 404
+34 verbose pkgid karma-chai-as-promised
+35 verbose cwd /Users/cam/coa/simplicity-ui/master
+36 error Darwin 14.0.0
+37 error argv "node" "/usr/local/bin/npm" "install" "karma-chai-as-promised" "--save-dev"
+38 error node v0.10.32
+39 error npm  v2.0.2
+40 error code E404
+41 error 404 Not Found: karma-chai-as-promised
+41 error 404
+41 error 404 'karma-chai-as-promised' is not in the npm registry.
+41 error 404 You should bug the author to publish it (or use the name yourself!)
+41 error 404 It was specified as a dependency of 'simplicity'
+41 error 404
+41 error 404 Note that you can also install from a
+41 error 404 tarball, folder, http url, or git url.
+42 verbose exit [ 1, true ]
