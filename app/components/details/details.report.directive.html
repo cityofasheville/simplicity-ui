@@ -1,0 +1,95 @@
+<div>
+	<a class = 'pull-right'ng-click = "goTo(map);">View on Map</a>
+	<div class="list-item-panel col-xs-12" style = "padding : 10px">
+		<div class="col-xs-12 list-item-panel">
+			<div class="col-xs-12 col-md-6">
+				<address style = "margin-bottom: 5px">
+				  <strong>{{locationProperties.address.attributes.House}} {{locationProperties.address.attributes.preType}} {{locationProperties.address.attributes.StreetName}} {{locationProperties.address.attributes.SufType}} {{locationProperties.address.attributes.SufDir}} 
+				  	<span ng-if= "locationProperties.address.attributes.User_fld !== ''">UNIT: {{locationProperties.address.attributes.User_fld}}</span>
+				  </strong><br>
+				  <span ng-if = "locationProperties.inTheCity">Asheville, NC</span>
+				  {{locationProperties.address.attributes.ZIP}}
+				</address>
+				<h5>PIN : <span>{{propertyDetails.attributes.pinnum}}</span></h5>
+			</div>
+			<div class="col-xs-12 col-md-6">
+				<div ng-if = "propertyDetails.attributes.isincity === 'Yes'" class="pull-left">
+					<i class="fa fa-check-circle fa-2x text-success pull-left" style = "margin-top : 4px"></i> 
+					<h4 class="pull-left" style = "margin-top : 7px">It's in the city!</h4>
+				</div>
+				<div ng-if = "propertyDetails.attributes.isincity === 'No'" class="pull-left">
+					<i class="fa fa-times-circle fa-2x text-danger pull-left" style = "margin-top : 4px"></i> 
+					<h4 class="pull-left" style = "margin-top : 7px" >It's not in the city!</h4>
+				</div>
+				<div ng-if = "propertyDetails.attributes.iscityowned === 'Yes'" class="pull-left">
+					<i class="fa fa-check-circle fa-2x text-success pull-left" style = "margin-top : 4px"></i> 
+					<h4 class="pull-left" style = "margin-top : 7px">It's city owned!</h4>
+				</div>
+				<div ng-if = "propertyDetails.attributes.iscityowned === 'No'" class="pull-left">
+					<i class="fa fa-times-circle fa-2x text-danger pull-left" style = "margin-top : 4px"></i> 
+					<h4 class="pull-left" style = "margin-top : 7px" >It's not city owned!</h4>
+				</div>
+			</div>
+		</div>
+			<div class="col-xs-12 col-md-6 list-item-panel pull-left">
+				<h4>Owner</h4>
+				<strong>{{propertyDetails.attributes.owner}}</strong>
+				<address>{{propertyDetails.attributes.owner_address}}<br>
+				{{propertyDetails.attributes.owner_citystatezip}}</address>
+			</div>
+			<div class="col-xs-12 col-md-5 list-item-panel pull-right">
+				<h4>Tax Details</h4>
+				<p ng-if= "propertyDetails.attributes.exempt === null">
+					Tax exempt : <span class = "text-danger">NO</span>
+				</p>
+		      	<p ng-if= "propertyDetails.attributes.exempt !== null">
+		      		Tax exempt : <span class = "text-success">YES</span>
+		      	</p>
+		      	<p ng-if= "propertyDetails.attributes.improved === 'Y'">
+		      		Improved : 
+		      		<span class = "text-success">YES (${{propertyDetails.attributes.improvementvalue|number}})</span>
+		      	</p>
+		      	<p>Appraisal Area : {{propertyDetails.attributes.appraisalarea}}</p>
+			</div>
+			<div class="col-xs-12 list-item-panel">
+				<h4>Property and Tax Value</h4>
+		      	<table class="table ">
+			      <thead>
+			        <tr>
+			          <th>Value Type</th>
+			          <th>Amount</th>
+			        </tr>
+			      </thead>
+			      <tbody>
+			        <tr>
+			          <td>Building Value</td>
+			          <td>${{propertyDetails.attributes.buildingvalue|number}}</td>
+			        </tr>
+			        <tr>
+			          <td>Land Value</td>
+			          <td>${{propertyDetails.attributes.landvalue|number}}</td>
+			        </tr>
+			        <tr>
+			          <td>Appraised Value</td>
+			          <td>${{propertyDetails.attributes.appraisedvalue|number}}</td>
+			        </tr>
+			        <tr>
+			          <td>Tax Value</td>
+			          <td>${{propertyDetails.attributes.taxvalue|number}}</td>
+			        </tr>
+			        <tr>
+			          <td>Total Market Value</td>
+			          <td>${{propertyDetails.attributes.totalmarketvalue|number}}</td>
+			        </tr>
+			      </tbody>
+			    </table>
+		    </div>
+		<div class="col-xs-12 list-item-panel">
+			<br>
+			<a class="col-xs-12 col-md-3" style = "text-align : center; margin-bottom : 10px">Deed</a>
+			<a class="col-xs-12 col-md-3" style = "text-align : center; margin-bottom : 10px">Plat</a>
+			<a class="col-xs-12 col-md-4" style = "text-align : center; margin-bottom : 10px">Property Card</a>
+			<br>
+		</div>
+	</div>
+</div>

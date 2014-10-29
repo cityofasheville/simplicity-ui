@@ -1,45 +1,4 @@
 <div>
-<table class = "table table-condensed table-striped">
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th style = "text-align : center">Number</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Aggravated Assault</td>
-        <td style = "text-align : center">2</td>
-      </tr>
-      <tr>
-        <td>Burglary</td>
-        <td style = "text-align : center">12</td>
-      </tr>
-      <tr>
-        <td>Drug Arrest</td>
-        <td style = "text-align : center">2</td>
-      </tr>
-      <tr>
-        <td>Larceny</td>
-        <td style = "text-align : center">28</td>
-      </tr>
-      <tr>
-        <td>Larceny of Motor Vehicles</td>
-        <td style = "text-align : center">2</td>
-      </tr>
-      <tr>
-        <td>Rape</td>
-        <td style = "text-align : center">1</td>
-      </tr>
-      <tr>
-        <td>Robbery</td>
-        <td style = "text-align : center">0</td>
-      </tr>
-      <tr>
-        <td>Vandalism</td>
-        <td style = "text-align : center">8</td>
-      </tr>
-    </tbody>
-  </table>
-  <a ui-sref="main.location.category.time.detail.map">Map</a>
+  <div ng-if = "stateParams.details === 'report'" report = "stateParams"></div>
+  <div ng-if = "stateParams.details === 'map'" map = "stateParams"></div>
 </div>

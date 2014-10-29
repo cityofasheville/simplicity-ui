@@ -1,18 +1,15 @@
 
-app.controller('ListCtrl', ['$scope','$state','AppFact', 'location', function ($scope, $state, AppFact, location) {
-    
-    //Get locationProperties 
-    AppFact.locationProperties(location)
-        .then(function(locationProperties){
-            $scope.locationProperties = locationProperties;
+app.controller('QuestionsCtrl', ['$scope','$state','Category', 'Questions', 'LocationProperties', 
+    function ($scope, $state, Category, Questions, LocationProperties) {
+
+    LocationProperties.properties()
+        .then(function(properties){
+           $scope.locationProperties = properties;
         });
-
-
-
 
     //Get a list of questions for the current location
     //****This could be an HTTP request****//
-    var questions = AppFact.questions();
+    var questions = Questions.get();
 
     //Get the top 2 questions
     $scope.questions = questions.slice(0,2);
@@ -46,10 +43,8 @@ app.controller('ListCtrl', ['$scope','$state','AppFact', 'location', function ($
     }
 
     //if active, call on left arrow key press also
-    $scope.getAnswer = function(){
-        var category = AppFact.categoryDefinition('crime');
-        $scope.category = category;
-        $state.go('main.location.category.time.extent.filter.details', category);
+    $scope.getAnswer = function(question){
+        $state.go('main.location.category', {'category': question.category});
     };
 
 

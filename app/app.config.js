@@ -15,6 +15,11 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
         url: '',
         templateUrl: 'main/main.html',
         controller: 'MainCtrl',
+        resolve :  {
+          featureServiceProperties : ['ArcGisServer', function(ArcGisServer){
+                return ArcGisServer.featureService.properties();
+          }]
+        }
       })
       //location can be a CAI (civic address id) or an neighborhood
       .state('main.location', {
@@ -22,19 +27,16 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
         template: '<div ui-view style = "z-index : 100" class = "slide"></div>',
         controller: 'LocationCtrl',
         resolve:  {
-          location: ['$stateParams', 'AppFact', function($stateParams, AppFact){
-            AppFact.locationProperties($stateParams.location)
-              .then(function(locationProperties){
+          location: ['$stateParams', function($stateParams){
                 return $stateParams.location;
-              }); 
           }]
         }
       })
       //list of question for a location
-      .state('main.location.list', {
-        url: '/list',
-        templateUrl: 'list/list.html',
-        controller: 'ListCtrl',
+      .state('main.location.questions', {
+        url: '/questions',
+        templateUrl: 'questions/questions.html',
+        controller: 'QuestionsCtrl',
       })
       //category is a data category such as property, crime, or development
       .state('main.location.category', {
