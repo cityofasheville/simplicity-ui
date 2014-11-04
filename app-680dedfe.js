@@ -222,8 +222,6 @@ app.factory('ArcGisServer', ['$http', '$location', '$q', '$filter',
           if(data.error){
             console.log(data.error.code + ' ArcGisServer.featureService.query on featureServiceId ' + featureServiceId + '. ' + data.error.message);
           }else{
-            console.log('query ' + featureServiceId);
-            console.log(data);
             q.resolve(data);
           }
         })
@@ -966,12 +964,13 @@ app.factory('Extent', [function(){
     //****Create the factory object****//
     var Extent = {};
 
+    // {'value' : 'within-a-half-mile', 'label' : 'Within a half mile'},
+    //   {'value' : 'within-a-mile', 'label' : 'Within a mile'},
+    //   {'value' : 'within-5-miles', 'label' : 'Within 5 miles'}
+
     var extentOptions = [
       {'value' : 'within-an-eighth-of-a-mile', 'label' : 'Within an eighth of a mile'},
-      {'value' : 'within-a-quarter-mile', 'label' : 'Within a quarter mile'},
-      {'value' : 'within-a-half-mile', 'label' : 'Within a half mile'},
-      {'value' : 'within-a-mile', 'label' : 'Within a mile'},
-      {'value' : 'within-5-miles', 'label' : 'Within 5 miles'}
+      {'value' : 'within-a-quarter-mile', 'label' : 'Within a quarter mile'}   
     ];
   
 
@@ -1167,7 +1166,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('main/main.html',
-    '<div class="col-md-6 col-md-offset-3"><br><div class="col-xs-12"><div class="col-xs-12"><div class="pull-left" ng-click="goHome();" ;="" style="cursor : pointer"><h1>SimpliCity</h1><h4>city data simplified</h4></div><img class="pull-right" style="margin-top: 5px" src="http://123graffitifree.com/images/citylogo-flatblack.png"></div><div class="col-xs-12"><br></div><div class="col-xs-12"><input tabindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location" style="z-index: 0" ng-model="typedLocation" ng-keypress="getAddressCandidates(typedLocation, $event)"><div class="row col-xs-12"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-warning">{{helperMessage.message}}</p><div class="list-group" style="width : 100%; position : absolute; z-index : 1000; max-height : 230px; overflow-y: scroll"><a tabindex="{{$index+1}}" ng-click="getLocationProperties(candidate, $event)" ng-keypress="getLocationProperties(candidate, $event)" ng-repeat="candidate in addresses.candidates" class="list-group-item"><p class="text-info">{{candidate.attributes.House}} {{candidate.attributes.preType}} {{candidate.attributes.StreetName}} {{candidate.attributes.SufType}} {{candidate.attributes.SufDir}} <span ng-if="candidate.attributes.User_fld !== \'\'">UNIT: {{candidate.attributes.User_fld}}</span>, {{candidate.attributes.ZIP}}</p></a></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div></div><div class="col-xs-12"><br></div></div><div class="col-xs-12 content" style="height : 400px"><div ui-view="" class="slide"></div></div></div>');
+    '<div class="col-md-6 col-md-offset-3"><br><div class="col-xs-12"><div class="col-xs-12"><div class="pull-left" ng-click="goHome();" ;="" style="cursor : pointer"><h1>SimpliCity</h1><h4>city data simplified</h4></div><img class="pull-right hidden-xs" style="margin-top: 5px" src="http://123graffitifree.com/images/citylogo-flatblack.png"> <img class="pull-right visible-xs" style="margin-top: 5px; height : 30px" src="http://123graffitifree.com/images/citylogo-flatblack.png"></div><div class="col-xs-12"><br></div><div class="col-xs-12"><input tabindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location" style="z-index: 0" ng-model="typedLocation" ng-keypress="getAddressCandidates(typedLocation, $event)"><div class="row col-xs-12"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-warning">{{helperMessage.message}}</p><div class="list-group" style="width : 100%; position : absolute; z-index : 1000; max-height : 230px; overflow-y: scroll"><a tabindex="{{$index+1}}" ng-click="getLocationProperties(candidate, $event)" ng-keypress="getLocationProperties(candidate, $event)" ng-repeat="candidate in addresses.candidates" class="list-group-item"><p class="text-info">{{candidate.attributes.House}} {{candidate.attributes.preType}} {{candidate.attributes.StreetName}} {{candidate.attributes.SufType}} {{candidate.attributes.SufDir}} <span ng-if="candidate.attributes.User_fld !== \'\'">UNIT: {{candidate.attributes.User_fld}}</span>, {{candidate.attributes.ZIP}}</p></a></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div></div><div class="col-xs-12"><br></div></div><div class="col-xs-12 content" style="height : 400px"><div ui-view="" class="slide"></div></div></div>');
 }]);
 })();
 
