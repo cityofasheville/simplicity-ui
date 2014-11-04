@@ -1,0 +1,82 @@
+<div class="col-xs-12">
+	<div class="col-xs-12" style = "height : 100px; text-align : center" ng-show = "loading">
+		<i class="fa fa-5x fa-spinner fa-spin"></i>
+	</div>
+<!-- 	<div class="col-xs-12" ng-if = 'isEmpty'>No development activity was found based on your search criteria.</div>
+ -->	<div class="col-xs-12" ng-if = '!isEmpty' ng-show = "!loading" ng-cloak>
+		<a class = 'pull-right' ng-click = "goTo(map);">View on Map</a>
+		<div class="col-xs-12 list-item-panel">
+			<table class="table" >
+		      <thead>
+		        <tr>
+		          <th>Development Type</th>
+		          <th>Count</th>
+		        </tr>
+		      </thead>
+		      <tbody>
+		        <tr ng-repeat = "(key, value) in developmentSummary">
+		          <td><strong>{{key}}:</strong>{{developmentExplanations[key]}}</td>
+		          <td>{{value}}</td>
+		        </tr>
+		      </tbody>
+		    </table>
+		</div>
+	</div>
+	<div class="col-xs-12" ng-if= 'developmentArray.length !== 0' ng-show = "!loading" ng-cloak>
+		<a class = 'pull-right' ng-click = "goTo(map);">View on Map</a>
+		<div class="col-xs-12 list-item-panel" ng-repeat = "item in developmentArray">
+			<h5 class = 'text-center'>{{item.attributes.address}}</h5>
+			<div class="col-xs-12">
+				<div class="col-xs-12 col-md-4">
+					<strong>Opened</strong>
+					<p>{{item.attributes.date_opened|date}}</p>
+				</div>
+				<div class="col-xs-12 col-md-4">
+					<strong>Updated</strong>
+					<p>{{item.attributes.date_statused|date}}</p>
+				</div>
+				<div class="col-xs-12 col-md-4">
+					<strong>Status</strong>
+					<p>{{item.attributes.record_status}}</p>
+				</div>
+			</div>
+			<div class="col-xs-12">
+				
+				<p><strong>Description: </strong>{{item.attributes.description}}</p>
+			</div>
+			<div ng-init = 'showMore = false' ng-show = 'showMore'>
+				<div class="col-xs-12">
+					<div class="pull-left">
+						<strong>Record Id</strong>
+						<p>{{item.attributes.record_id}}</p>
+					</div>
+					<div class="pull-right">
+						<strong>License Number</strong>
+						<p>{{item.attributes.license_number}}</p>
+					</div>
+				</div>
+				<div class="col-xs-12">
+					<div class="pull-left">
+						<strong>Record Name</strong>
+						<p>{{item.attributes.record_name}}</p>
+					</div>
+					<div class="pull-right">
+						<strong>Business Name</strong>
+						<p>{{item.attributes.business_name}}</p>
+					</div>
+				</div>
+				<div ng-init = 'showComments = false' ng-show = 'showComments'>
+					<strong>Comments</strong>
+					<p>{{item.attributes.record_comments}}</p>
+				</div>
+				<a  ng-click = "showComments = !showComments">
+					<p class = 'text-center' ng-if = '!showComments'>Show Comments</p>
+					<p class = 'text-center' ng-if = 'showComments'>Hide Comments</p>
+				</a>
+			</div>
+			<a  ng-click = "showMore = !showMore">
+				<p class = 'text-center' ng-if = '!showMore'>Show More</p>
+				<p class = 'text-center' ng-if = 'showMore'>Show Less</p>
+			</a>
+		</div>
+	</div></div>

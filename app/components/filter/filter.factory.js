@@ -24,11 +24,26 @@ app.factory('Filter', [function(){
       {'value' : 'larceny', 'label' : 'Larcenies'},
       {'value' : 'larceny-auto', 'label' : 'Larcenies (Auto)'},
     ];
-  
+
+    var developmentFilterOptions = [
+      {'value' : 'summary', 'label' : 'Development Summary'},
+    ];
+
+    var filterOptions = {
+      'crime' : crimeFilterOptions,
+      'property' : propertyFilterOptions,
+      'development' : developmentFilterOptions
+    };
+
+    Filter.updateOptions = function(newFilterOptions, categeory){
+        filterOptions[categeory] = newFilterOptions;
+    };
+    
+
 
     //****API*****//
     Filter.options = function(categeory){
-      return crimeFilterOptions
+      return filterOptions[categeory];
     };
     
 

@@ -9,7 +9,7 @@ app.controller('ExtentCtrl', ['$scope', '$stateParams', '$state', 'Extent',
 
 		for (var i = 0; i < $scope.extentOptions.length; i++) {
 			if($scope.extentOptions[i].value === $stateParams.extent){
-				$scope.defaultOption = 2;
+				$scope.defaultOption = i;
 			}
 		}
 	}

@@ -18,6 +18,7 @@ app.factory('LocationProperties', ['$http', '$location', '$q', '$filter', '$stat
       };
       ArcGisServer.featureService.query(dataCacheId, queryParams)
         .then(function(dataCacheResults){
+          console.log(dataCacheResults);
           for (var i = 0; i < dataCacheResults.features.length; i++) {
             if(dataCacheResults.features[i].attributes.type === 'ADDRESS IN CITY'){
               properties.inTheCity = (dataCacheResults.features[i].attributes.data === 'YES')? true : false;

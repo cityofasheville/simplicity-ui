@@ -5,7 +5,6 @@ app.controller('TimeCtrl', ['$scope', '$stateParams', '$state', 'Time',
 		$scope.show = false;
 	}else{
 		$scope.show = true;
-		//Probably will be HTTP
 		$scope.timeOptions = Time.options();
 		for (var i = 0; i < $scope.timeOptions.length; i++) {
 			if($scope.timeOptions[i].value === $stateParams.time){

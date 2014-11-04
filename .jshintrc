@@ -3,7 +3,7 @@
     "browser": true,
     "esnext": true,
     "bitwise": true,
-    "camelcase": true,
+    "camelcase": false,
     "curly": true,
     "eqeqeq": true,
     "immed": true,
@@ -11,7 +11,6 @@
     "latedef": true,
     "newcap": true,
     "noarg": true,
-    "quotmark": "single",
     "undef": true,
     "unused": false,
     "strict": true,
@@ -21,6 +20,7 @@
     "globals": {
         "app": true,
         "angular": false,
-        "L" : true
+        "L" : true,
+        "$" : true
     }
 }

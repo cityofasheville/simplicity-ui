@@ -4,6 +4,7 @@ app.factory('Extent', [function(){
     var Extent = {};
 
     var extentOptions = [
+      {'value' : 'within-an-eighth-of-a-mile', 'label' : 'Within an eighth of a mile'},
       {'value' : 'within-a-quarter-mile', 'label' : 'Within a quarter mile'},
       {'value' : 'within-a-half-mile', 'label' : 'Within a half mile'},
       {'value' : 'within-a-mile', 'label' : 'Within a mile'},

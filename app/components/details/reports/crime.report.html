@@ -1,0 +1,25 @@
+<div class="col-xs-12">
+	<div class="col-xs-12" style = "height : 100px; text-align : center" ng-show = "loading">
+		<i class="fa fa-5x fa-spinner fa-spin"></i>
+	</div>
+	<div class="col-xs-12" ng-show = "!loading" ng-cloak>
+		<a class = 'pull-right'ng-click = "goTo(map);">View on Map</a>
+		<div class="col-xs-12 list-item-panel">
+			<table class="table" >
+		      <thead>
+		        <tr>
+		          <th>Crime Type</th>
+		          <th>Count</th>
+		        </tr>
+		      </thead>
+		      <tbody>
+		        <tr ng-repeat = "(key, value) in crimeSummary">
+		          <td>{{key}}</td>
+		          <td>{{value}}</td>
+		        </tr>
+		      </tbody>
+		    </table>
+		</div>
+	</div>
+  	
+</div>

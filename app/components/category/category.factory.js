@@ -10,8 +10,8 @@ app.factory('Category', ['$http', '$location', '$q', '$filter',
     var caiCrimeDefinition = {
       title : 'Crime',
       defaultStates : {
-        time : '2014',
-        extent : 'within-a-quarter-mile',
+        time : 'last-year',
+        extent : 'within-an-eighth-of-a-mile',
         filter : 'summary',
         details : 'report'
       }
@@ -27,6 +27,27 @@ app.factory('Category', ['$http', '$location', '$q', '$filter',
       }
     };
 
+
+    var developmentDefinition = {
+      title : 'Development',
+      defaultStates : {
+        time : 'last-year',
+        extent : 'within-an-eighth-of-a-mile',
+        filter : 'summary',
+        details : 'report'
+      }
+    };
+
+    var permitsDefinition = {
+      title : 'Permits',
+      defaultStates : {
+        time : 'last-year',
+        extent : 'location',
+        filter : 'summary',
+        details : 'report'
+      }
+    };
+
     var neighborhoodCrimeDefinition = {
       showTimeOptions : true,
       defaultTimeOption : 2,
@@ -36,19 +57,14 @@ app.factory('Category', ['$http', '$location', '$q', '$filter',
       defaultFilterOption : 'summary'
     };
 
-    // var propertyDefinition = {
-    //   showTimeOptions : false,
-    //   defaultTimeOption : 'current',
-    //   showExtentOptions : false,
-    //   defaultExtentOption : 'location',
-    //   showFilterOptions : false,
-    //   defaultFilterOption : 'summary'
-    // };
+
 
     var categoryDefinitions = {
       cai : {
         crime : caiCrimeDefinition,
-        property : propertyDefinition
+        property : propertyDefinition,
+        development : developmentDefinition,
+        permits : permitsDefinition
       },
       neighborhood : {
         crime : neighborhoodCrimeDefinition
