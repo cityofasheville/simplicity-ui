@@ -4537,6 +4537,10 @@ table .success, table .warning, table .danger, table .info, .table .success, .ta
 a {
   cursor: pointer; }
 
+.modal .modal-body {
+  max-height: 500px;
+  overflow-y: auto; }
+
 /*
 Author: L. Voogdt
 License: MIT

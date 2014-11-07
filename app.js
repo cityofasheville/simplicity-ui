@@ -250,14 +250,77 @@ app.factory('ArcGisServer', ['$http', '$location', '$q', '$filter',
 
     
 }]); //END ArcGisServer factory function
+
+app.factory('LayerDefintion', ['$http', '$location', '$q', '$filter', '$state', '$stateParams',
+  function($http, $location, $q, $filter, $state, $stateParams){
+
+    //****Create the factory object****//
+  	var LayerDefintion = {};
+
+    var layerDefinitions = {
+      'development' : {
+        'layer' : 'coagis.gisowner.coa_opendata_permits',
+        'type' : 'layer',
+        'time' : 'date_opened',
+        'filter' : 'record_type',
+        'colors' : {
+          'Alternative Compliance' : '0F2859',
+          'Conditional Zoning Permit' : 'F2E96B',
+          'Major Subdivision' : '537324',
+          'Major Work' : 'DB770F',
+          'Minor Work' : '817B7E',
+          'Planning - Historical' : 'F25E3D',
+          'Planning Level I' : 'F2913D',
+          'Planning Level II' : '30588C',
+          'Planning Level III' : '63038C',
+          'Planning/Non Development/Alternative Compliance/NA' : '387352',
+          'Research Zoning Letters' : '8C3503',
+          'Subdivision Alternative Access' : '4D5973',
+          'Subdivision Recombination' : 'A25EBF',
+          'Variance Zoning' : '9DBF21'
+        }
+      },
+      'crime' : {
+        'layer' : 'coagis.gisowner.coa_opendata_crime',
+        'type' : 'layer',
+        'time' : 'thedate',
+        'filter' : 'offense',
+        'colors' : {
+          'Aggrevated Assault' : '0F2859',
+          'Burglary' : 'F2E96B',
+          'Drug Arrest' : '8C3503',
+          'Larceny' : '4D5973',
+          'Larceny of Motor Vehicle' : '817B7E',
+          'Rape' : 'F25E3D',
+          'Robbery' : 'F2913D',
+          'Vandalism' : '30588C'
+        }
+      }
+    };
+
+    LayerDefintion.get = function(property){
+      return layerDefinitions[$stateParams.category][property]
+    };
+
+    //****Return the factory object****//
+    return LayerDefintion; 
+
+    
+}]); //END LayerDefintion factory function
 //Keep a scope variable of the current address to share across all 
-app.controller('CategoryCtrl', ['$scope', '$stateParams', '$state', 'Category', 
-	function ($scope, $stateParams, $state, Category) {
+app.controller('CategoryCtrl', ['$scope', '$stateParams', '$state', 'Category', 'LocationProperties',
+	function ($scope, $stateParams, $state, Category, LocationProperties) {
 
 	//***TODO: Get category definition via HTTP ***//
     $scope.category = Category.getDefinition($stateParams.category);
-    console.log($scope.category);
-    $state.go('main.location.category.time.extent.filter.details', $scope.category.defaultStates);    
+    LocationProperties.properties()
+        .then(function(properties){
+        	$scope.locationProperties = properties;
+        });
+    $state.go('main.location.category.time.extent.filter.details', $scope.category.defaultStates);  
+    $scope.goBack = function(){
+        $state.go('main.location.questions');
+      };  
 }]);
 
 
@@ -362,13 +425,53 @@ app.controller('DetailsCtrl', ['$scope', '$stateParams', '$state',
     };
 }]);
 
-app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', 'ArcGisServer', 'Time', 'Filter',
-  function($http, $location, $q, $filter, $stateParams, ArcGisServer, Time, Filter){
+app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', 'ArcGisServer', 'LayerDefintion','LocationProperties', 'Time', 'Extent', 'Filter',
+  function($http, $location, $q, $filter, $stateParams, ArcGisServer, LayerDefintion, LocationProperties, Time, Extent, Filter){
 
     //****Create the factory object****//
     var Details = {};
 
     var detailsCache = {};
+
+    var buildWhereClause = function(arrayOfIds){
+      if($stateParams.category === 'property'){
+
+      }else if($stateParams.category === 'crime'){
+        return 'pid in (' + arrayOfIds + ')'
+      }else if($stateParams.category === 'development'){
+        var stringOfDevelopmentIds = '';
+        for (var i = 0; i < arrayOfIds.length; i++) {
+          if(i === 0){
+            stringOfDevelopmentIds = stringOfDevelopmentIds + "'" + arrayOfIds[i] + "'";
+          }else{
+            stringOfDevelopmentIds = stringOfDevelopmentIds + ",'" + arrayOfIds[i] + "'";
+          }         
+        }
+        return "apn in (" + stringOfDevelopmentIds + ") and record_module = 'Planning'";
+      }
+
+    };
+
+    var getFeaturesFromAnArrayOfLayerIds = function(arrayOfIds){
+      var q = $q.defer();
+      var layerId = ArcGisServer.featureService.getId(LayerDefintion.get('layer'), LayerDefintion.get('type'));
+      var where = buildWhereClause(arrayOfIds);
+      //Need to put  quotes on everything
+      var queryParams = {
+        'where' : where,
+        'f' : 'json',
+        'outFields' : '*'
+      };
+      ArcGisServer.featureService.query(layerId, queryParams)
+        .then(function(features){
+          
+          //this is being assigned wrong
+          detailsCache[$stateParams.location] = features;
+          q.resolve(features);
+        });
+      return q.promise;
+    };
+
 
 
 
@@ -405,106 +508,9 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
 
     //****CRIME REPORT****//
 
-    Details.getCrimeFeatures = function(crimeIdArray){
-      var processCrimesArray = function(arrayOfCrimes){
-        var crimesArray = [];
-        var crimeLayerId = ArcGisServer.featureService.getId('coagis.gisowner.coa_opendata_crime', 'layer');
-        var queryParams = {
-            'where' : 'pid in (' + arrayOfCrimes + ')',
-            'f' : 'json',
-            'outFields' : '*'
-          };
-          ArcGisServer.featureService.query(crimeLayerId, queryParams)
-            .then(function(crimes){
-              //this is being assigned wrong
-              detailsCache[$stateParams.location] = crimes;
-              q.resolve(crimes);
-            });
-      };
-      var q = $q.defer();
-      if(detailsCache[$stateParams.location]){
-        if(detailsCache[$stateParams.location].crime){
-          q.resolve(detailsCache[$stateParams.location].crime);
-        }else{
-          processCrimesArray(crimeIdArray);
-        }
-        
-      }else{
-        processCrimesArray(crimeIdArray);
-      }
-      return q.promise;
-    };
-
-    Details.filterCrimeDetailsByTime = function(crimeFeatures){
-      var timeFilterValue = Time.filterValue($stateParams.time);
-      var crimeSummary= {};
-      for (var i = 0; i < crimeFeatures.features.length; i++) {
-        if(crimeFeatures.features[i].attributes.thedate >= timeFilterValue){
-          if(crimeSummary[crimeFeatures.features[i].attributes.offense] === undefined){
-            crimeSummary[crimeFeatures.features[i].attributes.offense] = 1;
-          }else{
-            crimeSummary[crimeFeatures.features[i].attributes.offense] = crimeSummary[crimeFeatures.features[i].attributes.offense] + 1;
-          }
-        }
-      }
-      var filterOptions = [];
-      filterOptions.push({'value' : 'summary', 'label' : 'Crime Summary'});
-      for (var key in crimeSummary) {
-        filterOptions.push({'value' : key.toLowerCase().replace(/ /g, '-'), 'label' : key});
-      }
-      Filter.updateOptions(filterOptions, $stateParams.category);
-      return crimeSummary;
-    };
-
-    Details.filterCrimeSummaryByFilter = function(crimeSummary){
-      if($stateParams.filter === 'summary'){
-        return crimeSummary;
-      }else{
-        var filterOptions = Filter.options($stateParams.category);
-        for (var i = 0; i < filterOptions.length; i++) {
-          if(filterOptions[i].value === $stateParams.filter){
-            var temp = {};
-            temp[filterOptions[i].label] = crimeSummary[filterOptions[i].label];
-            return(temp);
-          }
-        }
-      }
-    };
 
     //****CRIME MAP****//
 
-    Details.filterCrimeGeoJsonByTime = function(crimeGeoJson){
-      var timeFilterValue = Time.filterValue($stateParams.time);
-      var filteredCrimeFeatures = [];
-      for (var i = 0; i < crimeGeoJson.features.length; i++) {
-        if(crimeGeoJson.features[i].properties.thedate >= timeFilterValue){
-          filteredCrimeFeatures.push(crimeGeoJson.features[i]);
-        }
-      }
-      crimeGeoJson.features = filteredCrimeFeatures;
-      return crimeGeoJson;
-    };
-
-    Details.filterCrimeGeoJsonByFilter = function(crimeGeoJson){
-      if($stateParams.filter === 'summary'){
-        return crimeGeoJson;
-      }else{
-        var filterOptions = Filter.options($stateParams.category);
-        for (var x = 0; x < filterOptions.length; x++) {
-          if(filterOptions[x].value === $stateParams.filter){
-            var filteredCrimeFeatures = [];
-            for (var i = 0; i < crimeGeoJson.features.length; i++) {
-              if(crimeGeoJson.features[i].properties.offense === filterOptions[x].label){
-                filteredCrimeFeatures.push(crimeGeoJson.features[i]);
-              }
-            }
-            crimeGeoJson.features = filteredCrimeFeatures;
-            console.log(crimeGeoJson);
-            return crimeGeoJson;
-          }
-        }
-      }
-    };
 
 
     //*********************************************************//
@@ -513,102 +519,65 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
 
     //****DEVELOPMENT REPORT****//
 
-    Details.getDevelopmentFeatures = function(developmentIdArray){
-      var processDevelopmentArray = function(arrayOfDevelopment){
-        var developmentLayerId = ArcGisServer.featureService.getId('coagis.gisowner.coa_opendata_permits', 'layer');
-        //The development ids in the developmentIdArray are being stored as strings, they need to be numbers
-        var stringOfDevelopmentIds = '';
-        for (var i = 0; i < arrayOfDevelopment.length; i++) {
-          if(i === 0){
-            stringOfDevelopmentIds = stringOfDevelopmentIds + "'" + arrayOfDevelopment[i] + "'";
-          }else{
-            stringOfDevelopmentIds = stringOfDevelopmentIds + ",'" + arrayOfDevelopment[i] + "'";
-          }         
-        }
-        //Need to put  quotes on everything
-        var queryParams = {
-            'where' : "apn in (" + stringOfDevelopmentIds + ") and record_module = 'Planning'",
-            'f' : 'json',
-            'outFields' : '*'
-          };
-          ArcGisServer.featureService.query(developmentLayerId, queryParams)
-            .then(function(development){
-              console.log('development');
-              console.log(development);
-              //Filter out the record types that are actually part of development
-              // var developmentFeatures = [];
-              // for (var i = 0; i < development.features.length; i++) {
-              //   if(development.features[i].attributes.record_type === 'Planning Level II' || development.features[i].attributes.record_type === 'Planning Level III' || development.features[i].attributes.record_type === 'Conditional Zoning Permit' || development.features[i].attributes.record_type === 'Major Subdivision' || development.features[i].attributes.record_type === 'Rezoning' || development.features[i].attributes.record_type === 'Conditional Use Permit'){
-              //     console.log(development.features[i].attributes.record_type);
-              //     developmentFeatures.push(development.features[i]);
-              //   }
-              // }
-              // development.features = developmentFeatures;
-              // console.log('development filtered');
-              // console.log(development);
-              
-              //this is being assigned wrong
-              detailsCache[$stateParams.location] = development;
-              q.resolve(development);
-            });
-      };
+    Details.getFilteredDetails = function(){
+      //Use promises to handle the request asynchronously; defer till resolved
       var q = $q.defer();
-      if(detailsCache[$stateParams.location]){
-        if(detailsCache[$stateParams.location].development){
-          q.resolve(detailsCache[$stateParams.location].development);
-        }else{
-          processDevelopmentArray(developmentIdArray);
-        }
-        
-      }else{
-        processDevelopmentArray(developmentIdArray);
-      }
+
+      var category = $stateParams.category;
+      //Get Location Properties
+      LocationProperties.properties()
+        .then(function(properties){
+          //Get the features based on the category and the extent 
+          getFeaturesFromAnArrayOfLayerIds(properties[category][Extent.filterValue()])
+            .then(function(features){
+              //Values to filter time and filter by
+              var time = LayerDefintion.get('time');
+              var filter = LayerDefintion.get('filter');
+              var colors = LayerDefintion.get('colors');
+
+              //object that holds a summary of the feature {filterValue : count}
+              //e.g. for crime {'Bulgary' : 12, 'Larceny' : 2}
+              var filteredFeaturesSummary= {};
+              //array that holds features filtered by time and the filter value
+              var filterdFeaturesArray = [];
+
+              for (var i = 0; i < features.features.length; i++) {
+                //filter by time
+                if(features.features[i].attributes[time] >= Time.filterValue()){
+                  //filter by filter
+                  features.features[i].attributes.color = colors[features.features[i].attributes[filter]];
+                  //build a summary object
+                  if(filteredFeaturesSummary[features.features[i].attributes[filter]] === undefined){
+                    filteredFeaturesSummary[features.features[i].attributes[filter]] = {'color' : features.features[i].attributes.color, 'count' : 1 };
+                  }else{
+                    filteredFeaturesSummary[features.features[i].attributes[filter]].count = filteredFeaturesSummary[features.features[i].attributes[filter]].count + 1;
+                  }
+                  //add filtered features to array
+                  if($stateParams.filter === 'summary' || features.features[i].attributes[filter].toLowerCase().replace(/ /g, '-') === $stateParams.filter){
+                    filterdFeaturesArray.push(features.features[i]);
+                  }
+                  if(features.features[i].attributes.record_comments){
+                    features.features[i].attributes.commentsArray = features.features[i].attributes.record_comments.split('***');
+                  }
+                  
+                }
+              };
+
+              //Update filter options based on filter summary
+              var filterOptions = [];
+              filterOptions.push({'value' : 'summary', 'label' : 'Summary'});
+              for (var key in filteredFeaturesSummary) {
+                filterOptions.push({'value' : key.toLowerCase().replace(/ /g, '-'), 'label' : key});
+              }
+              Filter.options($stateParams.category, filterOptions);
+              var filteredDetails = {
+                'features' : filterdFeaturesArray,
+                'summary' : filteredFeaturesSummary
+              };
+              q.resolve(filteredDetails);
+            })//END getFeaturesFromAnArrayOfLayerIds Callback
+        })//END LocationProperties Callback
       return q.promise;
-    };
-
-    Details.filterDevelopmentFeaturesByTime = function(developmentFeatures){
-      var timeFilterValue = Time.filterValue($stateParams.time);
-      var developmentSummary= {};
-      var developmentArray = []
-      for (var i = 0; i < developmentFeatures.features.length; i++) {
-        if(developmentFeatures.features[i].attributes.date_opened >= timeFilterValue){
-          if(developmentSummary[developmentFeatures.features[i].attributes.record_type] === undefined){
-            developmentSummary[developmentFeatures.features[i].attributes.record_type] = 1;
-          }else{
-            developmentSummary[developmentFeatures.features[i].attributes.record_type] = developmentSummary[developmentFeatures.features[i].attributes.record_type] + 1;
-          }
-          if($stateParams.filter !== 'summary' && developmentFeatures.features[i].attributes.record_type.toLowerCase().replace(/ /g, '-') === $stateParams.filter){
-            developmentArray.push(developmentFeatures.features[i]);
-          }
-        }
-      }
-      var filterOptions = [];
-      filterOptions.push({'value' : 'summary', 'label' : 'Development Summary'});
-      for (var key in developmentSummary) {
-        filterOptions.push({'value' : key.toLowerCase().replace(/ /g, '-'), 'label' : key});
-      }
-      Filter.updateOptions(filterOptions, $stateParams.category);
-      if($stateParams.filter === 'summary'){
-        return developmentSummary;
-      }else{
-        return developmentArray
-      }
-      
-    };
-
-    Details.filterDevelopmentSummaryByFilter = function(developmentSummary){
-      if($stateParams.filter === 'summary'){
-        return developmentSummary;
-      }else{
-        var filterOptions = Filter.options($stateParams.category);
-        for (var i = 0; i < filterOptions.length; i++) {
-          if(filterOptions[i].value === $stateParams.filter){
-            var temp = {};
-            temp[filterOptions[i].label] = developmentSummary[filterOptions[i].label];
-            return(temp);
-          }
-        }
-      }
     };
 
       //****CRIME MAP****//
@@ -647,8 +616,8 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
 
     
 }]); //END Details factory function
-app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Details', 'LocationProperties',
-  function($compile, $filter, $state, $stateParams, $q, Details, LocationProperties){
+app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Details', 'Extent', 'LocationProperties', 'Modal',
+  function($compile, $filter, $state, $stateParams, $q, Details, Extent, LocationProperties, Modal){
   return {
     //Restrict the directive to attribute ep-form on an element 
     restrict: 'A',
@@ -663,20 +632,20 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Detai
 
 
     //Creates GeoJson from an ArcGIS Feature Service
-    var createPointGeoJsonFromArcGisFeatureService = function(featureService){
+    var createPointGeoJsonFromFilteredDetails = function(filteredDetails){
         var geoJson = {
             'type' : 'FeatureCollection',
             'features' : []
         };
 
-        for (var i = 0; i < featureService.features.length; i++) {
+        for (var i = 0; i < filteredDetails.features.length; i++) {
             var temp = {
                 'type':'Feature',
                 'geometry' : {
                     'type': 'Point', 
-                    'coordinates': [featureService.features[i].geometry.x, featureService.features[i].geometry.y]
+                    'coordinates': [filteredDetails.features[i].geometry.x, filteredDetails.features[i].geometry.y]
                 },
-                'properties': featureService.features[i].attributes
+                'properties': filteredDetails.features[i].attributes
             };
             geoJson.features.push(temp);
         }
@@ -687,11 +656,19 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Detai
     var createGeoJsonMarkers = function(data){
       return L.geoJson(data, {
           pointToLayer: function (feature, latlng) {
-              return L.marker(latlng, {icon: crimeMarker}).addTo(map);    
+
+              return L.circleMarker(latlng, {
+                  radius: 6,
+                  fillColor: "#"+feature.properties.color,
+                  color: "#"+feature.properties.color,
+                  weight: 1,
+                  opacity: 1,
+                  fillOpacity: 0.8
+              }); 
           },
           onEachFeature: function (feature, layer) {
               layer.on('click', function(){
-
+                  console.log('click');
                   $scope.getPointDetails(feature.properties);
                   $scope.pointDetails = feature.properties;
                   $scope.$apply();
@@ -802,8 +779,8 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Detai
     var crimeMarker = L.AwesomeMarkers.icon({
         icon: 'circle',
         prefix: 'fa',
-        iconColor :'white',
-        markerColor: 'red',
+        iconColor :'#12BFFF',
+        markerColor: 'white',
       });
 
     //L.control.layers(baseMaps).addTo(map);
@@ -827,36 +804,47 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Detai
               map.fitBounds(propertyBounds);
               map.setZoom(18);
             });
-        }else if($scope.map.category === 'crime'){
-          Details.getCrimeFeatures(properties.crime)
-            .then(function(crimes){
-              var crimeDetails = Details.filterCrimeSummaryByFilter(Details.filterCrimeDetailsByTime(crimes));
-              var crimeGeoJson = createPointGeoJsonFromArcGisFeatureService(crimes);
-              var filterCrimeGeoJson = Details.filterCrimeGeoJsonByFilter(Details.filterCrimeGeoJsonByTime(crimeGeoJson));
-              var crimeGeoJsonLayer = createGeoJsonMarkers(filterCrimeGeoJson);
-              map.fitBounds(getBoundsOfPointGeoJson(filterCrimeGeoJson));
-              crimeGeoJsonLayer.addTo(map);
-              console.log(properties);
+        }else{
+          Details.getFilteredDetails()
+            .then(function(filteredDetails){
+              var radiusInFeet = Extent.filterValue();
+              var radiusInMeters = radiusInFeet*0.3048;
               L.marker([properties.address.location.y, properties.address.location.x]).addTo(map);
-              L.circle([properties.address.location.y, properties.address.location.x], 201.168, {
+              var circle = L.circle([properties.address.location.y, properties.address.location.x], radiusInMeters, {
                 'fillOpacity' : 0
-              }).addTo(map);
-              map.setZoom(18);
+              });
+              circle.addTo(map);
+              var circleBounds = circle.getBounds();
+              map.fitBounds(circleBounds);
+              var geojson = createPointGeoJsonFromFilteredDetails(filteredDetails)
+              var geoJsonLayer = createGeoJsonMarkers(geojson);
+              geoJsonLayer.addTo(map);
+              
+              
             });
         }
       });
-
-      $scope.getPointDetails = function(pointPointProperties){
+      $scope.crime = true
+      if($stateParams.category !== 'crime'){
+        $scope.crime = false
+      };
+      $scope.showMarkerDetails = false;
+      $scope.getPointDetails = function(pointProperties){
+        Modal.setData(pointProperties)
+        //$scope.showMarkerDetails = true;
         $('#pointDetailsModal').modal({'backdrop' : false});
       };
 
+      $scope.goTo = function(detailsLocation){
+        $state.go('main.location.category.time.extent.filter.details', {'details' : 'report'});
+      };
       
       
     }]//END Details Directive Controller function
   };//END returned object
 }]);//END Details directivective function
-app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$timeout','Details', 'LocationProperties',
-  function($compile, $filter, $state, $stateParams, $q, $timeout, Details, LocationProperties){
+app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$timeout','Details', 'LocationProperties', 'Filter',
+  function($compile, $filter, $state, $stateParams, $q, $timeout, Details, LocationProperties, Filter){
   return {
     //Restrict the directive to attribute ep-form on an element 
     restrict: 'A',
@@ -877,6 +865,7 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
       };
 
       $scope.loading = false;
+      $scope.showSummary = true;
 
       var isEmpty = function (obj) {
           for(var prop in obj) {
@@ -901,30 +890,19 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
               .then(function(propertyDetails){
                 $scope.propertyDetails = propertyDetails;
               });
-          }else if($scope.report.category === 'crime'){
+          }else{
             $scope.loading = true;
-            Details.getCrimeFeatures(properties.crime)
-              .then(function(crimeFeatures){
-                $scope.crimeSummary = Details.filterCrimeSummaryByFilter(Details.filterCrimeDetailsByTime(crimeFeatures));
-                $scope.loading = false;
-              });
-          }else if($scope.report.category === 'development'){
-            $scope.loading = true;
-            Details.getDevelopmentFeatures(properties.development)
-              .then(function(developmentFeatures){
-                if($scope.report.filter === 'summary'){
-                  $scope.developmentSummary = Details.filterDevelopmentSummaryByFilter(Details.filterDevelopmentFeaturesByTime(developmentFeatures));
-                  $scope.isEmpty = isEmpty($scope.developmentSummary);
-                  $scope.developmentArray = [];
-                  $scope.loading = false;
+            Details.getFilteredDetails()
+              .then(function(filteredDetails){
+                $scope.filteredDetails = filteredDetails;
+                
+                $scope.isEmpty = isEmpty(filteredDetails.summary);
+                if($stateParams.filter === 'summary'){
+                  $scope.showSummary = true;
                 }else{
-                  $scope.developmentSummary = {};
-                  $scope.isEmpty = true;
-                  $scope.developmentArray = Details.filterDevelopmentFeaturesByTime(developmentFeatures);
-                  console.log($scope.developmentArray);
-                  $scope.loading = false;
+                  $scope.showSummary = false;
                 }
-                  
+                $scope.loading = false;                  
               });
           }
         });
@@ -959,7 +937,7 @@ app.controller('ExtentCtrl', ['$scope', '$stateParams', '$state', 'Extent',
 		$state.go('main.location.category.time.extent.filter.details', {extent : $scope.extentValue.value});
 	};
 }]);
-app.factory('Extent', [function(){
+app.factory('Extent', ['$stateParams', function($stateParams){
 
     //****Create the factory object****//
     var Extent = {};
@@ -968,9 +946,16 @@ app.factory('Extent', [function(){
     //   {'value' : 'within-a-mile', 'label' : 'Within a mile'},
     //   {'value' : 'within-5-miles', 'label' : 'Within 5 miles'}
 
+    var extentFilterValues = {
+      'within-about-a-block' : 330,
+      'within-an-eighth-of-a-mile' : 660,
+      'within-a-quarter-mile' : 1320,
+    };
+
     var extentOptions = [
-      {'value' : 'within-an-eighth-of-a-mile', 'label' : 'Within an eighth of a mile'},
-      {'value' : 'within-a-quarter-mile', 'label' : 'Within a quarter mile'}   
+      {'value' : 'within-about-a-block', 'label' : 'within a city block (110 yards)'},
+      {'value' : 'within-an-eighth-of-a-mile', 'label' : 'within a couple city blocks (1/8 of a mile)'},
+      {'value' : 'within-a-quarter-mile', 'label' : 'within a quarter mile'}   
     ];
   
 
@@ -981,6 +966,10 @@ app.factory('Extent', [function(){
       }else{
         return extentOptions;
       }
+    };
+
+    Extent.filterValue = function(){
+      return extentFilterValues[$stateParams.extent];
     };
     
 
@@ -994,16 +983,32 @@ app.controller('FilterCtrl', ['$scope', '$stateParams', '$state', 'Filter', func
   	$scope.filterOptions = Filter.options($stateParams.category);
 	for (var i = 0; i < $scope.filterOptions.length; i++) {
 		if($scope.filterOptions[i].value === $stateParams.filter){
-			console.log($scope.filterOptions[i].value );
 			$scope.defaultOption = i;
 		}
 	}
-		
+	$scope.hasFilter = false;
     if($stateParams.filter === 'summary'){
     	$scope.show = false;
 	}else{
 		$scope.show = true;
 	}
+
+	//Watch to see if the options returned from teh Filter factory change
+	$scope.$watch(function () {return Filter.options($stateParams.category);},                       
+      	function(newVal, oldVal) {
+      		if(newVal.length > 1 || $stateParams.category !== 'property'){
+      			$scope.hasFilter = true;
+      			$scope.filterOptions = newVal;
+      			for (var i = 0; i < $scope.filterOptions.length; i++) {
+					if($scope.filterOptions[i].value === $stateParams.filter){
+						$scope.filterValue = $scope.filterOptions[i];
+					}
+				}
+      		}else{
+      			$scope.hasFilter = false;
+      		}
+        	
+    	}, true);
 
 	
 	$scope.onChangeFilterValue = function(){
@@ -1021,26 +1026,15 @@ app.factory('Filter', [function(){
     
     //Should get these for the properties of the if it has a property it is filterable
     var propertyFilterOptions = [
-      {'value' : 'summary', 'label' : 'Property Summary'},
-      {'value' : 'zoning', 'label' : 'Zoning'},
-      {'value' : 'owner', 'label' : 'Owner'},
-      {'value' : 'deed', 'label' : 'Deed'},
-      {'value' : 'garbage', 'label' : 'Garbage Collection'},
-      {'value' : 'recycling', 'label' : 'Recycling'},
-      {'value' : 'leaf', 'label' : 'Leaf & Brush Collection'}
+      {'value' : 'summary', 'label' : 'Property Summary'}
     ];
 
     var crimeFilterOptions = [
-      {'value' : 'summary', 'label' : 'Crime Summary'},
-      {'value' : 'aggravated-assault', 'label' : 'Aggravated Assaults'},
-      {'value' : 'rape', 'label' : 'Rapes'},
-      {'value' : 'vandalism', 'label' : 'Vandalism'},
-      {'value' : 'larceny', 'label' : 'Larcenies'},
-      {'value' : 'larceny-auto', 'label' : 'Larcenies (Auto)'},
+      {'value' : 'summary', 'label' : 'Crime Summary'}
     ];
 
     var developmentFilterOptions = [
-      {'value' : 'summary', 'label' : 'Development Summary'},
+      {'value' : 'summary', 'label' : 'Development Summary'}
     ];
 
     var filterOptions = {
@@ -1049,14 +1043,18 @@ app.factory('Filter', [function(){
       'development' : developmentFilterOptions
     };
 
-    Filter.updateOptions = function(newFilterOptions, categeory){
-        filterOptions[categeory] = newFilterOptions;
-    };
+    // Filter.updateOptions = function(newFilterOptions, categeory){
+
+    //     filterOptions[categeory] = newFilterOptions;
+    // };
     
 
-
     //****API*****//
-    Filter.options = function(categeory){
+
+    Filter.options = function(categeory, newFilterOptions){
+      if(newFilterOptions){
+        return filterOptions[categeory] = newFilterOptions;
+      }
       return filterOptions[categeory];
     };
     
@@ -1074,162 +1072,6 @@ app.factory('Filter', [function(){
   http://leafletjs.com
   https://github.com/lvoogdt
 *//*global L*/(function(e,t,n){"use strict";L.AwesomeMarkers={};L.AwesomeMarkers.version="2.0.1";L.AwesomeMarkers.Icon=L.Icon.extend({options:{iconSize:[35,45],iconAnchor:[17,42],popupAnchor:[1,-32],shadowAnchor:[10,12],shadowSize:[36,16],className:"awesome-marker",prefix:"glyphicon",spinClass:"fa-spin",icon:"home",markerColor:"blue",iconColor:"white"},initialize:function(e){e=L.Util.setOptions(this,e)},createIcon:function(){var e=t.createElement("div"),n=this.options;n.icon&&(e.innerHTML=this._createInner());n.bgPos&&(e.style.backgroundPosition=-n.bgPos.x+"px "+ -n.bgPos.y+"px");this._setIconStyles(e,"icon-"+n.markerColor);return e},_createInner:function(){var e,t="",n="",r="",i=this.options;i.icon.slice(0,i.prefix.length+1)===i.prefix+"-"?e=i.icon:e=i.prefix+"-"+i.icon;i.spin&&typeof i.spinClass=="string"&&(t=i.spinClass);i.iconColor&&(i.iconColor==="white"||i.iconColor==="black"?n="icon-"+i.iconColor:r="style='color: "+i.iconColor+"' ");return"<i "+r+"class='"+i.prefix+" "+e+" "+t+" "+n+"'></i>"},_setIconStyles:function(e,t){var n=this.options,r=L.point(n[t==="shadow"?"shadowSize":"iconSize"]),i;t==="shadow"?i=L.point(n.shadowAnchor||n.iconAnchor):i=L.point(n.iconAnchor);!i&&r&&(i=r.divideBy(2,!0));e.className="awesome-marker-"+t+" "+n.className;if(i){e.style.marginLeft=-i.x+"px";e.style.marginTop=-i.y+"px"}if(r){e.style.width=r.x+"px";e.style.height=r.y+"px"}},createShadow:function(){var e=t.createElement("div");this._setIconStyles(e,"shadow");return e}});L.AwesomeMarkers.icon=function(e){return new L.AwesomeMarkers.Icon(e)}})(this,document);
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('category/category.html',
-    '<div><div class="panel panel-default"><div class="panel-body"><h3>{{category.title}}</h3><div ng-if="category.hasForm" coa-form="category.form"></div><div ui-view=""></div></div></div></div>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('details/details.html',
-    '<div><div ng-if="stateParams.details === \'report\'" report="stateParams"></div><div ng-if="stateParams.details === \'map\'" map="stateParams"></div></div>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('details/details.map.directive.html',
-    '<div id="map" style="width : 100%; height : 400px"><div class="modal fade" id="pointDetailsModal"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">{{pointDetails.offense}}</h4></div><div class="modal-body"><p>Address : {{pointDetails.address}}</p><p>Date : {{pointDetails.thedate|date}}</p><p>Case Number : {{pointDetails.casenumber}}</p></div></div></div></div></div>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('details/details.report.directive.html',
-    '<div ng-include="getTemplate();"></div>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('extent/extent.html',
-    '<div><div class="form-group" ng-show="show"><select class="form-control" id="extent" ng-init="extentValue = extentOptions[defaultOption]" ng-model="extentValue" ng-options="item.label for item in extentOptions" ng-change="onChangeExtentValue()" style="width : 100%"></select></div><div ui-view=""></div></div>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('filter/filter.html',
-    '<div><a ng-click="show = !show" ng-show="!show">Filter Results</a> <a ng-click="show = !show" ng-show="show">Remove Filter</a><div class="form-group" ng-show="show"><select class="form-control" id="filter" ng-init="filterValue = filterOptions[defaultOption]" ng-model="filterValue" ng-options="item.label for item in filterOptions" ng-change="onChangeFilterValue()" style="width : 100%"></select></div><div ui-view=""></div></div>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('location/location.html',
-    '');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('main/main.html',
-    '<div class="col-md-6 col-md-offset-3"><br><div class="col-xs-12"><div class="col-xs-12"><div class="pull-left" ng-click="goHome();" ;="" style="cursor : pointer"><h1>SimpliCity</h1><h4>city data simplified</h4></div><img class="pull-right hidden-xs" style="margin-top: 5px" src="http://123graffitifree.com/images/citylogo-flatblack.png"> <img class="pull-right visible-xs" style="margin-top: 5px; height : 30px" src="http://123graffitifree.com/images/citylogo-flatblack.png"></div><div class="col-xs-12"><br></div><div class="col-xs-12"><input tabindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location" style="z-index: 0" ng-model="typedLocation" ng-keypress="getAddressCandidates(typedLocation, $event)"><div class="row col-xs-12"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-warning">{{helperMessage.message}}</p><div class="list-group" style="width : 100%; position : absolute; z-index : 1000; max-height : 230px; overflow-y: scroll"><a tabindex="{{$index+1}}" ng-click="getLocationProperties(candidate, $event)" ng-keypress="getLocationProperties(candidate, $event)" ng-repeat="candidate in addresses.candidates" class="list-group-item"><p class="text-info">{{candidate.attributes.House}} {{candidate.attributes.preType}} {{candidate.attributes.StreetName}} {{candidate.attributes.SufType}} {{candidate.attributes.SufDir}} <span ng-if="candidate.attributes.User_fld !== \'\'">UNIT: {{candidate.attributes.User_fld}}</span>, {{candidate.attributes.ZIP}}</p></a></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div></div><div class="col-xs-12"><br></div></div><div class="col-xs-12 content" style="height : 400px"><div ui-view="" class="slide"></div></div></div>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('questions/questions.html',
-    '<div class="col-xs-12"><div class="list-group"><a class="col-xs-12 list-group-item list-item-panel"><div class="col-xs-12 col-md-4"><address class="pull-left"><strong>{{locationProperties.address.attributes.House}} {{locationProperties.address.attributes.preType}} {{locationProperties.address.attributes.StreetName}} {{locationProperties.address.attributes.SufType}} {{locationProperties.address.attributes.SufDir}} <span ng-if="locationProperties.address.attributes.User_fld !== \'\'">UNIT: {{locationProperties.address.attributes.User_fld}}</span></strong><br><span ng-if="locationProperties.inTheCity">Asheville, NC</span> {{locationProperties.address.attributes.ZIP}}</address></div><div class="col-xs-12 col-md-8"><div ng-if="locationProperties.inTheCity" class="pull-right hidden-xs"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s in the city!</h2></div><div ng-if="!locationProperties.inTheCity" class="pull-right hidden-xs"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s not in the city!</h2></div></div></a> <a ng-if="locationProperties.inTheCity" class="list-group-item list-item-panel visible-xs"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s in the city!</h2></a> <a ng-if="!locationProperties.inTheCity" class="list-group-item list-item-panel visible-xs"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s not in the city!</h2></a> <a class="col-xs-12 list-group-item list-item-panel" ng-click="getAnswer(question)" ng-repeat="question in questions" tabindex="{{$index + 11}}"><h4>{{question.question}}<i class="fa fa-chevron-right pull-right text-primary" style="margin-top: 8px"></i></h4></a> <a class="col-xs-12 list-group-item list-item-panel" ng-show="more.show" ng-click="more.get()" tabindex="{{questions.length + 12}}"><h3 class="text-primary" style="text-align : center">More</h3></a></div></div>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('time/time.html',
-    '<div><div class="form-group" ng-show="show"><select class="form-control" id="time" ng-init="timeValue = timeOptions[defaultOption]" ng-model="timeValue" ng-options="item.label for item in timeOptions" ng-change="onChangeTimeValue()" style="width : 100%"></select></div><div ui-view=""></div></div>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('details/reports/crime.report.html',
-    '<div class="col-xs-12"><div class="col-xs-12" style="height : 100px; text-align : center" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div class="col-xs-12" ng-show="!loading" ng-cloak=""><a class="pull-right" ng-click="goTo(map);">View on Map</a><div class="col-xs-12 list-item-panel"><table class="table"><thead><tr><th>Crime Type</th><th>Count</th></tr></thead><tbody><tr ng-repeat="(key, value) in crimeSummary"><td>{{key}}</td><td>{{value}}</td></tr></tbody></table></div></div></div>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('details/reports/development.report.html',
-    '<div class="col-xs-12"><div class="col-xs-12" style="height : 100px; text-align : center" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div class="col-xs-12" ng-if="!isEmpty" ng-show="!loading" ng-cloak=""><a class="pull-right" ng-click="goTo(map);">View on Map</a><div class="col-xs-12 list-item-panel"><table class="table"><thead><tr><th>Development Type</th><th>Count</th></tr></thead><tbody><tr ng-repeat="(key, value) in developmentSummary"><td><strong>{{key}}:</strong>{{developmentExplanations[key]}}</td><td>{{value}}</td></tr></tbody></table></div></div><div class="col-xs-12" ng-if="developmentArray.length !== 0" ng-show="!loading" ng-cloak=""><a class="pull-right" ng-click="goTo(map);">View on Map</a><div class="col-xs-12 list-item-panel" ng-repeat="item in developmentArray"><h5 class="text-center">{{item.attributes.address}}</h5><div class="col-xs-12"><div class="col-xs-12 col-md-4"><strong>Opened</strong><p>{{item.attributes.date_opened|date}}</p></div><div class="col-xs-12 col-md-4"><strong>Updated</strong><p>{{item.attributes.date_statused|date}}</p></div><div class="col-xs-12 col-md-4"><strong>Status</strong><p>{{item.attributes.record_status}}</p></div></div><div class="col-xs-12"><p><strong>Description:</strong>{{item.attributes.description}}</p></div><div ng-init="showMore = false" ng-show="showMore"><div class="col-xs-12"><div class="pull-left"><strong>Record Id</strong><p>{{item.attributes.record_id}}</p></div><div class="pull-right"><strong>License Number</strong><p>{{item.attributes.license_number}}</p></div></div><div class="col-xs-12"><div class="pull-left"><strong>Record Name</strong><p>{{item.attributes.record_name}}</p></div><div class="pull-right"><strong>Business Name</strong><p>{{item.attributes.business_name}}</p></div></div><div ng-init="showComments = false" ng-show="showComments"><strong>Comments</strong><p>{{item.attributes.record_comments}}</p></div><a ng-click="showComments = !showComments"><p class="text-center" ng-if="!showComments">Show Comments</p><p class="text-center" ng-if="showComments">Hide Comments</p></a></div><a ng-click="showMore = !showMore"><p class="text-center" ng-if="!showMore">Show More</p><p class="text-center" ng-if="showMore">Show Less</p></a></div></div></div>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('details/reports/property.report.html',
-    '<div><a class="pull-right" ng-click="goTo(map);">View on Map</a><div class="list-item-panel col-xs-12" style="padding : 10px"><div class="col-xs-12 list-item-panel"><div class="col-xs-12 col-md-6"><address style="margin-bottom: 5px"><strong>{{locationProperties.address.attributes.House}} {{locationProperties.address.attributes.preType}} {{locationProperties.address.attributes.StreetName}} {{locationProperties.address.attributes.SufType}} {{locationProperties.address.attributes.SufDir}} <span ng-if="locationProperties.address.attributes.User_fld !== \'\'">UNIT: {{locationProperties.address.attributes.User_fld}}</span></strong><br><span ng-if="locationProperties.inTheCity">Asheville, NC</span> {{locationProperties.address.attributes.ZIP}}</address><h5>PIN : <span>{{propertyDetails.attributes.pinnum}}</span></h5></div><div class="col-xs-12 col-md-6"><div ng-if="propertyDetails.attributes.isincity === \'Yes\'" class="pull-left"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s in the city!</h4></div><div ng-if="propertyDetails.attributes.isincity === \'No\'" class="pull-left"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s not in the city!</h4></div><div ng-if="propertyDetails.attributes.iscityowned === \'Yes\'" class="pull-left"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s city owned!</h4></div><div ng-if="propertyDetails.attributes.iscityowned === \'No\'" class="pull-left"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s not city owned!</h4></div></div></div><div class="col-xs-12 col-md-6 list-item-panel pull-left"><h4>Owner</h4><strong>{{propertyDetails.attributes.owner}}</strong><address>{{propertyDetails.attributes.owner_address}}<br>{{propertyDetails.attributes.owner_citystatezip}}</address></div><div class="col-xs-12 col-md-5 list-item-panel pull-right"><h4>Tax Details</h4><p ng-if="propertyDetails.attributes.exempt === null">Tax exempt : <span class="text-danger">NO</span></p><p ng-if="propertyDetails.attributes.exempt !== null">Tax exempt : <span class="text-success">YES</span></p><p ng-if="propertyDetails.attributes.improved === \'Y\'">Improved : <span class="text-success">YES (${{propertyDetails.attributes.improvementvalue|number}})</span></p><p>Appraisal Area : {{propertyDetails.attributes.appraisalarea}}</p></div><div class="col-xs-12 list-item-panel"><h4>Property and Tax Value</h4><table class="table "><thead><tr><th>Value Type</th><th>Amount</th></tr></thead><tbody><tr><td>Building Value</td><td>${{propertyDetails.attributes.buildingvalue|number}}</td></tr><tr><td>Land Value</td><td>${{propertyDetails.attributes.landvalue|number}}</td></tr><tr><td>Appraised Value</td><td>${{propertyDetails.attributes.appraisedvalue|number}}</td></tr><tr><td>Tax Value</td><td>${{propertyDetails.attributes.taxvalue|number}}</td></tr><tr><td>Total Market Value</td><td>${{propertyDetails.attributes.totalmarketvalue|number}}</td></tr></tbody></table></div><div class="col-xs-12 list-item-panel"><br><a class="col-xs-12 col-md-3" style="text-align : center; margin-bottom : 10px" target="_blank" href="{{propertyDetails.attributes.deed_url}}">Deed</a> <a class="col-xs-12 col-md-3" style="text-align : center; margin-bottom : 10px" target="_blank" href="{{propertyDetails.attributes.plat_url}}">Plat</a> <a class="col-xs-12 col-md-4" style="text-align : center; margin-bottom : 10px" target="_blank" href="{{propertyDetails.attributes.propcard_url}}">Property Card</a><br></div></div></div>');
-}]);
-})();
-
 //template is defined inline in app.config.js
 app.controller('LocationCtrl', [function () {
 	//Doesn't do anything
@@ -1243,7 +1085,28 @@ app.factory('LocationProperties', ['$http', '$location', '$q', '$filter', '$stat
   	var LocationProperties = {};
 
     //****Private variables*****//
-  	var properties = {};
+  	var properties = {
+    };
+
+    var assignValueToProperties = function(parentPropertyName, thisPropertyName, value){
+      //check if parent property already exist
+      if(properties[parentPropertyName]){
+          properties[parentPropertyName][thisPropertyName] = value;
+      //parent property doesn't exist, so create it
+      }else{
+        properties[parentPropertyName] = {};
+        properties[parentPropertyName][thisPropertyName] = value;
+      }
+    };
+    //
+    var createArrayFromNullorString = function(value, delimter){
+      if(value === null){
+          return []
+      }else{
+        return value.split(delimter);
+      }
+    };
+
 
     var setPropertiesWithCivicAddressId = function(CivicAddressId){
       var q = $q.defer();
@@ -1257,30 +1120,29 @@ app.factory('LocationProperties', ['$http', '$location', '$q', '$filter', '$stat
         .then(function(dataCacheResults){
           console.log(dataCacheResults);
           for (var i = 0; i < dataCacheResults.features.length; i++) {
-            if(dataCacheResults.features[i].attributes.type === 'ADDRESS IN CITY'){
-              properties.inTheCity = (dataCacheResults.features[i].attributes.data === 'YES')? true : false;
-            }else if(dataCacheResults.features[i].attributes.type === 'CRIME'){
-              if(dataCacheResults.features[i].attributes.data === null){
-                properties.crime = [];
-              }else{
-                properties.crime = dataCacheResults.features[i].attributes.data.split(',');
-              }
-            }else if(dataCacheResults.features[i].attributes.type === 'ZONING'){
-              if(dataCacheResults.features[i].attributes.data === null){
+            //assign iterator to attributes to make it easier to read
+            var attributes = dataCacheResults.features[i].attributes;
+
+            if(attributes.type === 'ADDRESS IN CITY'){
+              properties.inTheCity = (attributes.data === 'YES')? true : false;
+            }else if(attributes.type === 'CRIME'){
+              var value = createArrayFromNullorString(attributes.data, ',');
+              assignValueToProperties('crime', attributes.distance, value);
+            }else if(attributes.type === 'ZONING'){
+              if(attributes.data === null){
                 properties.zoning = [];
               }else{
-                properties.zoning = dataCacheResults.features[i].attributes.data.split(',');
+                properties.zoning = attributes.data.split(',');
               }
-            }else if(dataCacheResults.features[i].attributes.type === 'DEVELOPMENT'){
-              if(dataCacheResults.features[i].attributes.data === null){
-                properties.development = [];
-              }else{
-                properties.development = dataCacheResults.features[i].attributes.data.split(',');
-              }
+            }else if(attributes.type === 'DEVELOPMENT'){
+              var value = createArrayFromNullorString(attributes.data, ',');
+              assignValueToProperties('development', attributes.distance, value);
             }else{
               //Do nothing
             }
           }
+          console.log('properties');
+          console.log(properties);
           q.resolve(properties);
         });
         return q.promise;
@@ -1374,6 +1236,198 @@ app.factory('LocationProperties', ['$http', '$location', '$q', '$filter', '$stat
 
     
 }]); //END LocationProperties factory function
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('category/category.html',
+    '<div class="row list-item-panel" style="padding : 20px"><div class="col-xs-12"><a ng-click="goBack();">Back</a></div><div class="col-xs-12 col-md-6"><h3>{{category.title}}</h3></div><div class="col-xs-12 col-md-6"><address class="pull-right" style="margin-top: 12px;"><strong>{{locationProperties.address.attributes.House}} {{locationProperties.address.attributes.preType}} {{locationProperties.address.attributes.StreetName}} {{locationProperties.address.attributes.SufType}} {{locationProperties.address.attributes.SufDir}} <span ng-if="locationProperties.address.attributes.User_fld !== \'\'">UNIT: {{locationProperties.address.attributes.User_fld}}</span></strong><br><span ng-if="locationProperties.inTheCity">Asheville, NC</span> {{locationProperties.address.attributes.ZIP}}</address></div><div ui-view=""></div></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('details/details.html',
+    '<div class="row"><div ng-if="stateParams.details === \'report\'" report="stateParams"></div><div ng-if="stateParams.details === \'map\'" map="stateParams"></div></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('details/details.map.directive.html',
+    '<div class="col-xs-12"><div id="map" style="width : 100%; height : 400px"></div><div class="col-xs-12"><a ng-click="goTo(report);"><p class="text-center">View Report</p></a></div></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('details/details.report.directive.html',
+    '<div ng-include="getTemplate();"></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('extent/extent.html',
+    '<div><div class="form-group" ng-show="show"><select class="form-control" id="extent" ng-init="extentValue = extentOptions[defaultOption]" ng-model="extentValue" ng-options="item.label for item in extentOptions" ng-change="onChangeExtentValue()" style="width : 100%"></select></div><div ui-view=""></div></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('filter/filter.html',
+    '<div><div ng-show="hasFilter"><a ng-click="show = !show" ng-show="!show">Filter Results</a> <a ng-click="show = !show" ng-show="show">Remove Filter</a><div class="form-group" ng-show="show"><select class="form-control" id="filter" ng-init="filterValue = filterOptions[defaultOption]" ng-model="filterValue" ng-options="item.label for item in filterOptions" ng-change="onChangeFilterValue()" style="width : 100%"></select></div></div><div class="row" ui-view=""></div></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('location/location.html',
+    '');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('main/main.html',
+    '<div class="col-md-6 col-md-offset-3"><br><div class="col-xs-12"><div class="col-xs-12"><div class="pull-left" ng-click="goHome();" ;="" style="cursor : pointer"><h1>SimpliCity</h1><h4>city data simplified</h4></div><img class="pull-right hidden-xs" style="margin-top: 5px" src="http://123graffitifree.com/images/citylogo-flatblack.png"> <img class="pull-right visible-xs" style="margin-top: 5px; height : 30px" src="http://123graffitifree.com/images/citylogo-flatblack.png"></div><div class="col-xs-12"><br></div><div class="row"><input tabindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location" style="z-index: 0" ng-model="typedLocation" ng-keypress="getAddressCandidates(typedLocation, $event)"><div class="row col-xs-12"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-warning">{{helperMessage.message}}</p><div class="list-group" style="width : 100%; position : absolute; z-index : 1000; max-height : 230px; overflow-y: scroll"><a tabindex="{{$index+1}}" ng-click="getLocationProperties(candidate, $event)" ng-keypress="getLocationProperties(candidate, $event)" ng-repeat="candidate in addresses.candidates" class="list-group-item"><p class="text-info">{{candidate.attributes.House}} {{candidate.attributes.preType}} {{candidate.attributes.StreetName}} {{candidate.attributes.SufType}} {{candidate.attributes.SufDir}} <span ng-if="candidate.attributes.User_fld !== \'\'">UNIT: {{candidate.attributes.User_fld}}</span>, {{candidate.attributes.ZIP}}</p></a></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div></div><div class="col-xs-12"><br></div></div><div class="col-xs-12 content" style="height : 400px"><div ui-view="" class="slide"></div></div><div modal="modal"></div></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('modal/modal.directive.html',
+    '<div class="modal fade" id="pointDetailsModal" style="z-index : 3000"><div class="modal-dialog"><div class="modal-content"><div class="modal-header" ng-if="category === \'crime\'"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">{{modalData.offense}}</h4></div><div class="modal-header" ng-if="category === \'development\'"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">{{modalData.record_type}}</h4></div><div class="modal-body"><div class="col-xs-12" ng-if="category === \'development\'" style="max-height : 300px; overflow-y : scroll"><h5 class="text-center">{{modalData.address}}</h5><div class="col-xs-12 col-md-6"><strong>Opened</strong><p>{{modalData.date_opened|date}}</p></div><div class="col-xs-12 col-md-6"><strong>Updated</strong><p>{{modalData.date_statused|date}}</p></div><div class="col-xs-12 col-md-4"><strong>Status</strong><p>{{modalData.record_status}}</p></div><div class="col-xs-12 col-md-8"><strong>Business Name</strong><p>{{modalData.business_name}}</p></div><div class="col-xs-12"><strong>Description</strong><p>{{modalData.description}}</p></div></div><div class="col-xs-12 list-item-panel" ng-if="category === \'crime\'"><div class="col-xs-12"><div class="col-xs-12 col-sm-6"><h5 class="pull-left">{{modalData.address}}</h5></div><div class="col-xs-12 col-sm-6"><h5 class="pull-right">{{modalData.thedate|date}}</h5></div></div><div class="col-xs-12"><div class="col-xs-12 col-sm-4"><p class="text-center"><strong>Case Number</strong></p><p class="text-center">{{modalData.casenumber}}</p></div><div class="col-xs-12 col-sm-4"><p class="text-center"><strong>Law Beat</strong></p><p class="text-center">{{modalData.law_beat}}</p></div><div class="col-xs-12 col-sm-4"><p class="text-center"><strong>Severity</strong></p><p class="text-center">{{modalData.severity}}</p></div></div><a ng-click="showMore = !showMore"><p class="text-center" ng-if="showMore">Show More</p><p class="text-center" ng-if="showMore">Show Less</p></a></div></div></div></div>--></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('questions/questions.html',
+    '<div class="col-xs-12"><div class="list-group"><a class="col-xs-12 list-group-item list-item-panel"><div class="col-xs-12 col-md-4"><address class="pull-left"><strong>{{locationProperties.address.attributes.House}} {{locationProperties.address.attributes.preType}} {{locationProperties.address.attributes.StreetName}} {{locationProperties.address.attributes.SufType}} {{locationProperties.address.attributes.SufDir}} <span ng-if="locationProperties.address.attributes.User_fld !== \'\'">UNIT: {{locationProperties.address.attributes.User_fld}}</span></strong><br><span ng-if="locationProperties.inTheCity">Asheville, NC</span> {{locationProperties.address.attributes.ZIP}}</address></div><div class="col-xs-12 col-md-8"><div ng-if="locationProperties.inTheCity" class="pull-right hidden-xs"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s in the city!</h2></div><div ng-if="!locationProperties.inTheCity" class="pull-right hidden-xs"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s not in the city!</h2></div></div></a> <a ng-if="locationProperties.inTheCity" class="list-group-item list-item-panel visible-xs"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s in the city!</h2></a> <a ng-if="!locationProperties.inTheCity" class="list-group-item list-item-panel visible-xs"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s not in the city!</h2></a> <a class="col-xs-12 list-group-item list-item-panel" ng-click="getAnswer(question)" ng-repeat="question in questions" tabindex="{{$index + 11}}"><h4>{{question.question}}<i class="fa fa-chevron-right pull-right text-primary" style="margin-top: 8px"></i></h4></a> <a class="col-xs-12 list-group-item list-item-panel" ng-show="more.show" ng-click="more.get()" tabindex="{{questions.length + 12}}"><h3 class="text-primary" style="text-align : center">More</h3></a></div></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('time/time.html',
+    '<div><div class="form-group" ng-show="show"><select class="form-control" id="time" ng-init="timeValue = timeOptions[defaultOption]" ng-model="timeValue" ng-options="item.label for item in timeOptions" ng-change="onChangeTimeValue()" style="width : 100%"></select></div><div ui-view=""></div></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('details/reports/crime.report.html',
+    '<div class="col-xs-12"><div class="col-xs-12" style="height : 100px; text-align : center" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div ng-show="!loading"><div class="col-xs-12" ng-if="isEmpty">No crime activity was found based on your search criteria.</div><div class="col-xs-12" ng-if="!isEmpty" ng-show="showSummary" ng-cloak=""><div class="col-xs-12 list-item-panel"><table class="table"><thead><tr><th>Crime Type</th><th>Count</th></tr></thead><tbody><tr ng-repeat="(key, value) in filteredDetails.summary"><td><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}</td><td>{{value.count}}</td></tr></tbody></table></div></div><div class="col-xs-12 list-item-panel" ng-repeat="item in filteredDetails.features" ng-show="!showSummary" ng-cloak=""><div class="col-xs-12"><div class="col-xs-12 col-sm-6"><h5 class="pull-left">{{item.attributes.address}}</h5></div><div class="col-xs-12 col-sm-6"><h5 class="pull-right">{{item.attributes.thedate|date}}</h5></div></div><div class="col-xs-12"><div class="col-xs-12 col-sm-4"><p class="text-center"><strong>Case Number</strong></p><p class="text-center">{{item.attributes.casenumber}}</p></div><div class="col-xs-12 col-sm-4"><p class="text-center"><strong>Law Beat</strong></p><p class="text-center">{{item.attributes.law_beat}}</p></div><div class="col-xs-12 col-sm-4"><p class="text-center"><strong>Severity</strong></p><p class="text-center">{{item.attributes.severity}}</p></div></div><a ng-click="showMore = !showMore"><p class="text-center" ng-if="showMore">Show More</p><p class="text-center" ng-if="showMore">Show Less</p></a></div><div class="col-xs-12"><a ng-click="goTo(map);"><p class="text-center">View on Map</p></a></div></div></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('details/reports/default.report.html',
+    '<div class="col-xs-12"><div class="col-xs-12" style="height : 100px; text-align : center" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div ng-show="!loading"><div class="col-xs-12" ng-if="isEmpty">No development activity was found based on your search criteria.</div><div class="col-xs-12" ng-if="!isEmpty" ng-show="showSummary" ng-cloak=""><div class="col-xs-12 list-item-panel"><table class="table"><thead><tr><th>Development Type</th><th>Count</th></tr></thead><tbody><tr ng-repeat="(key, value) in filteredDetails.summary"><td>{{key}}<br><p class="text-muted">{{developmentExplanations[key]}}</p></td><td>{{value}}</td></tr></tbody></table></div></div><div class="col-xs-12 list-item-panel" ng-repeat="item in filteredDetails.features" ng-show="!showSummary" ng-cloak=""><div ng-include="details/reports/test.report.html"></div></div><div class="col-xs-12"><a ng-click="goTo(map);"><p class="text-center">View on Map</p></a></div></div></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('details/reports/development.report.html',
+    '<div class="col-xs-12"><div class="col-xs-12" style="height : 100px; text-align : center" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div ng-show="!loading"><div class="col-xs-12" ng-if="isEmpty">No development activity was found based on your search criteria.</div><div class="col-xs-12" ng-if="!isEmpty" ng-show="showSummary" ng-cloak=""><div class="col-xs-12 list-item-panel"><table class="table"><thead><tr><th>Development Type</th><th>Count</th></tr></thead><tbody><tr ng-repeat="(key, value) in filteredDetails.summary"><td><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}<br><p class="text-muted">{{developmentExplanations[key]}}</p></td><td>{{value.count}}</td></tr></tbody></table></div></div><div class="col-xs-12 list-item-panel" ng-repeat="item in filteredDetails.features" ng-show="!showSummary" ng-cloak=""><h5 class="text-center">{{item.attributes.address}}</h5><div class="col-xs-12"><div class="col-xs-12 col-sm-4"><strong>Opened</strong><p>{{item.attributes.date_opened|date}}</p></div><div class="col-xs-12 col-sm-4"><strong>Updated</strong><p>{{item.attributes.date_statused|date}}</p></div><div class="col-xs-12 col-sm-4"><strong>Status</strong><p>{{item.attributes.record_status}}</p></div></div><div class="col-xs-12"><p><strong>Description:</strong>{{item.attributes.description}}</p></div><div ng-init="showMore = false" ng-show="showMore"><div class="col-xs-12"><div class="pull-left"><strong>Record Id</strong><p>{{item.attributes.record_id}}</p></div><div class="pull-right"><strong>License Number</strong><p>{{item.attributes.license_number}}</p></div></div><div class="col-xs-12"><div class="pull-left"><strong>Record Name</strong><p>{{item.attributes.record_name}}</p></div><div class="pull-right"><strong>Business Name</strong><p>{{item.attributes.business_name}}</p></div></div><div ng-init="showComments = false" ng-show="showComments"><strong>Comments</strong><ul class="list-group"><li class="list-group-item list-item-panel" ng-repeat="comment in item.attributes.commentsArray">{{comment}}</li></ul></div><a ng-click="showComments = !showComments"><p class="text-center" ng-if="!showComments">Show Comments</p><p class="text-center" ng-if="showComments">Hide Comments</p></a></div><a ng-click="showMore = !showMore"><p class="text-center" ng-if="!showMore">Show More</p><p class="text-center" ng-if="showMore">Show Less</p></a></div><div class="col-xs-12"><a ng-click="goTo(map);"><p class="text-center">View on Map</p></a></div></div></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('details/reports/property.report.html',
+    '<div class="col-xs-12"><div class="col-xs-12" style="padding : 10px"><div class="col-xs-12 list-item-panel"><div class="col-xs-12 col-md-6"><h5><strong>Zoning</strong> : <span>TODO</span></h5><h5><strong>PIN</strong> : <span>{{propertyDetails.attributes.pinnum}}</span></h5></div><div class="col-xs-12 col-md-6"><div ng-if="propertyDetails.attributes.isincity === \'Yes\'" class="pull-left"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s in the city!</h4></div><div ng-if="propertyDetails.attributes.isincity === \'No\'" class="pull-left"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s not in the city!</h4></div><div ng-if="propertyDetails.attributes.iscityowned === \'Yes\'" class="pull-left"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s city owned!</h4></div><div ng-if="propertyDetails.attributes.iscityowned === \'No\'" class="pull-left"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s not city owned!</h4></div></div></div><div class="col-xs-12 col-md-6 list-item-panel pull-left"><h4>Owner</h4><strong>{{propertyDetails.attributes.owner}}</strong><address>{{propertyDetails.attributes.owner_address}}<br>{{propertyDetails.attributes.owner_citystatezip}}</address></div><div class="col-xs-12 col-md-5 list-item-panel pull-right"><h4>Tax Details</h4><p ng-if="propertyDetails.attributes.exempt === null">Tax exempt : <span class="text-danger">NO</span></p><p ng-if="propertyDetails.attributes.exempt !== null">Tax exempt : <span class="text-success">YES</span></p><p ng-if="propertyDetails.attributes.improved === \'Y\'">Improved : <span class="text-success">YES (${{propertyDetails.attributes.improvementvalue|number}})</span></p><p>Appraisal Area : {{propertyDetails.attributes.appraisalarea}}</p></div><div class="col-xs-12 list-item-panel"><h4>Property and Tax Value</h4><table class="table "><thead><tr><th>Value Type</th><th>Amount</th></tr></thead><tbody><tr><td>Building Value</td><td>${{propertyDetails.attributes.buildingvalue|number}}</td></tr><tr><td>Land Value</td><td>${{propertyDetails.attributes.landvalue|number}}</td></tr><tr><td>Appraised Value</td><td>${{propertyDetails.attributes.appraisedvalue|number}}</td></tr><tr><td>Tax Value</td><td>${{propertyDetails.attributes.taxvalue|number}}</td></tr><tr><td>Total Market Value</td><td>${{propertyDetails.attributes.totalmarketvalue|number}}</td></tr></tbody></table></div><div class="col-xs-12 list-item-panel"><br><a class="col-xs-12 col-md-3" style="text-align : center; margin-bottom : 10px" target="_blank" href="{{propertyDetails.attributes.deed_url}}">Deed</a> <a class="col-xs-12 col-md-3" style="text-align : center; margin-bottom : 10px" target="_blank" href="{{propertyDetails.attributes.plat_url}}">Plat</a> <a class="col-xs-12 col-md-4" style="text-align : center; margin-bottom : 10px" target="_blank" href="{{propertyDetails.attributes.propcard_url}}">Property Card</a><br></div></div><div class="col-xs-12"><a ng-click="goTo(map);"><p class="text-center">View on Map</p></a></div></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('details/reports/test.report.html',
+    '<div class="col-xs-12"><h5 class="text-center">{{item.attributes.address}}</h5><div class="col-xs-12"><div class="col-xs-12 col-md-4"><strong>Opened</strong><p>{{item.attributes.date_opened|date}}</p></div><div class="col-xs-12 col-md-4"><strong>Updated</strong><p>{{item.attributes.date_statused|date}}</p></div><div class="col-xs-12 col-md-4"><strong>Status</strong><p>{{item.attributes.record_status}}</p></div></div><div class="col-xs-12"><p><strong>Description:</strong>{{item.attributes.description}}</p></div><div ng-init="showMore = false" ng-show="showMore"><div class="col-xs-12"><div class="pull-left"><strong>Record Id</strong><p>{{item.attributes.record_id}}</p></div><div class="pull-right"><strong>License Number</strong><p>{{item.attributes.license_number}}</p></div></div><div class="col-xs-12"><div class="pull-left"><strong>Record Name</strong><p>{{item.attributes.record_name}}</p></div><div class="pull-right"><strong>Business Name</strong><p>{{item.attributes.business_name}}</p></div></div><div ng-init="showComments = false" ng-show="showComments"><strong>Comments</strong><ul class="list-group"><li class="list-group-item list-item-panel" ng-repeat="comment in item.attributes.commentsArray">{{comment}}</li></ul></div><a ng-click="showComments = !showComments"><p class="text-center" ng-if="!showComments">Show Comments</p><p class="text-center" ng-if="showComments">Hide Comments</p></a></div><a ng-click="showMore = !showMore"><p class="text-center" ng-if="!showMore">Show More</p><p class="text-center" ng-if="showMore">Show Less</p></a></div>');
+}]);
+})();
+
 app.controller('MainCtrl', ['$scope', '$state', '$location', '$http', '$timeout', 'ArcGisServer', 'LocationProperties',
   function ($scope, $state, $location, $http, $timeout, ArcGisServer, LocationProperties) {
     
@@ -1405,7 +1459,7 @@ app.controller('MainCtrl', ['$scope', '$state', '$location', '$http', '$timeout'
 
     $scope.getLocationProperties = function(location, event){
         $scope.addresses = []; 
-        $scope.typedLocation = '';
+        $scope.typedLocation = location.address;
         LocationProperties.properties(location)
           .then(function(){
             $state.go('main.location.questions', {location : location.attributes.Ref_ID});
@@ -1417,6 +1471,56 @@ app.controller('MainCtrl', ['$scope', '$state', '$location', '$http', '$timeout'
     };
 
 }]);
+app.directive('modal', ['$compile','$filter','$state', '$stateParams','$q', 'Modal',
+  function($compile, $filter, $state, $stateParams, $q, Modal){
+  return {
+    //Restrict the directive to attribute ep-form on an element 
+    restrict: 'A',
+    //Defines the scope object for the directive 
+    scope:{
+      modal : '= modal',
+    },
+    replace : true,
+    //Template for the directive
+    templateUrl: 'modal/modal.directive.html',
+    controller : ['$scope', function($scope){
+
+      $scope.modalData = Modal.getData();
+
+      $scope.category = $stateParams.category;
+
+      $scope.$watch(function () {return Modal.getData();},                       
+        function(newVal, oldVal) {
+          $scope.modalData = newVal;
+          console.log('$scope.modalData'  );
+          console.log($scope.modalData);
+      }, true);
+
+      
+    }]//END modal Directive Controller function
+  };//END returned object
+}]);//END modal directivective function
+app.factory('Modal', ['$stateParams', function($stateParams){
+
+    //****Create the factory object****//
+    
+    var Modal = {};
+
+    var modalData = {};
+    
+  	Modal.getData = function(){
+  		return modalData;
+  	}; 
+
+  	Modal.setData = function(data){
+  		modalData = data;
+  	}
+
+    //****Return the factory object****//
+    return Modal; 
+
+    
+}]); //END Modal factory function
 
 app.controller('QuestionsCtrl', ['$scope','$state','Category', 'Questions', 'LocationProperties', 
     function ($scope, $state, Category, Questions, LocationProperties) {
@@ -1524,7 +1628,7 @@ app.controller('TimeCtrl', ['$scope', '$stateParams', '$state', 'Time',
 
 	
 }]);
-app.factory('Time', [function(){
+app.factory('Time', ['$stateParams', function($stateParams){
 
     //****Create the factory object****//
     var Time = {};
@@ -1543,12 +1647,12 @@ app.factory('Time', [function(){
 
     //****Private variables*****//
     var timeOptions = [
-      {'value' : 'last-30-days', 'label' : 'During the last 30 days'},
-      {'value' : 'last-6-months', 'label' : 'During the last 6 months'},
-      {'value' : 'last-year', 'label' : 'During the last year'},
-      {'value' : 'last-5-years', 'label' : 'During the last 5 years'},
-      {'value' : 'last-10-years', 'label' : 'During the last 10 years'},
-      {'value' : 'all-time', 'label' : 'All time'}
+      {'value' : 'last-30-days', 'label' : 'during the last 30 days'},
+      {'value' : 'last-6-months', 'label' : 'during the last 6 months'},
+      {'value' : 'last-year', 'label' : 'during the last year'},
+      {'value' : 'last-5-years', 'label' : 'during the last 5 years'},
+      {'value' : 'last-10-years', 'label' : 'during the last 10 years'},
+      {'value' : 'all-time', 'label' : 'all time'}
     ];
   
 
@@ -1561,8 +1665,8 @@ app.factory('Time', [function(){
       }
     };
 
-    Time.filterValue = function(timeOptionValue){
-      return timeFilterValues[timeOptionValue];
+    Time.filterValue = function(){
+      return timeFilterValues[$stateParams.time];
     };
   
 
