@@ -1,44 +1,15 @@
-<div class="col-xs-12">
-	<div class="col-xs-12" style = "height : 100px; text-align : center" ng-show = "loading">
-		<i class="fa fa-5x fa-spinner fa-spin"></i>
-	</div>
-	<div ng-show = "!loading">
-		<div class="col-xs-12" ng-if = 'isEmpty' >No development activity was found based on your search criteria.</div>
-		<div class="col-xs-12" ng-if = '!isEmpty' ng-show = "showSummary" ng-cloak>
-			<div class="col-xs-12 list-item-panel">
-				<table class="table" >
-			      <thead>
-			        <tr>
-			          <th>Development Type</th>
-			          <th>Count</th>
-			        </tr>
-			      </thead>
-			      <tbody>
-			        <tr ng-repeat = "(key, value) in filteredDetails.summary">
-			          <td>
-			          	<i class="fa fa-circle" style = "color: #{{value.color}}"></i> {{key}}
-			          	<br>
-			          	<p class = 'text-muted'>{{developmentExplanations[key]}}</p>
-			          	
-			          </td>
-			          <td>{{value.count}}</td>
-			        </tr>
-			      </tbody>
-			    </table>
-			</div>
-		</div>
-		<div class="col-xs-12 list-item-panel" ng-repeat = "item in filteredDetails.features" ng-show = "!showSummary" ng-cloak>
-			<h5 class = 'text-center'>{{item.attributes.address}}</h5>
+<div class = 'col-xs-12'>
+<h5 class = 'text-center'>{{item.attributes.address}}</h5>
 			<div class="col-xs-12">
-				<div class="col-xs-12 col-sm-4">
+				<div class="col-xs-12 col-md-4">
 					<strong>Opened</strong>
 					<p>{{item.attributes.date_opened|date}}</p>
 				</div>
-				<div class="col-xs-12 col-sm-4">
+				<div class="col-xs-12 col-md-4">
 					<strong>Updated</strong>
 					<p>{{item.attributes.date_statused|date}}</p>
 				</div>
-				<div class="col-xs-12 col-sm-4">
+				<div class="col-xs-12 col-md-4">
 					<strong>Status</strong>
 					<p>{{item.attributes.record_status}}</p>
 				</div>
@@ -82,10 +53,4 @@
 				<p class = 'text-center' ng-if = '!showMore'>Show More</p>
 				<p class = 'text-center' ng-if = 'showMore'>Show Less</p>
 			</a>
-		</div>
-		<div class="col-xs-12">
-			<a  ng-click = "goTo(map);"><p class = 'text-center'>View on Map</p></a>
-		</div>
-	</div>
-	
 </div>

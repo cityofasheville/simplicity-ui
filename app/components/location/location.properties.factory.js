@@ -6,7 +6,28 @@ app.factory('LocationProperties', ['$http', '$location', '$q', '$filter', '$stat
   	var LocationProperties = {};
 
     //****Private variables*****//
-  	var properties = {};
+  	var properties = {
+    };
+
+    var assignValueToProperties = function(parentPropertyName, thisPropertyName, value){
+      //check if parent property already exist
+      if(properties[parentPropertyName]){
+          properties[parentPropertyName][thisPropertyName] = value;
+      //parent property doesn't exist, so create it
+      }else{
+        properties[parentPropertyName] = {};
+        properties[parentPropertyName][thisPropertyName] = value;
+      }
+    };
+    //
+    var createArrayFromNullorString = function(value, delimter){
+      if(value === null){
+          return []
+      }else{
+        return value.split(delimter);
+      }
+    };
+
 
     var setPropertiesWithCivicAddressId = function(CivicAddressId){
       var q = $q.defer();
@@ -20,30 +41,29 @@ app.factory('LocationProperties', ['$http', '$location', '$q', '$filter', '$stat
         .then(function(dataCacheResults){
           console.log(dataCacheResults);
           for (var i = 0; i < dataCacheResults.features.length; i++) {
-            if(dataCacheResults.features[i].attributes.type === 'ADDRESS IN CITY'){
-              properties.inTheCity = (dataCacheResults.features[i].attributes.data === 'YES')? true : false;
-            }else if(dataCacheResults.features[i].attributes.type === 'CRIME'){
-              if(dataCacheResults.features[i].attributes.data === null){
-                properties.crime = [];
-              }else{
-                properties.crime = dataCacheResults.features[i].attributes.data.split(',');
-              }
-            }else if(dataCacheResults.features[i].attributes.type === 'ZONING'){
-              if(dataCacheResults.features[i].attributes.data === null){
+            //assign iterator to attributes to make it easier to read
+            var attributes = dataCacheResults.features[i].attributes;
+
+            if(attributes.type === 'ADDRESS IN CITY'){
+              properties.inTheCity = (attributes.data === 'YES')? true : false;
+            }else if(attributes.type === 'CRIME'){
+              var value = createArrayFromNullorString(attributes.data, ',');
+              assignValueToProperties('crime', attributes.distance, value);
+            }else if(attributes.type === 'ZONING'){
+              if(attributes.data === null){
                 properties.zoning = [];
               }else{
-                properties.zoning = dataCacheResults.features[i].attributes.data.split(',');
+                properties.zoning = attributes.data.split(',');
               }
-            }else if(dataCacheResults.features[i].attributes.type === 'DEVELOPMENT'){
-              if(dataCacheResults.features[i].attributes.data === null){
-                properties.development = [];
-              }else{
-                properties.development = dataCacheResults.features[i].attributes.data.split(',');
-              }
+            }else if(attributes.type === 'DEVELOPMENT'){
+              var value = createArrayFromNullorString(attributes.data, ',');
+              assignValueToProperties('development', attributes.distance, value);
             }else{
               //Do nothing
             }
           }
+          console.log('properties');
+          console.log(properties);
           q.resolve(properties);
         });
         return q.promise;

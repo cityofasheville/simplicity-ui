@@ -1,5 +1,5 @@
-app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$timeout','Details', 'LocationProperties',
-  function($compile, $filter, $state, $stateParams, $q, $timeout, Details, LocationProperties){
+app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$timeout','Details', 'LocationProperties', 'Filter',
+  function($compile, $filter, $state, $stateParams, $q, $timeout, Details, LocationProperties, Filter){
   return {
     //Restrict the directive to attribute ep-form on an element 
     restrict: 'A',
@@ -20,6 +20,7 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
       };
 
       $scope.loading = false;
+      $scope.showSummary = true;
 
       var isEmpty = function (obj) {
           for(var prop in obj) {
@@ -44,30 +45,19 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
               .then(function(propertyDetails){
                 $scope.propertyDetails = propertyDetails;
               });
-          }else if($scope.report.category === 'crime'){
+          }else{
             $scope.loading = true;
-            Details.getCrimeFeatures(properties.crime)
-              .then(function(crimeFeatures){
-                $scope.crimeSummary = Details.filterCrimeSummaryByFilter(Details.filterCrimeDetailsByTime(crimeFeatures));
-                $scope.loading = false;
-              });
-          }else if($scope.report.category === 'development'){
-            $scope.loading = true;
-            Details.getDevelopmentFeatures(properties.development)
-              .then(function(developmentFeatures){
-                if($scope.report.filter === 'summary'){
-                  $scope.developmentSummary = Details.filterDevelopmentSummaryByFilter(Details.filterDevelopmentFeaturesByTime(developmentFeatures));
-                  $scope.isEmpty = isEmpty($scope.developmentSummary);
-                  $scope.developmentArray = [];
-                  $scope.loading = false;
+            Details.getFilteredDetails()
+              .then(function(filteredDetails){
+                $scope.filteredDetails = filteredDetails;
+                
+                $scope.isEmpty = isEmpty(filteredDetails.summary);
+                if($stateParams.filter === 'summary'){
+                  $scope.showSummary = true;
                 }else{
-                  $scope.developmentSummary = {};
-                  $scope.isEmpty = true;
-                  $scope.developmentArray = Details.filterDevelopmentFeaturesByTime(developmentFeatures);
-                  console.log($scope.developmentArray);
-                  $scope.loading = false;
+                  $scope.showSummary = false;
                 }
-                  
+                $scope.loading = false;                  
               });
           }
         });

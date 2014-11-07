@@ -1,4 +1,4 @@
-app.factory('Time', [function(){
+app.factory('Time', ['$stateParams', function($stateParams){
 
     //****Create the factory object****//
     var Time = {};
@@ -17,12 +17,12 @@ app.factory('Time', [function(){
 
     //****Private variables*****//
     var timeOptions = [
-      {'value' : 'last-30-days', 'label' : 'During the last 30 days'},
-      {'value' : 'last-6-months', 'label' : 'During the last 6 months'},
-      {'value' : 'last-year', 'label' : 'During the last year'},
-      {'value' : 'last-5-years', 'label' : 'During the last 5 years'},
-      {'value' : 'last-10-years', 'label' : 'During the last 10 years'},
-      {'value' : 'all-time', 'label' : 'All time'}
+      {'value' : 'last-30-days', 'label' : 'during the last 30 days'},
+      {'value' : 'last-6-months', 'label' : 'during the last 6 months'},
+      {'value' : 'last-year', 'label' : 'during the last year'},
+      {'value' : 'last-5-years', 'label' : 'during the last 5 years'},
+      {'value' : 'last-10-years', 'label' : 'during the last 10 years'},
+      {'value' : 'all-time', 'label' : 'all time'}
     ];
   
 
@@ -35,8 +35,8 @@ app.factory('Time', [function(){
       }
     };
 
-    Time.filterValue = function(timeOptionValue){
-      return timeFilterValues[timeOptionValue];
+    Time.filterValue = function(){
+      return timeFilterValues[$stateParams.time];
     };
   
 

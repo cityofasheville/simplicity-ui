@@ -1,5 +1,5 @@
-app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Details', 'LocationProperties',
-  function($compile, $filter, $state, $stateParams, $q, Details, LocationProperties){
+app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Details', 'Extent', 'LocationProperties', 'Modal',
+  function($compile, $filter, $state, $stateParams, $q, Details, Extent, LocationProperties, Modal){
   return {
     //Restrict the directive to attribute ep-form on an element 
     restrict: 'A',
@@ -14,20 +14,20 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Detai
 
 
     //Creates GeoJson from an ArcGIS Feature Service
-    var createPointGeoJsonFromArcGisFeatureService = function(featureService){
+    var createPointGeoJsonFromFilteredDetails = function(filteredDetails){
         var geoJson = {
             'type' : 'FeatureCollection',
             'features' : []
         };
 
-        for (var i = 0; i < featureService.features.length; i++) {
+        for (var i = 0; i < filteredDetails.features.length; i++) {
             var temp = {
                 'type':'Feature',
                 'geometry' : {
                     'type': 'Point', 
-                    'coordinates': [featureService.features[i].geometry.x, featureService.features[i].geometry.y]
+                    'coordinates': [filteredDetails.features[i].geometry.x, filteredDetails.features[i].geometry.y]
                 },
-                'properties': featureService.features[i].attributes
+                'properties': filteredDetails.features[i].attributes
             };
             geoJson.features.push(temp);
         }
@@ -38,11 +38,19 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Detai
     var createGeoJsonMarkers = function(data){
       return L.geoJson(data, {
           pointToLayer: function (feature, latlng) {
-              return L.marker(latlng, {icon: crimeMarker}).addTo(map);    
+
+              return L.circleMarker(latlng, {
+                  radius: 6,
+                  fillColor: "#"+feature.properties.color,
+                  color: "#"+feature.properties.color,
+                  weight: 1,
+                  opacity: 1,
+                  fillOpacity: 0.8
+              }); 
           },
           onEachFeature: function (feature, layer) {
               layer.on('click', function(){
-
+                  console.log('click');
                   $scope.getPointDetails(feature.properties);
                   $scope.pointDetails = feature.properties;
                   $scope.$apply();
@@ -153,8 +161,8 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Detai
     var crimeMarker = L.AwesomeMarkers.icon({
         icon: 'circle',
         prefix: 'fa',
-        iconColor :'white',
-        markerColor: 'red',
+        iconColor :'#12BFFF',
+        markerColor: 'white',
       });
 
     //L.control.layers(baseMaps).addTo(map);
@@ -178,29 +186,40 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Detai
               map.fitBounds(propertyBounds);
               map.setZoom(18);
             });
-        }else if($scope.map.category === 'crime'){
-          Details.getCrimeFeatures(properties.crime)
-            .then(function(crimes){
-              var crimeDetails = Details.filterCrimeSummaryByFilter(Details.filterCrimeDetailsByTime(crimes));
-              var crimeGeoJson = createPointGeoJsonFromArcGisFeatureService(crimes);
-              var filterCrimeGeoJson = Details.filterCrimeGeoJsonByFilter(Details.filterCrimeGeoJsonByTime(crimeGeoJson));
-              var crimeGeoJsonLayer = createGeoJsonMarkers(filterCrimeGeoJson);
-              map.fitBounds(getBoundsOfPointGeoJson(filterCrimeGeoJson));
-              crimeGeoJsonLayer.addTo(map);
-              console.log(properties);
+        }else{
+          Details.getFilteredDetails()
+            .then(function(filteredDetails){
+              var radiusInFeet = Extent.filterValue();
+              var radiusInMeters = radiusInFeet*0.3048;
               L.marker([properties.address.location.y, properties.address.location.x]).addTo(map);
-              L.circle([properties.address.location.y, properties.address.location.x], 201.168, {
+              var circle = L.circle([properties.address.location.y, properties.address.location.x], radiusInMeters, {
                 'fillOpacity' : 0
-              }).addTo(map);
-              map.setZoom(18);
+              });
+              circle.addTo(map);
+              var circleBounds = circle.getBounds();
+              map.fitBounds(circleBounds);
+              var geojson = createPointGeoJsonFromFilteredDetails(filteredDetails)
+              var geoJsonLayer = createGeoJsonMarkers(geojson);
+              geoJsonLayer.addTo(map);
+              
+              
             });
         }
       });
-
-      $scope.getPointDetails = function(pointPointProperties){
+      $scope.crime = true
+      if($stateParams.category !== 'crime'){
+        $scope.crime = false
+      };
+      $scope.showMarkerDetails = false;
+      $scope.getPointDetails = function(pointProperties){
+        Modal.setData(pointProperties)
+        //$scope.showMarkerDetails = true;
         $('#pointDetailsModal').modal({'backdrop' : false});
       };
 
+      $scope.goTo = function(detailsLocation){
+        $state.go('main.location.category.time.extent.filter.details', {'details' : 'report'});
+      };
       
       
     }]//END Details Directive Controller function

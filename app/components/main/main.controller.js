@@ -29,7 +29,7 @@ app.controller('MainCtrl', ['$scope', '$state', '$location', '$http', '$timeout'
 
     $scope.getLocationProperties = function(location, event){
         $scope.addresses = []; 
-        $scope.typedLocation = '';
+        $scope.typedLocation = location.address;
         LocationProperties.properties(location)
           .then(function(){
             $state.go('main.location.questions', {location : location.attributes.Ref_ID});

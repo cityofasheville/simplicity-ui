@@ -2,16 +2,32 @@ app.controller('FilterCtrl', ['$scope', '$stateParams', '$state', 'Filter', func
   	$scope.filterOptions = Filter.options($stateParams.category);
 	for (var i = 0; i < $scope.filterOptions.length; i++) {
 		if($scope.filterOptions[i].value === $stateParams.filter){
-			console.log($scope.filterOptions[i].value );
 			$scope.defaultOption = i;
 		}
 	}
-		
+	$scope.hasFilter = false;
     if($stateParams.filter === 'summary'){
     	$scope.show = false;
 	}else{
 		$scope.show = true;
 	}
+
+	//Watch to see if the options returned from teh Filter factory change
+	$scope.$watch(function () {return Filter.options($stateParams.category);},                       
+      	function(newVal, oldVal) {
+      		if(newVal.length > 1 || $stateParams.category !== 'property'){
+      			$scope.hasFilter = true;
+      			$scope.filterOptions = newVal;
+      			for (var i = 0; i < $scope.filterOptions.length; i++) {
+					if($scope.filterOptions[i].value === $stateParams.filter){
+						$scope.filterValue = $scope.filterOptions[i];
+					}
+				}
+      		}else{
+      			$scope.hasFilter = false;
+      		}
+        	
+    	}, true);
 
 	
 	$scope.onChangeFilterValue = function(){

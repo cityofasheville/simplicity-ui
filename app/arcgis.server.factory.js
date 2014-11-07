@@ -113,8 +113,6 @@ app.factory('ArcGisServer', ['$http', '$location', '$q', '$filter',
           if(data.error){
             console.log(data.error.code + ' ArcGisServer.featureService.query on featureServiceId ' + featureServiceId + '. ' + data.error.message);
           }else{
-            console.log('query ' + featureServiceId);
-            console.log(data);
             q.resolve(data);
           }
         })

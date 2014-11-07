@@ -1,16 +1,9 @@
-<div>
-	<a class = 'pull-right'ng-click = "goTo(map);">View on Map</a>
-	<div class="list-item-panel col-xs-12" style = "padding : 10px">
+<div class = 'col-xs-12'>
+	<div class="col-xs-12" style = "padding : 10px">
 		<div class="col-xs-12 list-item-panel">
 			<div class="col-xs-12 col-md-6">
-				<address style = "margin-bottom: 5px">
-				  <strong>{{locationProperties.address.attributes.House}} {{locationProperties.address.attributes.preType}} {{locationProperties.address.attributes.StreetName}} {{locationProperties.address.attributes.SufType}} {{locationProperties.address.attributes.SufDir}} 
-				  	<span ng-if= "locationProperties.address.attributes.User_fld !== ''">UNIT: {{locationProperties.address.attributes.User_fld}}</span>
-				  </strong><br>
-				  <span ng-if = "locationProperties.inTheCity">Asheville, NC</span>
-				  {{locationProperties.address.attributes.ZIP}}
-				</address>
-				<h5>PIN : <span>{{propertyDetails.attributes.pinnum}}</span></h5>
+				<h5><strong>Zoning</strong> : <span>TODO</span></h5>
+				<h5><strong>PIN</strong> : <span>{{propertyDetails.attributes.pinnum}}</span></h5>
 			</div>
 			<div class="col-xs-12 col-md-6">
 				<div ng-if = "propertyDetails.attributes.isincity === 'Yes'" class="pull-left">
@@ -91,5 +84,8 @@
 			<a class="col-xs-12 col-md-4" style = "text-align : center; margin-bottom : 10px" target = "_blank" href = "{{propertyDetails.attributes.propcard_url}}">Property Card</a>
 			<br>
 		</div>
+	</div>
+	<div class="col-xs-12">
+		<a  ng-click = "goTo(map);"><p class = 'text-center'>View on Map</p></a>
 	</div>
 </div>

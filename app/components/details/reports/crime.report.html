@@ -2,9 +2,10 @@
 	<div class="col-xs-12" style = "height : 100px; text-align : center" ng-show = "loading">
 		<i class="fa fa-5x fa-spinner fa-spin"></i>
 	</div>
-	<div class="col-xs-12" ng-show = "!loading" ng-cloak>
-		<a class = 'pull-right'ng-click = "goTo(map);">View on Map</a>
-		<div class="col-xs-12 list-item-panel">
+	<div ng-show = "!loading">
+		<div class="col-xs-12" ng-if = 'isEmpty' >No crime activity was found based on your search criteria.</div>
+		<div class="col-xs-12" ng-if = '!isEmpty' ng-show = "showSummary" ng-cloak>
+			<div class="col-xs-12 list-item-panel">
 			<table class="table" >
 		      <thead>
 		        <tr>
@@ -13,13 +14,46 @@
 		        </tr>
 		      </thead>
 		      <tbody>
-		        <tr ng-repeat = "(key, value) in crimeSummary">
-		          <td>{{key}}</td>
-		          <td>{{value}}</td>
+		        <tr ng-repeat = "(key, value) in filteredDetails.summary">
+		          <td><i class="fa fa-circle" style = "color: #{{value.color}}"></i> {{key}}</td>
+		          <td>{{value.count}}</td>
 		        </tr>
 		      </tbody>
 		    </table>
 		</div>
+		</div>
+		<div class="col-xs-12 list-item-panel" ng-repeat = "item in filteredDetails.features" ng-show = "!showSummary" ng-cloak>
+			<div class="col-xs-12">
+				<div class="col-xs-12 col-sm-6">
+					<h5 class = 'pull-left'>{{item.attributes.address}}</h5>
+				</div>
+				<div class="col-xs-12 col-sm-6">
+					<h5 class = 'pull-right'>{{item.attributes.thedate|date}}</h5>
+				</div>
+			</div>
+			
+			<div class="col-xs-12">
+				<div class="col-xs-12 col-sm-4">
+					<p class = "text-center"> <strong >Case Number</strong></p>
+					<p class = "text-center">{{item.attributes.casenumber}}</p>
+				</div>
+				<div class="col-xs-12 col-sm-4">
+					<p class = "text-center"><strong>Law Beat</strong></p>
+					<p class = "text-center">{{item.attributes.law_beat}}</p>
+				</div>
+				<div class="col-xs-12 col-sm-4">
+					<p class = "text-center"><strong >Severity</strong></p>
+					<p class = "text-center">{{item.attributes.severity}}</p>
+				</div>
+			</div>
+			<a  ng-click = "showMore = !showMore">
+				<p class = 'text-center' ng-if = 'showMore'>Show More</p>
+				<p class = 'text-center' ng-if = 'showMore'>Show Less</p>
+			</a>
+		</div>
+		<div class="col-xs-12">
+			<a  ng-click = "goTo(map);"><p class = 'text-center'>View on Map</p></a>
+		</div>
 	</div>
-  	
+	
 </div>
