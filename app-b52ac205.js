@@ -295,6 +295,54 @@ app.factory('LayerDefintion', ['$http', '$location', '$q', '$filter', '$state', 
           'Robbery' : 'F2913D',
           'Vandalism' : '30588C'
         }
+      },
+      'property' : {
+        'codelinks' : {
+          'CBD' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-18CEBUDI',
+          'CBI' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-12COBUIDI',
+          'CBII' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-13COBUIIDI',
+          'CBII-CZ' : 'disable',
+          'CI' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-20COINDI',
+          'HB' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-16HIBUDI',
+          'HB-CZ' : 'disable',
+          'HCU' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTIXOVDI_S7-9-2HIPROVDI',
+          'HR-1:CORE' : 'disable',
+          'HR-2:EXPN' : 'disable',
+          'HR-3:CRDR' : 'disable',
+          'HR-4:TRAD' : 'disable',
+          'HR-5:L-W' : 'disable',
+          'HR-6:TOWN' : 'disable',
+          'IND' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-22INDI',
+          'IND-CZ' : 'disable',
+          'INST' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-15INDI',
+          'INST-CZ' : 'disable',
+          'LI' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-21LIINDI',
+          'NB' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-8NEBUDI',
+          'NCD' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-24NECODI',
+          'NOT ZONED' : 'disable',
+          'O2' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-10OFIIDI',
+          'OB' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-11OFBUDI',
+          'OFFICE' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-9OFDI',
+          'RB' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-17REBUDI',
+          'RB-CU' : 'disable',
+          'RESORT' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-14REDI',
+          'RIVER' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-19RIDI',
+          'RM16' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-7RMREMUMIHIDEDI',
+          'RM16-CZ' : 'disable',
+          'RM6' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-5REMUMILODEDI',
+          'RM6-CZ' : 'disable',
+          'RM8' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-6REMUMIMEDEDI',
+          'RS2' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-2RESIMILODEDI',
+          'RS4' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-3RESIMIMEDEDI',
+          'RS4-CZ' : 'disable',
+          'RS8' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-4RESIMIHIDEDI',
+          'RS8-CZ' : 'disable',
+          'UP' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-26URPLDI',
+          'UP-CZ' : 'disable',
+          'URD' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-25URREDI',
+          'UV' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-23URVIDI',
+        }
+        
       }
     };
 
@@ -317,7 +365,14 @@ app.controller('CategoryCtrl', ['$scope', '$stateParams', '$state', 'Category', 
         .then(function(properties){
         	$scope.locationProperties = properties;
         });
-    $state.go('main.location.category.time.extent.filter.details', $scope.category.defaultStates);  
+    console.log('CategoryCtrl');
+    console.log($stateParams);
+    if($stateParams.time === undefined){
+        console.log('CategoryCtrl');
+        console.log($stateParams);
+        //$state.go('main.location.category.time.extent.filter.details', $scope.category.defaultStates);  
+    }
+    
     $scope.goBack = function(){
         $state.go('main.location.questions');
       };  
@@ -335,20 +390,22 @@ app.factory('Category', ['$http', '$location', '$q', '$filter',
     var caiCrimeDefinition = {
       title : 'Crime',
       defaultStates : {
-        time : 'last-year',
-        extent : 'within-an-eighth-of-a-mile',
-        filter : 'summary',
-        details : 'report'
+        'category' : 'crime',
+        'time' : 'last-year',
+        'extent' : 'within-an-eighth-of-a-mile',
+        'filter' : 'summary',
+        'details' : 'report'
       }
     };
 
     var propertyDefinition = {
       title : 'Property',
       defaultStates : {
-        time : 'current',
-        extent : 'location',
-        filter : 'summary',
-        details : 'report'
+        'category' : 'property',
+        'time' : 'current',
+        'extent' : 'location',
+        'filter' : 'summary',
+        'details' : 'report'
       }
     };
 
@@ -356,43 +413,45 @@ app.factory('Category', ['$http', '$location', '$q', '$filter',
     var developmentDefinition = {
       title : 'Development',
       defaultStates : {
-        time : 'last-year',
-        extent : 'within-an-eighth-of-a-mile',
-        filter : 'summary',
-        details : 'report'
+        'category' : 'development',
+        'time' : 'last-year',
+        'extent' : 'within-an-eighth-of-a-mile',
+        'filter' : 'summary',
+        'details' : 'report'
       }
     };
 
     var permitsDefinition = {
       title : 'Permits',
       defaultStates : {
-        time : 'last-year',
-        extent : 'location',
-        filter : 'summary',
-        details : 'report'
+        'category' : 'permits',
+        'time' : 'last-year',
+        'extent' : 'location',
+        'filter' : 'summary',
+        'details' : 'report'
       }
     };
 
     var neighborhoodCrimeDefinition = {
-      showTimeOptions : true,
-      defaultTimeOption : 2,
-      showExtentOptions : false,
-      defaultExtentOption : 'neighborhood',
-      showFilterOptions : false,
-      defaultFilterOption : 'summary'
+      'showTimeOptions' : true,
+      'defaultTimeOption' : 2,
+      'showExtentOptions' : false,
+      'defaultExtentOption' : 'neighborhood',
+      'showFilterOptions' : false,
+      'defaultFilterOption' : 'summary'
     };
 
 
 
     var categoryDefinitions = {
-      cai : {
-        crime : caiCrimeDefinition,
-        property : propertyDefinition,
-        development : developmentDefinition,
-        permits : permitsDefinition
+      'cai' : {
+        'crime' : caiCrimeDefinition,
+        'property' : propertyDefinition,
+        'development' : developmentDefinition,
+        'permits' : permitsDefinition
       },
-      neighborhood : {
-        crime : neighborhoodCrimeDefinition
+      'neighborhood' : {
+        'crime' : neighborhoodCrimeDefinition
       }
     };
 
@@ -416,6 +475,67 @@ app.factory('Category', ['$http', '$location', '$q', '$filter',
 
     
 }]); //END Category factory function
+app.controller('ExtentCtrl', ['$scope', '$stateParams', '$state', 'Extent', 
+	function ($scope, $stateParams, $state, Extent) {
+    if($stateParams.extent === 'location' || $stateParams.extent === 'neighborhood'){
+		$scope.show = false;
+	}else{
+		$scope.show = true;
+		
+		$scope.extentOptions = Extent.options();
+
+		for (var i = 0; i < $scope.extentOptions.length; i++) {
+			if($scope.extentOptions[i].value === $stateParams.extent){
+				$scope.defaultOption = i;
+			}
+		}
+	}
+	$scope.onChangeExtentValue = function(){
+		$state.go('main.location.category.time.extent.filter.details', {extent : $scope.extentValue.value});
+	};
+}]);
+app.factory('Extent', ['$stateParams', function($stateParams){
+
+    //****Create the factory object****//
+    var Extent = {};
+
+    // {'value' : 'within-a-half-mile', 'label' : 'Within a half mile'},
+    //   {'value' : 'within-a-mile', 'label' : 'Within a mile'},
+    //   {'value' : 'within-5-miles', 'label' : 'Within 5 miles'}
+
+    var extentFilterValues = {
+      'within-about-a-block' : 330,
+      'within-an-eighth-of-a-mile' : 660,
+      'within-a-quarter-mile' : 1320,
+    };
+
+    var extentOptions = [
+      {'value' : 'within-about-a-block', 'label' : 'within a city block (110 yards)'},
+      {'value' : 'within-an-eighth-of-a-mile', 'label' : 'within a couple city blocks (1/8 of a mile)'},
+      {'value' : 'within-a-quarter-mile', 'label' : 'within a quarter mile'}   
+    ];
+  
+
+    //****API*****//
+    Extent.options = function(newExtentOptions){
+      if(newExtentOptions !== undefined){
+        extentOptions = newExtentOptions;
+      }else{
+        return extentOptions;
+      }
+    };
+
+    Extent.filterValue = function(){
+      return extentFilterValues[$stateParams.extent];
+    };
+    
+
+
+    //****Return the factory object****//
+    return Extent; 
+
+    
+}]); //END Extent factory function
 app.controller('DetailsCtrl', ['$scope', '$stateParams', '$state', 
 	function ($scope, $stateParams, $state) {
   
@@ -495,29 +615,12 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
           };
           ArcGisServer.featureService.query(propertyLayerId, queryParams)
             .then(function(propertyDetails){
+              propertyDetails.features[0].attributes.codelinks = LayerDefintion.get('codelinks');
               q.resolve(propertyDetails.features[0]);
             });
         });
       return q.promise;
     };
-
-
-    //*********************************************************//
-    //**************************CRIME**************************//
-    //*********************************************************//
-
-    //****CRIME REPORT****//
-
-
-    //****CRIME MAP****//
-
-
-
-    //*********************************************************//
-    //***********************DEVELOPMENT***********************//
-    //*********************************************************//
-
-    //****DEVELOPMENT REPORT****//
 
     Details.getFilteredDetails = function(){
       //Use promises to handle the request asynchronously; defer till resolved
@@ -829,9 +932,12 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Detai
         $scope.crime = false
       };
       $scope.showMarkerDetails = false;
+
       $scope.getPointDetails = function(pointProperties){
-        Modal.setData(pointProperties)
+        //Modal.setData(pointProperties);
+        $scope.modalData = pointProperties;
         //$scope.showMarkerDetails = true;
+        $scope.category = $stateParams.category;
         $('#pointDetailsModal').modal({'backdrop' : false});
       };
 
@@ -888,6 +994,7 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
           if($scope.report.category === 'property'){
             Details.getPropertyDetails($scope.report.location)
               .then(function(propertyDetails){
+                propertyDetails.attributes.zoning = properties.zoning[0];
                 $scope.propertyDetails = propertyDetails;
               });
           }else{
@@ -918,67 +1025,6 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
     }]//END report Directive Controller function
   };//END returned object
 }]);//END report Directive function
-app.controller('ExtentCtrl', ['$scope', '$stateParams', '$state', 'Extent', 
-	function ($scope, $stateParams, $state, Extent) {
-    if($stateParams.extent === 'location' || $stateParams.extent === 'neighborhood'){
-		$scope.show = false;
-	}else{
-		$scope.show = true;
-		
-		$scope.extentOptions = Extent.options();
-
-		for (var i = 0; i < $scope.extentOptions.length; i++) {
-			if($scope.extentOptions[i].value === $stateParams.extent){
-				$scope.defaultOption = i;
-			}
-		}
-	}
-	$scope.onChangeExtentValue = function(){
-		$state.go('main.location.category.time.extent.filter.details', {extent : $scope.extentValue.value});
-	};
-}]);
-app.factory('Extent', ['$stateParams', function($stateParams){
-
-    //****Create the factory object****//
-    var Extent = {};
-
-    // {'value' : 'within-a-half-mile', 'label' : 'Within a half mile'},
-    //   {'value' : 'within-a-mile', 'label' : 'Within a mile'},
-    //   {'value' : 'within-5-miles', 'label' : 'Within 5 miles'}
-
-    var extentFilterValues = {
-      'within-about-a-block' : 330,
-      'within-an-eighth-of-a-mile' : 660,
-      'within-a-quarter-mile' : 1320,
-    };
-
-    var extentOptions = [
-      {'value' : 'within-about-a-block', 'label' : 'within a city block (110 yards)'},
-      {'value' : 'within-an-eighth-of-a-mile', 'label' : 'within a couple city blocks (1/8 of a mile)'},
-      {'value' : 'within-a-quarter-mile', 'label' : 'within a quarter mile'}   
-    ];
-  
-
-    //****API*****//
-    Extent.options = function(newExtentOptions){
-      if(newExtentOptions !== undefined){
-        extentOptions = newExtentOptions;
-      }else{
-        return extentOptions;
-      }
-    };
-
-    Extent.filterValue = function(){
-      return extentFilterValues[$stateParams.extent];
-    };
-    
-
-
-    //****Return the factory object****//
-    return Extent; 
-
-    
-}]); //END Extent factory function
 app.controller('FilterCtrl', ['$scope', '$stateParams', '$state', 'Filter', function ($scope, $stateParams, $state, Filter) {
   	$scope.filterOptions = Filter.options($stateParams.category);
 	for (var i = 0; i < $scope.filterOptions.length; i++) {
@@ -1244,7 +1290,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('category/category.html',
-    '<div class="row list-item-panel" style="padding : 20px"><div class="col-xs-12"><a ng-click="goBack();">Back</a></div><div class="col-xs-12 col-md-6"><h3>{{category.title}}</h3></div><div class="col-xs-12 col-md-6"><address class="pull-right" style="margin-top: 12px;"><strong>{{locationProperties.address.attributes.House}} {{locationProperties.address.attributes.preType}} {{locationProperties.address.attributes.StreetName}} {{locationProperties.address.attributes.SufType}} {{locationProperties.address.attributes.SufDir}} <span ng-if="locationProperties.address.attributes.User_fld !== \'\'">UNIT: {{locationProperties.address.attributes.User_fld}}</span></strong><br><span ng-if="locationProperties.inTheCity">Asheville, NC</span> {{locationProperties.address.attributes.ZIP}}</address></div><div ui-view=""></div></div>');
+    '<div class="row list-item-panel" style="padding : 20px"><div class="col-xs-12"><a ng-click="goBack();">Back to Questions</a></div><div class="col-xs-12 col-md-6"><h3>{{category.title}}</h3></div><div class="col-xs-12 col-md-6"><address class="pull-right" style="margin-top: 12px;"><strong>{{locationProperties.address.attributes.House}} {{locationProperties.address.attributes.preType}} {{locationProperties.address.attributes.StreetName}} {{locationProperties.address.attributes.SufType}} {{locationProperties.address.attributes.SufDir}} <span ng-if="locationProperties.address.attributes.User_fld !== \'\'">UNIT: {{locationProperties.address.attributes.User_fld}}</span></strong><br><span ng-if="locationProperties.inTheCity">Asheville, NC</span> {{locationProperties.address.attributes.ZIP}}</address></div><div ui-view=""></div></div>');
 }]);
 })();
 
@@ -1268,7 +1314,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('details/details.map.directive.html',
-    '<div class="col-xs-12"><div id="map" style="width : 100%; height : 400px"></div><div class="col-xs-12"><a ng-click="goTo(report);"><p class="text-center">View Report</p></a></div></div>');
+    '<div class="col-xs-12"><div id="map" style="width : 100%; height : 400px"><div class="modal fade" id="pointDetailsModal" style="z-index : 3000"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header" ng-if="category === \'crime\'"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">{{modalData.offense}}</h4></div><div class="modal-header" ng-if="category === \'development\'"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">{{modalData.record_type}}</h4></div><div class="modal-body"><div class="col-xs-12" ng-if="category === \'development\'"><h5 class="text-center">{{modalData.address}}</h5><div class="col-xs-12 col-md-6"><strong>Opened</strong><p>{{modalData.date_opened|date}}</p></div><div class="col-xs-12 col-md-6"><strong>Updated</strong><p>{{modalData.date_statused|date}}</p></div><div class="col-xs-12 col-md-4"><strong>Status</strong><p>{{modalData.record_status}}</p></div><div class="col-xs-12 col-md-8"><strong>Business Name</strong><p>{{modalData.business_name}}</p></div><div class="col-xs-12"><strong>Description</strong><p>{{modalData.description}}</p></div></div><div class="col-xs-12 list-item-panel" ng-if="category === \'crime\'"><div class="col-xs-12"><h5 class="lead">{{modalData.address}}</h5><h5 class="text-muted"><strong>{{modalData.thedate|date}}</strong></h5><p class="text-muted"><strong>Case #</strong>: {{modalData.casenumber}}</p><p class="text-muted"><strong>Law Beat</strong>: {{modalData.law_beat}}</p><p class="text-muted"><strong>Severity</strong>: {{modalData.severity}}</p></div><a ng-click="showMore = !showMore"><p class="text-center" ng-if="showMore">Show More</p><p class="text-center" ng-if="showMore">Show Less</p></a></div></div></div></div></div></div><div class="col-xs-12"><a ng-click="goTo(report);"><p class="text-center">View Report</p></a></div></div>');
 }]);
 })();
 
@@ -1328,7 +1374,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('main/main.html',
-    '<div class="col-md-6 col-md-offset-3"><br><div class="col-xs-12"><div class="col-xs-12"><div class="pull-left" ng-click="goHome();" ;="" style="cursor : pointer"><h1>SimpliCity</h1><h4>city data simplified</h4></div><img class="pull-right hidden-xs" style="margin-top: 5px" src="http://123graffitifree.com/images/citylogo-flatblack.png"> <img class="pull-right visible-xs" style="margin-top: 5px; height : 30px" src="http://123graffitifree.com/images/citylogo-flatblack.png"></div><div class="col-xs-12"><br></div><div class="row"><input tabindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location" style="z-index: 0" ng-model="typedLocation" ng-keypress="getAddressCandidates(typedLocation, $event)"><div class="row col-xs-12"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-warning">{{helperMessage.message}}</p><div class="list-group" style="width : 100%; position : absolute; z-index : 1000; max-height : 230px; overflow-y: scroll"><a tabindex="{{$index+1}}" ng-click="getLocationProperties(candidate, $event)" ng-keypress="getLocationProperties(candidate, $event)" ng-repeat="candidate in addresses.candidates" class="list-group-item"><p class="text-info">{{candidate.attributes.House}} {{candidate.attributes.preType}} {{candidate.attributes.StreetName}} {{candidate.attributes.SufType}} {{candidate.attributes.SufDir}} <span ng-if="candidate.attributes.User_fld !== \'\'">UNIT: {{candidate.attributes.User_fld}}</span>, {{candidate.attributes.ZIP}}</p></a></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div></div><div class="col-xs-12"><br></div></div><div class="col-xs-12 content" style="height : 400px"><div ui-view="" class="slide"></div></div><div modal="modal"></div></div>');
+    '<div class="col-md-6 col-md-offset-3"><br><div class="col-xs-12"><div class="col-xs-12"><div class="pull-left" ng-click="goHome();" ;="" style="cursor : pointer"><h1>SimpliCity</h1><h4>city data simplified</h4></div><img class="pull-right hidden-xs" style="margin-top: 5px" src="http://123graffitifree.com/images/citylogo-flatblack.png"> <img class="pull-right visible-xs" style="margin-top: 5px; height : 30px" src="http://123graffitifree.com/images/citylogo-flatblack.png"></div><div class="col-xs-12"><br></div><div class="row"><input tabindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location" style="z-index: 0" ng-model="typedLocation" ng-keypress="getAddressCandidates(typedLocation, $event)"><div class="row col-xs-12"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-warning">{{helperMessage.message}}</p><div class="list-group" style="width : 100%; position : absolute; z-index : 1000; max-height : 230px; overflow-y: scroll"><a tabindex="{{$index+1}}" ng-click="getLocationProperties(candidate, $event)" ng-keypress="getLocationProperties(candidate, $event)" ng-repeat="candidate in addresses.candidates" class="list-group-item"><p class="text-info">{{candidate.attributes.House}} {{candidate.attributes.preType}} {{candidate.attributes.StreetName}} {{candidate.attributes.SufType}} {{candidate.attributes.SufDir}} <span ng-if="candidate.attributes.User_fld !== \'\'">UNIT: {{candidate.attributes.User_fld}}</span>, {{candidate.attributes.ZIP}}</p></a></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div></div><div class="col-xs-12"><br></div></div><div class="col-xs-12 content" style="height : 400px"><div ui-view="" class="slide"></div></div></div>');
 }]);
 })();
 
@@ -1340,7 +1386,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('modal/modal.directive.html',
-    '<div class="modal fade" id="pointDetailsModal" style="z-index : 3000"><div class="modal-dialog"><div class="modal-content"><div class="modal-header" ng-if="category === \'crime\'"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">{{modalData.offense}}</h4></div><div class="modal-header" ng-if="category === \'development\'"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">{{modalData.record_type}}</h4></div><div class="modal-body"><div class="col-xs-12" ng-if="category === \'development\'" style="max-height : 300px; overflow-y : scroll"><h5 class="text-center">{{modalData.address}}</h5><div class="col-xs-12 col-md-6"><strong>Opened</strong><p>{{modalData.date_opened|date}}</p></div><div class="col-xs-12 col-md-6"><strong>Updated</strong><p>{{modalData.date_statused|date}}</p></div><div class="col-xs-12 col-md-4"><strong>Status</strong><p>{{modalData.record_status}}</p></div><div class="col-xs-12 col-md-8"><strong>Business Name</strong><p>{{modalData.business_name}}</p></div><div class="col-xs-12"><strong>Description</strong><p>{{modalData.description}}</p></div></div><div class="col-xs-12 list-item-panel" ng-if="category === \'crime\'"><div class="col-xs-12"><div class="col-xs-12 col-sm-6"><h5 class="pull-left">{{modalData.address}}</h5></div><div class="col-xs-12 col-sm-6"><h5 class="pull-right">{{modalData.thedate|date}}</h5></div></div><div class="col-xs-12"><div class="col-xs-12 col-sm-4"><p class="text-center"><strong>Case Number</strong></p><p class="text-center">{{modalData.casenumber}}</p></div><div class="col-xs-12 col-sm-4"><p class="text-center"><strong>Law Beat</strong></p><p class="text-center">{{modalData.law_beat}}</p></div><div class="col-xs-12 col-sm-4"><p class="text-center"><strong>Severity</strong></p><p class="text-center">{{modalData.severity}}</p></div></div><a ng-click="showMore = !showMore"><p class="text-center" ng-if="showMore">Show More</p><p class="text-center" ng-if="showMore">Show Less</p></a></div></div></div></div>--></div>');
+    '<div class="modal fade" id="pointDetailsModal" style="z-index : 3000"><div class="modal-dialog"><div class="modal-content"><div class="modal-header" ng-if="category === \'crime\'"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">{{modalData.offense}}</h4></div><div class="modal-header" ng-if="category === \'development\'"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">{{modalData.record_type}}</h4></div><div class="modal-body"><div class="col-xs-12" ng-if="category === \'development\'" style="max-height : 300px; overflow-y : scroll"><h5 class="text-center">{{modalData.address}}</h5><div class="col-xs-12 col-md-6"><strong>Opened</strong><p>{{modalData.date_opened|date}}</p></div><div class="col-xs-12 col-md-6"><strong>Updated</strong><p>{{modalData.date_statused|date}}</p></div><div class="col-xs-12 col-md-4"><strong>Status</strong><p>{{modalData.record_status}}</p></div><div class="col-xs-12 col-md-8"><strong>Business Name</strong><p>{{modalData.business_name}}</p></div><div class="col-xs-12"><strong>Description</strong><p>{{modalData.description}}</p></div></div><div class="col-xs-12 list-item-panel" ng-if="category === \'crime\'"><div class="col-xs-12"><div class="col-xs-12 col-sm-6"><h5 class="pull-left">{{modalData.address}}</h5></div><div class="col-xs-12 col-sm-6"><h5 class="pull-right">{{modalData.thedate|date}}</h5></div></div><div class="col-xs-12"><div class="col-xs-12 col-sm-4"><p class="text-center"><strong>Case Number</strong></p><p class="text-center">{{modalData.casenumber}}</p></div><div class="col-xs-12 col-sm-4"><p class="text-center"><strong>Law Beat</strong></p><p class="text-center">{{modalData.law_beat}}</p></div><div class="col-xs-12 col-sm-4"><p class="text-center"><strong>Severity</strong></p><p class="text-center">{{modalData.severity}}</p></div></div><a ng-click="showMore = !showMore"><p class="text-center" ng-if="showMore">Show More</p><p class="text-center" ng-if="showMore">Show Less</p></a></div></div></div></div></div>');
 }]);
 })();
 
@@ -1352,7 +1398,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('questions/questions.html',
-    '<div class="col-xs-12"><div class="list-group"><a class="col-xs-12 list-group-item list-item-panel"><div class="col-xs-12 col-md-4"><address class="pull-left"><strong>{{locationProperties.address.attributes.House}} {{locationProperties.address.attributes.preType}} {{locationProperties.address.attributes.StreetName}} {{locationProperties.address.attributes.SufType}} {{locationProperties.address.attributes.SufDir}} <span ng-if="locationProperties.address.attributes.User_fld !== \'\'">UNIT: {{locationProperties.address.attributes.User_fld}}</span></strong><br><span ng-if="locationProperties.inTheCity">Asheville, NC</span> {{locationProperties.address.attributes.ZIP}}</address></div><div class="col-xs-12 col-md-8"><div ng-if="locationProperties.inTheCity" class="pull-right hidden-xs"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s in the city!</h2></div><div ng-if="!locationProperties.inTheCity" class="pull-right hidden-xs"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s not in the city!</h2></div></div></a> <a ng-if="locationProperties.inTheCity" class="list-group-item list-item-panel visible-xs"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s in the city!</h2></a> <a ng-if="!locationProperties.inTheCity" class="list-group-item list-item-panel visible-xs"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s not in the city!</h2></a> <a class="col-xs-12 list-group-item list-item-panel" ng-click="getAnswer(question)" ng-repeat="question in questions" tabindex="{{$index + 11}}"><h4>{{question.question}}<i class="fa fa-chevron-right pull-right text-primary" style="margin-top: 8px"></i></h4></a> <a class="col-xs-12 list-group-item list-item-panel" ng-show="more.show" ng-click="more.get()" tabindex="{{questions.length + 12}}"><h3 class="text-primary" style="text-align : center">More</h3></a></div></div>');
+    '<div class="col-xs-12"><div class="list-group"><a class="col-xs-12 list-group-item list-item-panel"><div class="col-xs-12 col-md-4"><address class="pull-left"><strong>{{locationProperties.address.attributes.House}} {{locationProperties.address.attributes.preType}} {{locationProperties.address.attributes.StreetName}} {{locationProperties.address.attributes.SufType}} {{locationProperties.address.attributes.SufDir}} <span ng-if="locationProperties.address.attributes.User_fld !== \'\'">UNIT: {{locationProperties.address.attributes.User_fld}}</span></strong><br><span ng-if="locationProperties.inTheCity">Asheville, NC</span> {{locationProperties.address.attributes.ZIP}}</address></div><div class="col-xs-12 col-md-8"><div ng-if="locationProperties.inTheCity" class="pull-right hidden-xs"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s in the city!</h2></div><div ng-if="!locationProperties.inTheCity" class="pull-right hidden-xs"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s not in the city!</h2></div></div></a> <a ng-if="locationProperties.inTheCity" class="list-group-item list-item-panel visible-xs"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s in the city!</h2></a> <a ng-if="!locationProperties.inTheCity" class="list-group-item list-item-panel visible-xs"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 10px"></i><h2 class="pull-left" style="margin-top : 7px">It\'s not in the city!</h2></a> <a class="col-xs-12 list-group-item list-item-panel" ng-click="getAnswer(question)" ng-repeat="question in questions" tabindex="{{$index + 11}}"><h4>{{question.question}}<i class="fa fa-chevron-right pull-right text-primary" style="margin-top: 4px"></i></h4></a> <a class="col-xs-12 list-group-item list-item-panel" ng-show="more.show" ng-click="more.get()" tabindex="{{questions.length + 12}}"><h3 class="text-primary" style="text-align : center">More</h3></a></div></div>');
 }]);
 })();
 
@@ -1412,7 +1458,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('details/reports/property.report.html',
-    '<div class="col-xs-12"><div class="col-xs-12" style="padding : 10px"><div class="col-xs-12 list-item-panel"><div class="col-xs-12 col-md-6"><h5><strong>Zoning</strong> : <span>TODO</span></h5><h5><strong>PIN</strong> : <span>{{propertyDetails.attributes.pinnum}}</span></h5></div><div class="col-xs-12 col-md-6"><div ng-if="propertyDetails.attributes.isincity === \'Yes\'" class="pull-left"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s in the city!</h4></div><div ng-if="propertyDetails.attributes.isincity === \'No\'" class="pull-left"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s not in the city!</h4></div><div ng-if="propertyDetails.attributes.iscityowned === \'Yes\'" class="pull-left"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s city owned!</h4></div><div ng-if="propertyDetails.attributes.iscityowned === \'No\'" class="pull-left"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s not city owned!</h4></div></div></div><div class="col-xs-12 col-md-6 list-item-panel pull-left"><h4>Owner</h4><strong>{{propertyDetails.attributes.owner}}</strong><address>{{propertyDetails.attributes.owner_address}}<br>{{propertyDetails.attributes.owner_citystatezip}}</address></div><div class="col-xs-12 col-md-5 list-item-panel pull-right"><h4>Tax Details</h4><p ng-if="propertyDetails.attributes.exempt === null">Tax exempt : <span class="text-danger">NO</span></p><p ng-if="propertyDetails.attributes.exempt !== null">Tax exempt : <span class="text-success">YES</span></p><p ng-if="propertyDetails.attributes.improved === \'Y\'">Improved : <span class="text-success">YES (${{propertyDetails.attributes.improvementvalue|number}})</span></p><p>Appraisal Area : {{propertyDetails.attributes.appraisalarea}}</p></div><div class="col-xs-12 list-item-panel"><h4>Property and Tax Value</h4><table class="table "><thead><tr><th>Value Type</th><th>Amount</th></tr></thead><tbody><tr><td>Building Value</td><td>${{propertyDetails.attributes.buildingvalue|number}}</td></tr><tr><td>Land Value</td><td>${{propertyDetails.attributes.landvalue|number}}</td></tr><tr><td>Appraised Value</td><td>${{propertyDetails.attributes.appraisedvalue|number}}</td></tr><tr><td>Tax Value</td><td>${{propertyDetails.attributes.taxvalue|number}}</td></tr><tr><td>Total Market Value</td><td>${{propertyDetails.attributes.totalmarketvalue|number}}</td></tr></tbody></table></div><div class="col-xs-12 list-item-panel"><br><a class="col-xs-12 col-md-3" style="text-align : center; margin-bottom : 10px" target="_blank" href="{{propertyDetails.attributes.deed_url}}">Deed</a> <a class="col-xs-12 col-md-3" style="text-align : center; margin-bottom : 10px" target="_blank" href="{{propertyDetails.attributes.plat_url}}">Plat</a> <a class="col-xs-12 col-md-4" style="text-align : center; margin-bottom : 10px" target="_blank" href="{{propertyDetails.attributes.propcard_url}}">Property Card</a><br></div></div><div class="col-xs-12"><a ng-click="goTo(map);"><p class="text-center">View on Map</p></a></div></div>');
+    '<div class="col-xs-12"><div class="col-xs-12" style="padding : 10px"><div class="col-xs-12 list-item-panel"><div class="col-xs-12 col-md-6"><h5 ng-if="propertyDetails.attributes.codelinks === \'disable\'"><strong>Zoning</strong> : <span>{{propertyDetails.attributes.zoning}}</span></h5><h5 ng-if="propertyDetails.attributes.codelinks !== \'disable\'"><strong>Zoning</strong> : <a href="{{propertyDetails.attributes.codelinks[propertyDetails.attributes.zoning]}}">{{propertyDetails.attributes.zoning}}</a></h5><h5><strong>PIN</strong> : <span>{{propertyDetails.attributes.pinnum}}</span></h5></div><div class="col-xs-12 col-md-6"><div ng-if="propertyDetails.attributes.isincity === \'Yes\'" class="pull-left"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s in the city!</h4></div><div ng-if="propertyDetails.attributes.isincity === \'No\'" class="pull-left"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s not in the city!</h4></div><div ng-if="propertyDetails.attributes.iscityowned === \'Yes\'" class="pull-left"><i class="fa fa-check-circle fa-2x text-success pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s city owned!</h4></div><div ng-if="propertyDetails.attributes.iscityowned === \'No\'" class="pull-left"><i class="fa fa-times-circle fa-2x text-danger pull-left" style="margin-top : 4px"></i><h4 class="pull-left" style="margin-top : 7px">It\'s not city owned!</h4></div></div></div><div class="col-xs-12 col-md-6 list-item-panel pull-left"><h4>Owner</h4><strong>{{propertyDetails.attributes.owner}}</strong><address>{{propertyDetails.attributes.owner_address}}<br>{{propertyDetails.attributes.owner_citystatezip}}</address></div><div class="col-xs-12 col-md-5 list-item-panel pull-right"><h4>Tax Details</h4><p ng-if="propertyDetails.attributes.exempt === null">Tax exempt : <span class="text-danger">NO</span></p><p ng-if="propertyDetails.attributes.exempt !== null">Tax exempt : <span class="text-success">YES</span></p><p ng-if="propertyDetails.attributes.improved === \'Y\'">Improved : <span class="text-success">YES (${{propertyDetails.attributes.improvementvalue|number}})</span></p><p>Appraisal Area : {{propertyDetails.attributes.appraisalarea}}</p></div><div class="col-xs-12 list-item-panel"><h4>Property and Tax Value</h4><table class="table "><thead><tr><th>Value Type</th><th>Amount</th></tr></thead><tbody><tr><td>Building Value</td><td>${{propertyDetails.attributes.buildingvalue|number}}</td></tr><tr><td>Land Value</td><td>${{propertyDetails.attributes.landvalue|number}}</td></tr><tr><td>Appraised Value</td><td>${{propertyDetails.attributes.appraisedvalue|number}}</td></tr><tr><td>Tax Value</td><td>${{propertyDetails.attributes.taxvalue|number}}</td></tr><tr><td>Total Market Value</td><td>${{propertyDetails.attributes.totalmarketvalue|number}}</td></tr></tbody></table></div><div class="col-xs-12 list-item-panel"><br><a class="col-xs-12 col-md-3" style="text-align : center; margin-bottom : 10px" target="_blank" href="{{propertyDetails.attributes.deed_url}}">Deed</a> <a class="col-xs-12 col-md-3" style="text-align : center; margin-bottom : 10px" target="_blank" href="{{propertyDetails.attributes.plat_url}}">Plat</a> <a class="col-xs-12 col-md-4" style="text-align : center; margin-bottom : 10px" target="_blank" href="{{propertyDetails.attributes.propcard_url}}">Property Card</a><br></div></div><div class="col-xs-12"><a ng-click="goTo(map);"><p class="text-center">View on Map</p></a></div></div>');
 }]);
 })();
 
@@ -1522,24 +1568,32 @@ app.factory('Modal', ['$stateParams', function($stateParams){
     
 }]); //END Modal factory function
 
-app.controller('QuestionsCtrl', ['$scope','$state','Category', 'Questions', 'LocationProperties', 
-    function ($scope, $state, Category, Questions, LocationProperties) {
-
+app.controller('QuestionsCtrl', ['$scope','$state', '$stateParams', 'Category', 'Questions', 'LocationProperties', 
+    function ($scope, $state, $stateParams,  Category, Questions, LocationProperties) {
+    var questions = [];
     LocationProperties.properties()
         .then(function(properties){
-           $scope.locationProperties = properties;
+            $scope.locationProperties = properties;
+            var dataCacheKeyArray = [];
+            for(var key in properties){
+                dataCacheKeyArray.push(key);
+            }
+            console.log(dataCacheKeyArray);
+            //Get a list of questions for the current location
+            //****This could be an HTTP request****//
+            questions = Questions.get(dataCacheKeyArray);
+            console.log(questions);
+
+            //Get the top 2 questions
+            $scope.questions = questions.slice(0,3);
         });
 
-    //Get a list of questions for the current location
-    //****This could be an HTTP request****//
-    var questions = Questions.get();
-
-    //Get the top 2 questions
-    $scope.questions = questions.slice(0,2);
+    $scope.questions = []
 
     $scope.more = {
         show : true,
         get : function(){
+            console.log(questions.length);
             var currentQuestionCount = $scope.questions.length;
             var numberOfQuestionsToAdd = 3;
             //check to make sure that we have at least questions left
@@ -1560,14 +1614,16 @@ app.controller('QuestionsCtrl', ['$scope','$state','Category', 'Questions', 'Loc
 
     };
 
-    //if there are only 2 questions intiall, don't show the more option
+    //if there are only 2 questions intially, don't show the more option
     if($scope.questions === questions.length){
         $scope.more.show = false;
     }
-
+    
     //if active, call on left arrow key press also
     $scope.getAnswer = function(question){
-        $state.go('main.location.category', {'category': question.category});
+        $scope.category = Category.getDefinition(question.category);
+        $state.go('main.location.category.time.extent.filter.details', $scope.category.defaultStates);  
+        //$state.go('main.location.category', {'category': question.category});
     };
 
 
@@ -1582,25 +1638,48 @@ app.factory('Questions', [function(){
 
     //****Private Variables*****//
 
-    var caiQuestions = [
-      {'question' : 'Do you want to know about crime?', 'category' : 'crime', 'detail' : 'within-quarter-mile'},
+    var baseCaiQuestionArray = [
       {'question' : 'Do you want to know about this property?', 'category' : 'property', 'detail' : 'summary'},
-      {'question' : 'Do you want to know about development?', 'category' : 'development', 'detail' : 'summary'},
-      {'question' : 'Do you want to know about the owner?', 'category' : 'property', 'detail' : 'owner'},
-      {'question' : 'Do you want to know about the zoning?', 'category' : 'property', 'detail' : 'zoning'},
-      {'question' : 'Do you want to know about the trash collection?', 'category' : 'property', 'detail' : 'trash'},
+      {'question' : 'Do you want to know about the owner?', 'category' : 'property', 'detail' : 'owner'}
     ];
 
-    var neighborhoodQuestions = [
-      {'question' : 'Do you want to know about crime?', 'category' : 'crime', 'detail' : 'quarter-mile'},
-      {'question' : 'Do you want to know about development?', 'category' : 'development', 'detail' : 'summary'},
-    ];
+    var questionsLookupObj = {
+      'crime' : 
+        [
+          {'question' : 'Do you want to know about crime?', 'category' : 'crime', 'detail' : 'within-quarter-mile'}
+        ],
+      'development' :  
+        [
+          {'question' : 'Do you want to know about development?', 'category' : 'development', 'detail' : 'summary'},
+          {'question' : 'Do you want to know about residential building permits?', 'category' : 'residential-building-permits', 'detail' : 'summary'},
+          {'question' : 'Do you want to know about commercial building permits?', 'category' : 'commercial-building-permits', 'detail' : 'summary'},
+          {'question' : 'Do you want to know about permits?', 'category' : 'permits', 'detail' : 'summary'}
+        ],
+        'zoning' : 
+        [
+          {'question' : 'Do you want to know about the zoning?', 'category' : 'zoning', 'detail' : 'zoning'}
+        ]
+    };
+
+
+    // var neighborhoodQuestions = [
+    //   {'question' : 'Do you want to know about crime?', 'category' : 'crime', 'detail' : 'quarter-mile'},
+    //   {'question' : 'Do you want to know about development?', 'category' : 'development', 'detail' : 'summary'},
+    // ];
 
     //****API*****//
     
 
-    Questions.get = function(){
-      return caiQuestions
+    Questions.get = function(dataCacheKeyArray){
+      dataCacheKeyArray.sort();
+      var questions = baseCaiQuestionArray;
+      for (var i = 0; i < dataCacheKeyArray.length; i++) {
+        if(questionsLookupObj[dataCacheKeyArray[i]]){
+          questions = questions.concat(questionsLookupObj[dataCacheKeyArray[i]])  
+        }
+      };
+      //We should sort the questions by some value eventually
+      return questions
     };
 
     //****Return the factory object****//
