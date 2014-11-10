@@ -43,6 +43,7 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
           if($scope.report.category === 'property'){
             Details.getPropertyDetails($scope.report.location)
               .then(function(propertyDetails){
+                propertyDetails.attributes.zoning = properties.zoning[0];
                 $scope.propertyDetails = propertyDetails;
               });
           }else{

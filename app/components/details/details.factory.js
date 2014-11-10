@@ -69,29 +69,12 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
           };
           ArcGisServer.featureService.query(propertyLayerId, queryParams)
             .then(function(propertyDetails){
+              propertyDetails.features[0].attributes.codelinks = LayerDefintion.get('codelinks');
               q.resolve(propertyDetails.features[0]);
             });
         });
       return q.promise;
     };
-
-
-    //*********************************************************//
-    //**************************CRIME**************************//
-    //*********************************************************//
-
-    //****CRIME REPORT****//
-
-
-    //****CRIME MAP****//
-
-
-
-    //*********************************************************//
-    //***********************DEVELOPMENT***********************//
-    //*********************************************************//
-
-    //****DEVELOPMENT REPORT****//
 
     Details.getFilteredDetails = function(){
       //Use promises to handle the request asynchronously; defer till resolved

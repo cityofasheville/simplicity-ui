@@ -8,7 +8,14 @@ app.controller('CategoryCtrl', ['$scope', '$stateParams', '$state', 'Category', 
         .then(function(properties){
         	$scope.locationProperties = properties;
         });
-    $state.go('main.location.category.time.extent.filter.details', $scope.category.defaultStates);  
+    console.log('CategoryCtrl');
+    console.log($stateParams);
+    if($stateParams.time === undefined){
+        console.log('CategoryCtrl');
+        console.log($stateParams);
+        //$state.go('main.location.category.time.extent.filter.details', $scope.category.defaultStates);  
+    }
+    
     $scope.goBack = function(){
         $state.go('main.location.questions');
       };  

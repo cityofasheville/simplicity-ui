@@ -1,22 +1,30 @@
 
-app.controller('QuestionsCtrl', ['$scope','$state','Category', 'Questions', 'LocationProperties', 
-    function ($scope, $state, Category, Questions, LocationProperties) {
-
+app.controller('QuestionsCtrl', ['$scope','$state', '$stateParams', 'Category', 'Questions', 'LocationProperties', 
+    function ($scope, $state, $stateParams,  Category, Questions, LocationProperties) {
+    var questions = [];
     LocationProperties.properties()
         .then(function(properties){
-           $scope.locationProperties = properties;
+            $scope.locationProperties = properties;
+            var dataCacheKeyArray = [];
+            for(var key in properties){
+                dataCacheKeyArray.push(key);
+            }
+            console.log(dataCacheKeyArray);
+            //Get a list of questions for the current location
+            //****This could be an HTTP request****//
+            questions = Questions.get(dataCacheKeyArray);
+            console.log(questions);
+
+            //Get the top 2 questions
+            $scope.questions = questions.slice(0,3);
         });
 
-    //Get a list of questions for the current location
-    //****This could be an HTTP request****//
-    var questions = Questions.get();
-
-    //Get the top 2 questions
-    $scope.questions = questions.slice(0,2);
+    $scope.questions = []
 
     $scope.more = {
         show : true,
         get : function(){
+            console.log(questions.length);
             var currentQuestionCount = $scope.questions.length;
             var numberOfQuestionsToAdd = 3;
             //check to make sure that we have at least questions left
@@ -37,14 +45,16 @@ app.controller('QuestionsCtrl', ['$scope','$state','Category', 'Questions', 'Loc
 
     };
 
-    //if there are only 2 questions intiall, don't show the more option
+    //if there are only 2 questions intially, don't show the more option
     if($scope.questions === questions.length){
         $scope.more.show = false;
     }
-
+    
     //if active, call on left arrow key press also
     $scope.getAnswer = function(question){
-        $state.go('main.location.category', {'category': question.category});
+        $scope.category = Category.getDefinition(question.category);
+        $state.go('main.location.category.time.extent.filter.details', $scope.category.defaultStates);  
+        //$state.go('main.location.category', {'category': question.category});
     };
 
 

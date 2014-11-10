@@ -211,9 +211,12 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Detai
         $scope.crime = false
       };
       $scope.showMarkerDetails = false;
+
       $scope.getPointDetails = function(pointProperties){
-        Modal.setData(pointProperties)
+        //Modal.setData(pointProperties);
+        $scope.modalData = pointProperties;
         //$scope.showMarkerDetails = true;
+        $scope.category = $stateParams.category;
         $('#pointDetailsModal').modal({'backdrop' : false});
       };
 

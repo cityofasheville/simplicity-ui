@@ -10,20 +10,22 @@ app.factory('Category', ['$http', '$location', '$q', '$filter',
     var caiCrimeDefinition = {
       title : 'Crime',
       defaultStates : {
-        time : 'last-year',
-        extent : 'within-an-eighth-of-a-mile',
-        filter : 'summary',
-        details : 'report'
+        'category' : 'crime',
+        'time' : 'last-year',
+        'extent' : 'within-an-eighth-of-a-mile',
+        'filter' : 'summary',
+        'details' : 'report'
       }
     };
 
     var propertyDefinition = {
       title : 'Property',
       defaultStates : {
-        time : 'current',
-        extent : 'location',
-        filter : 'summary',
-        details : 'report'
+        'category' : 'property',
+        'time' : 'current',
+        'extent' : 'location',
+        'filter' : 'summary',
+        'details' : 'report'
       }
     };
 
@@ -31,43 +33,45 @@ app.factory('Category', ['$http', '$location', '$q', '$filter',
     var developmentDefinition = {
       title : 'Development',
       defaultStates : {
-        time : 'last-year',
-        extent : 'within-an-eighth-of-a-mile',
-        filter : 'summary',
-        details : 'report'
+        'category' : 'development',
+        'time' : 'last-year',
+        'extent' : 'within-an-eighth-of-a-mile',
+        'filter' : 'summary',
+        'details' : 'report'
       }
     };
 
     var permitsDefinition = {
       title : 'Permits',
       defaultStates : {
-        time : 'last-year',
-        extent : 'location',
-        filter : 'summary',
-        details : 'report'
+        'category' : 'permits',
+        'time' : 'last-year',
+        'extent' : 'location',
+        'filter' : 'summary',
+        'details' : 'report'
       }
     };
 
     var neighborhoodCrimeDefinition = {
-      showTimeOptions : true,
-      defaultTimeOption : 2,
-      showExtentOptions : false,
-      defaultExtentOption : 'neighborhood',
-      showFilterOptions : false,
-      defaultFilterOption : 'summary'
+      'showTimeOptions' : true,
+      'defaultTimeOption' : 2,
+      'showExtentOptions' : false,
+      'defaultExtentOption' : 'neighborhood',
+      'showFilterOptions' : false,
+      'defaultFilterOption' : 'summary'
     };
 
 
 
     var categoryDefinitions = {
-      cai : {
-        crime : caiCrimeDefinition,
-        property : propertyDefinition,
-        development : developmentDefinition,
-        permits : permitsDefinition
+      'cai' : {
+        'crime' : caiCrimeDefinition,
+        'property' : propertyDefinition,
+        'development' : developmentDefinition,
+        'permits' : permitsDefinition
       },
-      neighborhood : {
-        crime : neighborhoodCrimeDefinition
+      'neighborhood' : {
+        'crime' : neighborhoodCrimeDefinition
       }
     };
 
