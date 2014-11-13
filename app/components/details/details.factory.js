@@ -21,7 +21,7 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
             stringOfDevelopmentIds = stringOfDevelopmentIds + ",'" + arrayOfIds[i] + "'";
           }         
         }
-        return "apn in (" + stringOfDevelopmentIds + ") and record_module = 'Planning'";
+        return "apn in (" + stringOfDevelopmentIds + ") and record_module = 'Planning' and record_type_type = 'Development'";
       }
 
     };
@@ -92,29 +92,33 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
               var filter = LayerDefintion.get('filter');
               var colors = LayerDefintion.get('colors');
 
+
               //object that holds a summary of the feature {filterValue : count}
               //e.g. for crime {'Bulgary' : 12, 'Larceny' : 2}
               var filteredFeaturesSummary= {};
               //array that holds features filtered by time and the filter value
               var filterdFeaturesArray = [];
-
+  
               for (var i = 0; i < features.features.length; i++) {
                 //filter by time
                 if(features.features[i].attributes[time] >= Time.filterValue()){
                   //filter by filter
-                  features.features[i].attributes.color = colors[features.features[i].attributes[filter]];
+                  features.features[i].attributes.color = colors[features.features[i].attributes[filter]];          
                   //build a summary object
                   if(filteredFeaturesSummary[features.features[i].attributes[filter]] === undefined){
-                    filteredFeaturesSummary[features.features[i].attributes[filter]] = {'color' : features.features[i].attributes.color, 'count' : 1 };
+
+                    filteredFeaturesSummary[features.features[i].attributes[filter]] = {'color' : colors[features.features[i].attributes[filter]], 'count' : 1 };
+
                   }else{
                     filteredFeaturesSummary[features.features[i].attributes[filter]].count = filteredFeaturesSummary[features.features[i].attributes[filter]].count + 1;
                   }
                   //add filtered features to array
                   if($stateParams.filter === 'summary' || features.features[i].attributes[filter].toLowerCase().replace(/ /g, '-') === $stateParams.filter){
+
                     filterdFeaturesArray.push(features.features[i]);
-                  }
-                  if(features.features[i].attributes.record_comments){
-                    features.features[i].attributes.commentsArray = features.features[i].attributes.record_comments.split('***');
+                    if(features.features[i].attributes.record_comments){
+                      features.features[i].attributes.commentsArray = features.features[i].attributes.record_comments.split('[NEXTCOMMENT]');
+                    }
                   }
                   
                 }
@@ -137,36 +141,6 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
       return q.promise;
     };
 
-      //****CRIME MAP****//
-    // var commercialDevelopmentTypes = [
-    //             'Com: Upfit', 
-    //             'Com: Remodel', 
-    //             'Com: Mechanical', 
-    //             'Com: Plumbling', 
-    //             'Com: Gas Piping', 
-    //             'Com: Accessory Structure',
-    //             'Com: Other New',
-    //             'Com: Electrical',
-    //             'Com: Demo',
-    //             'Com: Addition',
-    //             'Com: Reroof'
-    //             ];
-    //           var residentialDevelopmentType = [
-    //             'Res: Accessory Structure',
-    //             'Res: Remodel', 
-    //             'Res: Site Work',
-    //             'Res: Change Out',
-    //             'Res: Gas Piping', 
-    //             'Res: Electrical',
-    //             'Res: Mechanical',
-    //             'Res: Gas Piping',
-    //             'Res: Plumbling',
-    //             'Res: Multi-Trade',
-    //             'Res: Demolition',
-    //             'Res: Reroof',
-    //             'Res: New',
-    //             'Res: Addition'
-    //             ];
 
     //****Return the factory object****//
     return Details; 

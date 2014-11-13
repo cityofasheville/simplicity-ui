@@ -70,6 +70,55 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
       $scope.goTo = function(detailsLocation){
         $state.go('main.location.category.time.extent.filter.details', {'details' : 'map'});
       };
+
+      $scope.openDownloadModal = function(){
+        $('#downloadModal').modal({'backdrop' : false});
+      };
+      $scope.openShareModal = function(){
+        $('#shareModal').modal({'backdrop' : false});
+      };
+
+      $scope.download = function(downloadType, details){
+        console.log(details);
+        var csvString =  'data:text/csv;charset=utf-8,';
+        if(downloadType === 'summary'){
+          csvString += 'Type, Count' + '\n';
+          for(var key in details.summary){
+            var summaryItemString = key + ',' + details.summary[key].count;
+            csvString += summaryItemString + '\n';
+          }
+          console.log(csvString);
+        }else{
+          var headerArray = [];
+          
+          for(var key in details.features[0].attributes){
+            headerArray.push(key);
+          }
+          for(var key in details.features[0].geometry){
+            headerArray.push(key);
+          }
+          csvString += headerArray.join(',') + '\n';
+          for (var i = 0; i < details.features.length; i++) {
+            var rowArray = [];
+            for (var x = 0; x < headerArray.length; x++) {
+
+              if(details.features[i].attributes[headerArray[x]]){
+                rowArray.push(details.features[i].attributes[headerArray[x]]);
+              }else if(details.features[i].geometry[headerArray[x]]){
+                rowArray.push(details.features[i].geometry[headerArray[x]]);
+              }else{
+                rowArray.push('NULL');
+              }
+            };
+            console.log(rowArray);
+            csvString += rowArray.join(',') + '\n';
+          };
+        }
+        var encodedUri = encodeURI(csvString);
+        window.open(encodedUri);
+      }
+      $scope.currentUrl = window.location.href;
+      $scope.iframeText = '<iframe width="100%" height="100%" style = "overflow-y" src="'+window.location.href+'" frameborder="0" ></iframe>'
       
     }]//END report Directive Controller function
   };//END returned object

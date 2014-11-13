@@ -1,0 +1,29 @@
+<div>
+	<div class="col-xs-12">
+		<div class="col-xs-12 col-sm-6">
+			<h5 class = 'pull-left'>{{feature.attributes.address}}</h5>
+		</div>
+		<div class="col-xs-12 col-sm-6">
+			<h5 class = 'pull-right'>{{feature.attributes.thedate|date}}</h5>
+		</div>
+	</div>
+
+	<div class="col-xs-12">
+		<div class="col-xs-12 col-sm-4">
+			<p class = "text-center"> <strong >Case Number</strong></p>
+			<p class = "text-center">{{feature.attributes.casenumber}}</p>
+		</div>
+		<div class="col-xs-12 col-sm-4">
+			<p class = "text-center"><strong>Law Beat</strong></p>
+			<p class = "text-center">{{feature.attributes.law_beat}}</p>
+		</div>
+		<div class="col-xs-12 col-sm-4">
+			<p class = "text-center"><strong >Severity</strong></p>
+			<p class = "text-center">{{feature.attributes.severity}}</p>
+		</div>
+	</div>
+	<a  ng-click = "showMore = !showMore">
+		<p class = 'text-center' ng-if = 'showMore'>Show More</p>
+		<p class = 'text-center' ng-if = 'showMore'>Show Less</p>
+	</a>
+</div>

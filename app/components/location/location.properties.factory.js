@@ -55,7 +55,7 @@ app.factory('LocationProperties', ['$http', '$location', '$q', '$filter', '$stat
               }else{
                 properties.zoning = attributes.data.split(',');
               }
-            }else if(attributes.type === 'DEVELOPMENT'){
+            }else if(attributes.type === 'PERMITS'){
               var value = createArrayFromNullorString(attributes.data, ',');
               assignValueToProperties('development', attributes.distance, value);
             }else{

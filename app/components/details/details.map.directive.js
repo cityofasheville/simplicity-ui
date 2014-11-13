@@ -1,5 +1,5 @@
-app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Details', 'Extent', 'LocationProperties', 'Modal',
-  function($compile, $filter, $state, $stateParams, $q, Details, Extent, LocationProperties, Modal){
+app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Details', 'Extent', 'LocationProperties',
+  function($compile, $filter, $state, $stateParams, $q, Details, Extent, LocationProperties){
   return {
     //Restrict the directive to attribute ep-form on an element 
     restrict: 'A',
@@ -149,12 +149,35 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Detai
       }
       
     };
+
+    //Base map tile layers for main map
+    var osm = L.tileLayer( 'http://{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright" title="OpenStreetMap" target="_blank">OpenStreetMap</a> contributors | Tiles Courtesy of <a href="http://www.mapquest.com/" title="MapQuest" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png" width="16" height="16">',
+        subdomains: ['otile1','otile2','otile3','otile4']
+    });
+
+    var esriImagery = L.tileLayer('http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{x}/{y}', {
+      attribution:'&copy; <a href="http://osm.org/copyright" title="OpenStreetMap" target="_blank">OpenStreetMap</a> contributors | Tiles Courtesy of <a href="http://www.esri.com/" title="MapQuest" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png" width="16" height="16">',
+    });
+    // var aerial = L.tileLayer("http://{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.png",{
+    //   attribution:'&copy; <a href="http://osm.org/copyright" title="OpenStreetMap" target="_blank">OpenStreetMap</a> contributors | Tiles Courtesy of <a href="http://www.mapquest.com/" title="MapQuest" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png" width="16" height="16">',
+    //   subdomains:["otile1","otile2","otile3","otile4"]
+    // });
+
+    http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/10/615/944
+
+    var baseMaps = {
+      "ESRI Imagery" : esriImagery,
+      "OSM" : osm
+      
+    };
     //Initialize the map
     var map = L.map('map', {
         center: [35.5951125,-82.5511088], 
         zoom : 13,
         maxZoom : 22,
-        fullscreenControl: true
+        fullscreenControl: true,
+        layers : [esriImagery, osm]
     });
 
     //Leaflet Awesome markers style (uses font awesome icons)
@@ -215,6 +238,7 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', 'Detai
       $scope.getPointDetails = function(pointProperties){
         //Modal.setData(pointProperties);
         $scope.modalData = pointProperties;
+        console.log(pointProperties);
         //$scope.showMarkerDetails = true;
         $scope.category = $stateParams.category;
         $('#pointDetailsModal').modal({'backdrop' : false});
