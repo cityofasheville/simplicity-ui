@@ -494,133 +494,6 @@ app.factory('LayerDefintion', ['$http', '$location', '$q', '$filter', '$state', 
 
     
 }]); //END LayerDefintion factory function
-//Keep a scope variable of the current address to share across all 
-app.controller('CategoryCtrl', ['$scope', '$stateParams', '$state', 'Category', 'LocationProperties',
-	function ($scope, $stateParams, $state, Category, LocationProperties) {
-
-	//***TODO: Get category definition via HTTP ***//
-    $scope.category = Category.getDefinition($stateParams.category);
-    LocationProperties.properties()
-        .then(function(properties){
-        	$scope.locationProperties = properties;
-        });
-    if($stateParams.time === undefined){
-        //$state.go('main.location.category.time.extent.filter.details', $scope.category.defaultStates);  
-    }
-    
-    $scope.goBack = function(){
-        $state.go('main.location.questions');
-      };  
-}]);
-
-
-app.factory('Category', ['$http', '$location', '$q', '$filter',
-  function($http, $location, $q, $filter){
-
-    //****Create the factory object****//
-    var Category = {};
-
-    
-    //****Private variables*****//
-    var caiCrimeDefinition = {
-      title : 'Crime',
-      defaultStates : {
-        'category' : 'crime',
-        'time' : 'last-year',
-        'extent' : 'within-an-eighth-of-a-mile',
-        'filter' : 'summary',
-        'details' : 'report'
-      }
-    };
-
-    var propertyDefinition = {
-      title : 'Property',
-      defaultStates : {
-        'category' : 'property',
-        'time' : 'current',
-        'extent' : 'location',
-        'filter' : 'summary',
-        'details' : 'report'
-      }
-    };
-
-    var sanitationDefinition = {
-      title : 'Sanitation',
-      defaultStates : {
-        'category' : 'sanitation',
-        'time' : 'current',
-        'extent' : 'location',
-        'filter' : 'summary',
-        'details' : 'report'
-      }
-    };
-
-    var developmentDefinition = {
-      title : 'Development',
-      defaultStates : {
-        'category' : 'development',
-        'time' : 'last-year',
-        'extent' : 'within-an-eighth-of-a-mile',
-        'filter' : 'summary',
-        'details' : 'report'
-      }
-    };
-
-    var permitsDefinition = {
-      title : 'Permits',
-      defaultStates : {
-        'category' : 'permits',
-        'time' : 'last-year',
-        'extent' : 'location',
-        'filter' : 'summary',
-        'details' : 'report'
-      }
-    };
-
-    var neighborhoodCrimeDefinition = {
-      'showTimeOptions' : true,
-      'defaultTimeOption' : 2,
-      'showExtentOptions' : false,
-      'defaultExtentOption' : 'neighborhood',
-      'showFilterOptions' : false,
-      'defaultFilterOption' : 'summary'
-    };
-
-
-
-    var categoryDefinitions = {
-      'cai' : {
-        'crime' : caiCrimeDefinition,
-        'property' : propertyDefinition,
-        'development' : developmentDefinition,
-        'permits' : permitsDefinition,
-        'sanitation' : sanitationDefinition
-      },
-      'neighborhood' : {
-        'crime' : neighborhoodCrimeDefinition
-      }
-    };
-
-    //****API*****//
-
-    Category.getDefinition = function(category){
-      //for now we only have addresses
-      return categoryDefinitions.cai[category];
-      //******TODO******//
-      //if cai do something if neighborhood do something else
-      // if(locationProperties.locationType === 'cai'){
-      //   return categoryDefinitions.cai[category];
-      // }else{
-      //   return categoryDefinitions.neighborhood[category];
-      // } 
-    };
-
-
-    //****Return the factory object****//
-    return Category; 
-
-    
-}]); //END Category factory function
 app.controller('DetailsCtrl', ['$scope', '$stateParams', '$state', 
 	function ($scope, $stateParams, $state) {
     $scope.stateParams = $stateParams;
@@ -840,6 +713,133 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
 
     
 }]); //END Details factory function
+//Keep a scope variable of the current address to share across all 
+app.controller('CategoryCtrl', ['$scope', '$stateParams', '$state', 'Category', 'LocationProperties',
+	function ($scope, $stateParams, $state, Category, LocationProperties) {
+
+	//***TODO: Get category definition via HTTP ***//
+    $scope.category = Category.getDefinition($stateParams.category);
+    LocationProperties.properties()
+        .then(function(properties){
+        	$scope.locationProperties = properties;
+        });
+    if($stateParams.time === undefined){
+        //$state.go('main.location.category.time.extent.filter.details', $scope.category.defaultStates);  
+    }
+    
+    $scope.goBack = function(){
+        $state.go('main.location.questions');
+      };  
+}]);
+
+
+app.factory('Category', ['$http', '$location', '$q', '$filter',
+  function($http, $location, $q, $filter){
+
+    //****Create the factory object****//
+    var Category = {};
+
+    
+    //****Private variables*****//
+    var caiCrimeDefinition = {
+      title : 'Crime',
+      defaultStates : {
+        'category' : 'crime',
+        'time' : 'last-year',
+        'extent' : 'within-an-eighth-of-a-mile',
+        'filter' : 'summary',
+        'details' : 'report'
+      }
+    };
+
+    var propertyDefinition = {
+      title : 'Property',
+      defaultStates : {
+        'category' : 'property',
+        'time' : 'current',
+        'extent' : 'location',
+        'filter' : 'summary',
+        'details' : 'report'
+      }
+    };
+
+    var sanitationDefinition = {
+      title : 'Sanitation',
+      defaultStates : {
+        'category' : 'sanitation',
+        'time' : 'current',
+        'extent' : 'location',
+        'filter' : 'summary',
+        'details' : 'report'
+      }
+    };
+
+    var developmentDefinition = {
+      title : 'Development',
+      defaultStates : {
+        'category' : 'development',
+        'time' : 'last-year',
+        'extent' : 'within-an-eighth-of-a-mile',
+        'filter' : 'summary',
+        'details' : 'report'
+      }
+    };
+
+    var permitsDefinition = {
+      title : 'Permits',
+      defaultStates : {
+        'category' : 'permits',
+        'time' : 'last-year',
+        'extent' : 'location',
+        'filter' : 'summary',
+        'details' : 'report'
+      }
+    };
+
+    var neighborhoodCrimeDefinition = {
+      'showTimeOptions' : true,
+      'defaultTimeOption' : 2,
+      'showExtentOptions' : false,
+      'defaultExtentOption' : 'neighborhood',
+      'showFilterOptions' : false,
+      'defaultFilterOption' : 'summary'
+    };
+
+
+
+    var categoryDefinitions = {
+      'cai' : {
+        'crime' : caiCrimeDefinition,
+        'property' : propertyDefinition,
+        'development' : developmentDefinition,
+        'permits' : permitsDefinition,
+        'sanitation' : sanitationDefinition
+      },
+      'neighborhood' : {
+        'crime' : neighborhoodCrimeDefinition
+      }
+    };
+
+    //****API*****//
+
+    Category.getDefinition = function(category){
+      //for now we only have addresses
+      return categoryDefinitions.cai[category];
+      //******TODO******//
+      //if cai do something if neighborhood do something else
+      // if(locationProperties.locationType === 'cai'){
+      //   return categoryDefinitions.cai[category];
+      // }else{
+      //   return categoryDefinitions.neighborhood[category];
+      // } 
+    };
+
+
+    //****Return the factory object****//
+    return Category; 
+
+    
+}]); //END Category factory function
 app.controller('ExtentCtrl', ['$scope', '$stateParams', '$state', 'Extent', 
 	function ($scope, $stateParams, $state, Extent) {
     if($stateParams.extent === 'location' || $stateParams.extent === 'neighborhood'){
@@ -1429,6 +1429,18 @@ try {
   module = angular.module('simplicity', []);
 }
 module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('details/details.html',
+    '<div class="row"><div ng-if="stateParams.details === \'report\'" report="stateParams"></div><div ng-if="stateParams.details === \'map\'" map="stateParams"></div></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
   $templateCache.put('category/category.html',
     '<div class="row list-item-panel" style="padding : 20px"><a class="col-xs-12 list-group-item list-item-panel" ng-click="goBack();"><h4><i class="fa fa-chevron-left pull-left text-primary" style="margin-top : 3px"></i>Back to Questions</h4></a><div class="col-xs-6"><h3>{{category.title}}</h3></div><div class="col-xs-6"><address class="pull-right" style="margin-top: 12px;"><strong>{{locationProperties.address.attributes.House}} {{locationProperties.address.attributes.preType}} {{locationProperties.address.attributes.StreetName}} {{locationProperties.address.attributes.SufType}} {{locationProperties.address.attributes.SufDir}} <span ng-if="locationProperties.address.attributes.User_fld !== \'\'">UNIT: {{locationProperties.address.attributes.User_fld}}</span></strong><br><span ng-if="locationProperties.inTheCity">Asheville, NC</span> {{locationProperties.address.attributes.ZIP}}</address></div><div ui-view=""></div></div>');
 }]);
@@ -1455,18 +1467,6 @@ try {
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('filter/filter.html',
     '<div><div ng-show="hasFilter"><a ng-click="show = !show" ng-show="!show">View Details by Type</a> <a ng-click="show = !show" ng-show="show">Hide Details Selector</a><div class="form-group col-xs-12" ng-show="show"><select class="form-control" id="filter" ng-init="filterValue = filterOptions[defaultOption]" ng-model="filterValue" ng-options="item.label for item in filterOptions" ng-change="onChangeFilterValue()" style="width : 100%"></select></div></div><div class="row" ui-view=""></div></div>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('details/details.html',
-    '<div class="row"><div ng-if="stateParams.details === \'report\'" report="stateParams"></div><div ng-if="stateParams.details === \'map\'" map="stateParams"></div></div>');
 }]);
 })();
 
@@ -1610,7 +1610,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('details/cards/summary.table.card.html',
-    '<div class="col-xs-12"><div class="col-xs-12 list-item-panel"><table class="table"><thead><tr><th>Type</th><th class="text-center">Count</th></tr></thead><tbody><tr ng-repeat="(key, value) in card.table"><td><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}<br><p class="text-muted">{{developmentExplanations[key]}}</p></td><td class="text-center">{{value.count}}</td></tr></tbody></table></div></div>');
+    '<div class="col-xs-12"><div class="col-xs-12 list-item-panel"><table class="table table-hover"><thead><tr><th>Type</th><th class="text-center">Count</th></tr></thead><tbody><tr ng-repeat="(key, value) in card.table"><td ng-click="getDetails(key)" style="cursor : pointer"><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}<br><p class="text-muted">{{developmentExplanations[key]}}</p></td><td class="text-center">{{value.count}}</td></tr></tbody></table></div></div>');
 }]);
 })();
 
@@ -1634,7 +1634,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('details/report/report.directive.html',
-    '<div class="col-xs-12"><div class="col-xs-12" style="height : 100px; text-align : center" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div ng-if="report.category === \'property\'"><div ng-if="propertyDetails" card="propertyDetails"></div></div><div ng-if="report.category === \'sanitation\'"><div ng-if="sanitation" card="sanitation"></div></div><div ng-if="report.category === \'crime\' || report.category === \'development\'"><div class="col-xs-12" ng-if="isEmpty">No results were found based on your search criteria.</div><div ng-if="!isEmpty" ng-show="showSummary"><div ng-if="filteredDetails.summary" card="filteredDetails.summary"></div></div><div class="col-xs-12 list-item-panel" ng-repeat="feature in filteredDetails.features" ng-show="!showSummary" ng-cloak=""><div card="feature"></div></div></div><div class="col-xs-12 btn-group btn-group-justified" role="group" ng-if="showFooter"><a class="col-xs-12 col-sm-4 text-center" ng-click="goTo(map);">View on Map</a> <a class="col-xs-12 col-sm-4 text-center" ng-click="openShareModal();">Share</a> <a class="col-xs-12 col-sm-4 text-center" ng-click="openDownloadModal(filteredDetails);">Download</a></div><div id="downloadModal" class="modal fade" style="z-index : 3000"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">Download</h4></div><div class="modal-body"><div ng-if="report.category === \'property\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'property\', propertyDetails)">Property Details <i class="fa fa-cloud-download"></i></button></div><div ng-if="report.category === \'crime\' || report.category === \'development\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'summary\', filteredDetails)">Summary Table <i class="fa fa-cloud-download"></i></button> <button class="btn btn-primary col-xs-12" style="margin-top : 3px" ng-click="download(\'complete\', filteredDetails)">Complete records <i class="fa fa-cloud-download"></i></button><p class="text-muted text-center">based on selected filters</p></div></div></div></div></div><div id="shareModal" class="modal fade" style="z-index : 3000"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">Share</h4></div><div class="modal-body"><h5 class="text-primary">Link <i class="fa fa-link"></i></h5><pre>{{currentUrl}}</pre><h5 class="text-primary">Embed <i class="fa fa-share-alt"></i></h5><pre>{{iframeText}}</pre></div></div></div></div></div>');
+    '<div class="col-xs-12"><div class="col-xs-12" style="height : 100px; text-align : center" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div ng-if="report.category === \'property\'"><div ng-if="propertyDetails" card="propertyDetails"></div></div><div ng-if="report.category === \'sanitation\'"><div ng-if="sanitation" card="sanitation"></div></div><a ng-click="showSummaryTable()" ng-show="!showSummary">Back to Summary</a><div ng-if="report.category === \'crime\' || report.category === \'development\'"><div class="col-xs-12" ng-if="isEmpty">No results were found based on your search criteria.</div><div ng-if="!isEmpty" ng-show="showSummary"><div ng-if="filteredDetails.summary" card="filteredDetails.summary"></div></div><div class="col-xs-12 list-item-panel" ng-repeat="feature in filteredDetails.features" ng-show="!showSummary" ng-cloak=""><div card="feature"></div></div></div><div class="col-xs-12 btn-group btn-group-justified" role="group" ng-if="showFooter"><a class="col-xs-12 col-sm-4 text-center" ng-click="goTo(map);">View on Map</a> <a class="col-xs-12 col-sm-4 text-center" ng-click="openShareModal();">Share</a> <a class="col-xs-12 col-sm-4 text-center" ng-click="openDownloadModal(filteredDetails);">Download</a></div><div id="downloadModal" class="modal fade" style="z-index : 3000"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">Download</h4></div><div class="modal-body"><div ng-if="report.category === \'property\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'property\', propertyDetails)">Property Details <i class="fa fa-cloud-download"></i></button></div><div ng-if="report.category === \'crime\' || report.category === \'development\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'summary\', filteredDetails)">Summary Table <i class="fa fa-cloud-download"></i></button> <button class="btn btn-primary col-xs-12" style="margin-top : 3px" ng-click="download(\'complete\', filteredDetails)">Complete records <i class="fa fa-cloud-download"></i></button><p class="text-muted text-center">based on selected filters</p></div></div></div></div></div><div id="shareModal" class="modal fade" style="z-index : 3000"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">Share</h4></div><div class="modal-body"><h5 class="text-primary">Link <i class="fa fa-link"></i></h5><pre>{{currentUrl}}</pre><h5 class="text-primary">Embed <i class="fa fa-share-alt"></i></h5><pre>{{iframeText}}</pre></div></div></div></div></div>');
 }]);
 })();
 
@@ -1673,6 +1673,13 @@ app.directive('card', ['$compile','$templateCache', '$filter','$state', '$stateP
       element.replaceWith(element.html(template));
       $compile(element.contents())(scope)
       
+      
+      scope.getDetails = function(typeString){
+        var typeStringWithHyphens = typeString.toLowerCase().replace(/ /g, '-');
+        console.log(typeStringWithHyphens);
+        $state.go('main.location.category.time.extent.filter.details', {filter : typeStringWithHyphens});
+      };
+
     }//END card Directive Controller function
   };//END returned object
 }]);//END card Directive function
@@ -1958,7 +1965,9 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
       $scope.openShareModal = function(){
         $('#shareModal').modal({'backdrop' : false});
       };
-
+      $scope.showSummaryTable = function(){
+        $state.go('main.location.category.time.extent.filter.details', {filter : 'summary'});
+      }
       $scope.download = function(downloadType, details){
         console.log(details);
         var csvString =  'data:text/csv;charset=utf-8,';
