@@ -46,14 +46,56 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
       return q.promise;
     };
 
+    var getCurrentRecyclingWeek = function(){
+      var d = new Date(); // current time 
+      var t = d.getTime() - (1000*60*60*24*3); // milliseconds since Jan 4 1970 Sunday
+      var w = Math.floor(t / (1000*60*60*24*7)); // weeks since Jan 4 1970  
+      var o = w % 2; // equals 0 for even (B weeks) numbered weeks, 1 for odd numbered weeks 
+      if(o == 0){
+        return 'B'
+      }else{ // do your odd numbered week stuff 
+        return 'A'
+      }
+    }
 
+    Details.getRecyclingSchedule = function(recyclingString){
+      var recyclingArray = recyclingString.split(' ');
+      var currentRecyclingWeek = getCurrentRecyclingWeek();
+      if(recyclingArray[3] === 'A)'){
+        if(getCurrentRecyclingWeek() === 'A'){
+          return {'week' : 'A', 'when' : 'this week'};
+        }else{
+          return {'week' : 'A', 'when' : 'next week'};
+        }
+      }else{
+        if(getCurrentRecyclingWeek() === 'B'){
+          return {'week' : 'B', 'when' : 'this week'};
+        }else{
+          return {'week' : 'B', 'when' : 'next week'};
+        }
+      }
+    };
 
+    Details.getBrushSchedule = function(recyclingSchedule, trashDay){
+      if(trashDay === 'MONDAY' || trashDay === 'TUESDAY'){
+        if(recyclingSchedule.week === 'B' && recyclingSchedule.when === 'this week'){
+          return {'when' : 'this week'};
+        }else{
+          return {'when' : 'next week'};
+        }
+      }else{
+        if(recyclingSchedule.week === 'A' && recyclingSchedule.when === 'this week'){
+          return {'when' : 'this week'};
+        }else{
+          return {'when' : 'next week'};
+        }
+      }
+    }
 
     Details.getPropertyDetails = function(civicAddressId){
       var q = $q.defer();
       //We need to cross-reference the civic address id to get the PIN(to look up the property)
       var crossRefTableId = ArcGisServer.featureService.getId('coagis.gisowner.coa_civicaddress_pinnum_centerline_xref_view', 'table');
-      console.log(crossRefTableId);
       var queryParams = {
         'where' : 'civicaddress_id=' + civicAddressId,
         'f' : 'json',
@@ -76,6 +118,23 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
       return q.promise;
     };
 
+    Details.getZoningOverlays = function(zoningOverlays){
+      var zoningOverlaysSplit = zoningOverlays.split('-');
+      var q = $q.defer();
+      var zoningLayerId = ArcGisServer.featureService.getId('coagis.gisowner.coa_opendata_zoning_overlays', 'layer');
+      var queryParams = {
+        'where' : "name='" + zoningOverlaysSplit[0] + "'",
+        'f' : 'json',
+        'outFields' : '*'
+      };
+      ArcGisServer.featureService.query(zoningLayerId, queryParams)
+            .then(function(zoningOverlayLayer){
+              q.resolve(zoningOverlayLayer.features[0]);
+            });
+
+      return q.promise;
+    };
+
     Details.getFilteredDetails = function(){
       //Use promises to handle the request asynchronously; defer till resolved
       var q = $q.defer();
@@ -95,7 +154,10 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
 
               //object that holds a summary of the feature {filterValue : count}
               //e.g. for crime {'Bulgary' : 12, 'Larceny' : 2}
-              var filteredFeaturesSummary= {};
+              var filteredFeaturesSummary= {
+                'template' : 'summary',
+                'table' : {}
+              };
               //array that holds features filtered by time and the filter value
               var filterdFeaturesArray = [];
   
@@ -105,20 +167,21 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
                   //filter by filter
                   features.features[i].attributes.color = colors[features.features[i].attributes[filter]];          
                   //build a summary object
-                  if(filteredFeaturesSummary[features.features[i].attributes[filter]] === undefined){
+                  if(filteredFeaturesSummary.table[features.features[i].attributes[filter]] === undefined){
 
-                    filteredFeaturesSummary[features.features[i].attributes[filter]] = {'color' : colors[features.features[i].attributes[filter]], 'count' : 1 };
+                    filteredFeaturesSummary.table[features.features[i].attributes[filter]] = {'color' : colors[features.features[i].attributes[filter]], 'count' : 1 };
 
                   }else{
-                    filteredFeaturesSummary[features.features[i].attributes[filter]].count = filteredFeaturesSummary[features.features[i].attributes[filter]].count + 1;
+                    filteredFeaturesSummary.table[features.features[i].attributes[filter]].count = filteredFeaturesSummary.table[features.features[i].attributes[filter]].count + 1;
                   }
                   //add filtered features to array
                   if($stateParams.filter === 'summary' || features.features[i].attributes[filter].toLowerCase().replace(/ /g, '-') === $stateParams.filter){
-
-                    filterdFeaturesArray.push(features.features[i]);
+                    features.features[i].template = $stateParams.category;
+                    
                     if(features.features[i].attributes.record_comments){
                       features.features[i].attributes.commentsArray = features.features[i].attributes.record_comments.split('[NEXTCOMMENT]');
                     }
+                    filterdFeaturesArray.push(features.features[i]);
                   }
                   
                 }
@@ -127,7 +190,7 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
               //Update filter options based on filter summary
               var filterOptions = [];
               filterOptions.push({'value' : 'summary', 'label' : 'Summary'});
-              for (var key in filteredFeaturesSummary) {
+              for (var key in filteredFeaturesSummary.table) {
                 filterOptions.push({'value' : key.toLowerCase().replace(/ /g, '-'), 'label' : key});
               }
               Filter.options($stateParams.category, filterOptions);

@@ -8,11 +8,7 @@ app.controller('CategoryCtrl', ['$scope', '$stateParams', '$state', 'Category', 
         .then(function(properties){
         	$scope.locationProperties = properties;
         });
-    console.log('CategoryCtrl');
-    console.log($stateParams);
     if($stateParams.time === undefined){
-        console.log('CategoryCtrl');
-        console.log($stateParams);
         //$state.go('main.location.category.time.extent.filter.details', $scope.category.defaultStates);  
     }
     

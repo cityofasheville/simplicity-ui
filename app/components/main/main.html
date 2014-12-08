@@ -1,14 +1,21 @@
 <div class="col-md-6 col-md-offset-3">
   <br>
   <div class = "col-xs-12">
-    <div class="col-xs-12">
+    <div class="col-xs-12 hidden-xs">
       <div class="pull-left" ng-click = "goHome();"; style = "cursor : pointer">
         <!-- <h1 >dr<span class = "text-primary">o</span>plet</h1> -->
-        <h1>SimpliCity</h1>
+        <h1 style = "color : #073F97">SimpliCity</h1>
         <h4>city data simplified</h4>
       </div>  
-      <img class = "pull-right hidden-xs" style = "margin-top: 5px" src="http://123graffitifree.com/images/citylogo-flatblack.png">
-      <img class = "pull-right visible-xs" style = "margin-top: 5px; height : 30px" src="http://123graffitifree.com/images/citylogo-flatblack.png">
+      <img class = "pull-right" style = "margin-top: 5px; height : 100px" src="http://123graffitifree.com/images/citylogo-flatblue.png">
+    </div>
+    <div class="col-xs-12 visible-xs">
+      <div class="pull-left" ng-click = "goHome();"; style = "cursor : pointer">
+        <!-- <h1 >dr<span class = "text-primary">o</span>plet</h1> -->
+        <h4 style = "color : #073F97">SimpliCity</h4>
+        <h5>city data simplified</h5>
+      </div>  
+      <img class = "pull-right " style = "margin-top: 5px; height : 50px" src="http://123graffitifree.com/images/citylogo-flatblue.png">
     </div>
     <div class="col-xs-12">
       <br>
@@ -19,7 +26,8 @@
         <p ng-show = "errorMessage.show" class="text-danger">{{errorMessage.message}}</p>
         <p ng-show = "helperMessage.show" class="text-warning">{{helperMessage.message}}</p>
         <div class="list-group" style = "width : 100%; position : absolute; z-index : 1000; max-height : 230px; overflow-y: scroll">
-          <a tabindex = "{{$index+1}}" ng-click = "getLocationProperties(candidate, $event)" ng-keypress = "getLocationProperties(candidate, $event)" ng-repeat = "candidate in addresses.candidates" class="list-group-item"><p class="text-info">{{candidate.attributes.House}} {{candidate.attributes.preType}} {{candidate.attributes.StreetName}} {{candidate.attributes.SufType}} {{candidate.attributes.SufDir}} <span ng-if= "candidate.attributes.User_fld !== ''">UNIT: {{candidate.attributes.User_fld}}</span>, {{candidate.attributes.ZIP}}</p></a>
+          <!-- <a tabindex = "{{$index+1}}" ng-click = "getLocationProperties(candidate, $event)" ng-keypress = "getLocationProperties(candidate, $event)" ng-repeat = "candidate in addresses.candidates" class="list-group-item"><p class="text-info">{{candidate.attributes.House}} {{candidate.attributes.PreDir}} {{candidate.attributes.StreetName}} {{candidate.attributes.SufType}} {{candidate.attributes.SufDir}} <span ng-if= "candidate.attributes.User_fld !== ''">UNIT: {{candidate.attributes.PreType}}</span>, {{candidate.attributes.ZIP}}</p></a> -->
+          <a tabindex = "{{$index+1}}" ng-click = "getLocationProperties(candidate, $event)" ng-keypress = "getLocationProperties(candidate, $event)" ng-repeat = "candidate in addresses.candidates" class="list-group-item"><p class="text-info">{{candidate.attributes.Match_addr}}</p></a>
         </div>
         <p ng-show = "errorMessage.show" class="text-danger">{{errorMessage.message}}</p>
       </div>
@@ -32,5 +40,47 @@
   <div class="col-xs-12 content" style = "height : 400px">
     <div ui-view class = "slide"></div>
   </div>
-  <!-- <div modal = 'modal'></div> -->
+  <div class="modal fade" id = "modal" style = "z-index : 3000">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+          <div class="modal-header" ng-if = "modal.category === 'crime'">
+            <button type="button" class="close" data-dismiss="modal">
+              <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+            </button>
+            <h4 class="modal-title">{{modal.offense}}</h4>
+          </div>
+          <div class="modal-header" ng-if = "modal.category === 'development'">
+            <button type="button" class="close" data-dismiss="modal">
+              <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+            </button>
+          <h4 class="modal-title">{{modal.record_type}}</h4>
+          </div>
+          <div class="modal-body">
+            <div class="col-xs-12" ng-if = "modal.category === 'development'">
+              <h5 class = 'text-center'>{{modal.address}}</h5>
+          <div class="col-xs-12">
+            <p class = "text-muted"><strong>Opened: </strong> {{modal.date_opened|date}}</p>
+            <p class = "text-muted"><strong>Updated: </strong> {{modal.date_statused|date}}</p>
+            <p class = "text-muted"><strong>Status: </strong> {{modal.record_status}}</p>
+            <p class = "text-muted"><strong>Business Name: </strong> {{modal.business_name}}</p>
+            <p class = "text-muted"><strong>Description: </strong> {{modal.description}}</p>
+          </div>
+        </div>
+        <div class="col-xs-12 list-item-panel" ng-if = "modal.category === 'crime'">
+          <div class="col-xs-12">
+            <h5 class = 'lead'>{{modal.address}}</h5>
+            <h5 class = "text-muted"><strong>{{modal.thedate|date}}</strong></h5>
+            <p class = "text-muted"><strong>Case #</strong>: {{modal.casenumber}}</p>
+            <p class = "text-muted"><strong>Law Beat</strong>: {{modal.law_beat}}</p>
+            <p class = "text-muted"><strong>Severity</strong>: {{modal.severity}}</p>
+          </div>
+          <a  ng-click = "showMore = !showMore">
+            <p class = 'text-center' ng-if = 'showMore'>Show More</p>
+            <p class = 'text-center' ng-if = 'showMore'>Show Less</p>
+          </a>
+        </div>
+          </div><!-- /.modal-body -->
+      </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 </div>

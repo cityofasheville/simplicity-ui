@@ -3,10 +3,6 @@ app.factory('Extent', ['$stateParams', function($stateParams){
     //****Create the factory object****//
     var Extent = {};
 
-    // {'value' : 'within-a-half-mile', 'label' : 'Within a half mile'},
-    //   {'value' : 'within-a-mile', 'label' : 'Within a mile'},
-    //   {'value' : 'within-5-miles', 'label' : 'Within 5 miles'}
-
     var extentFilterValues = {
       'within-about-a-block' : 330,
       'within-an-eighth-of-a-mile' : 660,

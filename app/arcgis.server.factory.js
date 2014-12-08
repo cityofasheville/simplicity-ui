@@ -15,7 +15,7 @@ app.factory('ArcGisServer', ['$http', '$location', '$q', '$filter',
 
     var serverProperties = {
       'baseServicesUrl' : 'http://arcgis-arcgisserver1-1222684815.us-east-1.elb.amazonaws.com/arcgis/rest/services',
-      'geocodeServiceName' : 'coa_address_loc',
+      'geocodeServiceName' : 'coa_composite_locator',
       'featureServiceName' : 'opendata',
     };
 
@@ -37,7 +37,7 @@ app.factory('ArcGisServer', ['$http', '$location', '$q', '$filter',
 
       //define query parameters
       var params = {
-        'Single Line Input' : address,
+        'SingleLine' : address,
         'outFields' : fields,
         'f' : 'json'
 

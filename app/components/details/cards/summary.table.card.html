@@ -1,0 +1,23 @@
+<div class="col-xs-12" >
+	<div class="col-xs-12 list-item-panel">
+
+	<table class="table table-hover" >
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th class = "text-center">Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat = "(key, value) in card.table">
+          <td ng-click = "getDetails(key)" style = "cursor : pointer">
+            <i class="fa fa-circle" style = "color: #{{value.color}}"></i> {{key}}
+            
+            <br>
+      			<p class = 'text-muted'>{{developmentExplanations[key]}}</p>
+      		</td>
+          <td class = "text-center">{{value.count}}</td>
+        </tr>
+      </tbody>
+    </table>
+</div>

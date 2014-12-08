@@ -1,8 +1,8 @@
 <div>
 	<div ng-show= "hasFilter">
-		<a ng-click = "show = !show" ng-show = "!show">Filter Results</a>
-		<a ng-click = "show = !show" ng-show = "show">Remove Filter</a>
-		<div class="form-group" ng-show = "show">
+		<a ng-click = "show = !show" ng-show = "!show">View Details by Type</a>
+		<a ng-click = "show = !show" ng-show = "show">Hide Details Selector</a>
+		<div class="form-group col-xs-12" ng-show = "show">
 			<select class = "form-control" id = "filter" ng-init = "filterValue = filterOptions[defaultOption]"  ng-model="filterValue" ng-options="item.label for item in filterOptions" ng-change = "onChangeFilterValue()" style = "width : 100%"></select>
 		</div>
 	</div>

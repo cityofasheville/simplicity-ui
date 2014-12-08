@@ -3,20 +3,29 @@
 		<i class="fa fa-5x fa-spinner fa-spin"></i>
 	</div>
 	<!-- PROPERTY -->
-	<div ng-if = "report.category === 'property'" ng-include = "'details/reports/property.report.html'"></div>
+	<div ng-if = "report.category === 'property'" >
+		<div ng-if = "propertyDetails" card = "propertyDetails"></div>
+	</div>
+	<!-- SANITATION -->
+	<div ng-if = "report.category === 'sanitation'" >
+		<div ng-if = "sanitation" card = "sanitation"></div>
+	</div>
 	<!-- CRIME AND DEVELOPMENT -->
+	<a ng-click = "showSummaryTable()" ng-show = "!showSummary">Back to Summary</a>
 	<div ng-if = "report.category === 'crime' || report.category === 'development'">
 		<div class="col-xs-12" ng-if = 'isEmpty' >No results were found based on your search criteria.</div>
-		<div ng-if = '!isEmpty' ng-show = "showSummary" ng-cloak table = "filteredDetails.summary"></div>
+		<div ng-if = '!isEmpty' ng-show = "showSummary" >
+			<div ng-if = 'filteredDetails.summary' card = "filteredDetails.summary"></div>
+		</div>
 		<div class="col-xs-12 list-item-panel" ng-repeat = "feature in filteredDetails.features" ng-show = "!showSummary" ng-cloak>
-			<div feature = "feature"></div>
+			<div card = "feature" ></div>
 		</div>
 	</div>
 
-	<div class="col-xs-12 btn-group btn-group-justified" role = "group" >
-		<a class="col-xs-12 col-sm-4 text-center" ng-click = "goTo(map);">View on Map</a>
-		<a class="col-xs-12 col-sm-4 text-center" ng-click = "openShareModal();">Share</a>
-		<a class="col-xs-12 col-sm-4 text-center" ng-click = "openDownloadModal(filteredDetails);">Download</a>
+	<div class="col-xs-12" role = "group" ng-if = "showFooter">
+		<a class="col-xs-12 col-sm-4 text-center btn btn-success" ng-click = "goTo(map);"><i class="fa fa-2x fa-map-marker"></i><br>View on Map</a>
+		<a class="col-xs-12 col-sm-4 text-center btn btn-success" ng-click = "openShareModal();"><i class="fa fa-2x fa-share"></i><br>Share</a>
+		<a class="col-xs-12 col-sm-4 text-center btn btn-success" ng-click = "openDownloadModal(filteredDetails);"><i class="fa fa-2x fa-cloud-download"></i><br>Download</a>
 	</div>
 
 	<!-- DOWNLOAD MODAL -->

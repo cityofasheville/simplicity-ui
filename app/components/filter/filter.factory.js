@@ -18,10 +18,15 @@ app.factory('Filter', [function(){
       {'value' : 'summary', 'label' : 'Development Summary'}
     ];
 
+    var sanitationFilterOptions = [
+      {'value' : 'summary', 'label' : 'Sanitation Summary'}
+    ];
+
     var filterOptions = {
       'crime' : crimeFilterOptions,
       'property' : propertyFilterOptions,
-      'development' : developmentFilterOptions
+      'development' : developmentFilterOptions,
+      'sanitation' : sanitationFilterOptions
     };
 
     // Filter.updateOptions = function(newFilterOptions, categeory){

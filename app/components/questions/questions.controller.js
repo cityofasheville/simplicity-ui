@@ -9,11 +9,9 @@ app.controller('QuestionsCtrl', ['$scope','$state', '$stateParams', 'Category', 
             for(var key in properties){
                 dataCacheKeyArray.push(key);
             }
-            console.log(dataCacheKeyArray);
             //Get a list of questions for the current location
             //****This could be an HTTP request****//
             questions = Questions.get(dataCacheKeyArray);
-            console.log(questions);
 
             //Get the top 2 questions
             $scope.questions = questions.slice(0,3);
@@ -24,7 +22,6 @@ app.controller('QuestionsCtrl', ['$scope','$state', '$stateParams', 'Category', 
     $scope.more = {
         show : true,
         get : function(){
-            console.log(questions.length);
             var currentQuestionCount = $scope.questions.length;
             var numberOfQuestionsToAdd = 3;
             //check to make sure that we have at least questions left
@@ -54,7 +51,6 @@ app.controller('QuestionsCtrl', ['$scope','$state', '$stateParams', 'Category', 
     $scope.getAnswer = function(question){
         $scope.category = Category.getDefinition(question.category);
         $state.go('main.location.category.time.extent.filter.details', $scope.category.defaultStates);  
-        //$state.go('main.location.category', {'category': question.category});
     };
 
 

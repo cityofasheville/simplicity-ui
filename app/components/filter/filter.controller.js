@@ -15,19 +15,26 @@ app.controller('FilterCtrl', ['$scope', '$stateParams', '$state', 'Filter', func
 	//Watch to see if the options returned from teh Filter factory change
 	$scope.$watch(function () {return Filter.options($stateParams.category);},                       
       	function(newVal, oldVal) {
-      		if(newVal.length > 1 || $stateParams.category !== 'property'){
-      			$scope.hasFilter = true;
-      			$scope.filterOptions = newVal;
-      			for (var i = 0; i < $scope.filterOptions.length; i++) {
-					if($scope.filterOptions[i].value === $stateParams.filter){
-						$scope.filterValue = $scope.filterOptions[i];
+      		if($stateParams.category === 'property' || $stateParams.category === 'sanitation'){
+				$scope.hasFilter = false;
+			}else{
+				if(newVal.length > 1){
+	      			$scope.hasFilter = true;
+	      			$scope.filterOptions = newVal;
+	      			for (var i = 0; i < $scope.filterOptions.length; i++) {
+						if($scope.filterOptions[i].value === $stateParams.filter){
+							$scope.filterValue = $scope.filterOptions[i];
+						}
 					}
-				}
-      		}else{
-      			$scope.hasFilter = false;
-      		}
-        	
+	      		}else{
+	      			$scope.hasFilter = false;
+	      		}
+
+			}
+  
     	}, true);
+
+	
 
 	
 	$scope.onChangeFilterValue = function(){

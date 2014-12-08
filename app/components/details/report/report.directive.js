@@ -9,18 +9,12 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
     },
     replace : true,
     //Template for the directive
-    templateUrl: 'details/details.report.directive.html',
+    templateUrl: 'details/report/report.directive.html',
     controller : ['$scope', function($scope){
-      console.log($scope.report);
-
-      var templates = {
-        'property' : 'details/reports/property.report.html',
-        'crime' : 'details/reports/crime.report.html',
-        'development' : 'details/reports/development.report.html',
-      };
 
       $scope.loading = false;
       $scope.showSummary = true;
+      $scope.showFooter = true;
 
       var isEmpty = function (obj) {
           for(var prop in obj) {
@@ -31,11 +25,27 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
           return true;
       };
 
-      $scope.developmentExplanations = {
-        'Planning Level I' : 'Commercial construction less than 35,000 square feet or less than 20 multi-family units',
-        'Planning Level II' : 'Commercial construction 35,000-100,000 square feet or 20-50 multi-family units',
-        'Planning Level III' : 'Commercial construction larger than 100,000 square feet or more than 50 multi-family units'
-      }
+      var makeZoningCard = function(properties, codelinks){
+        var zoningCard = {};
+        zoningCard.template = 'zoning';
+        zoningCard.zoning = properties.zoning[0];
+        zoningCard.codelinks = codelinks;
+        
+        if(properties.zoningOverlays){
+          zoningCard.zoningOverlays = properties.zoningOverlays;
+        }else{
+          zoningCard.zoningOverlays = 'No Zoning Overlays'
+        }
+        return zoningCard;
+      };
+      var makeOwnerCard = function(propertyDetails){
+        var ownerCard = {};
+        ownerCard.template = 'owner';
+        ownerCard.owner = propertyDetails.owner;
+        ownerCard.owner_address = propertyDetails.owner_address;
+        ownerCard.owner_citystatezip = propertyDetails.owner_citystatezip;
+        return ownerCard;
+      };
 
       LocationProperties.properties()
         .then(function(properties){
@@ -43,15 +53,27 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
           if($scope.report.category === 'property'){
             Details.getPropertyDetails($scope.report.location)
               .then(function(propertyDetails){
-                propertyDetails.attributes.zoning = properties.zoning[0];
+                console.log(propertyDetails);
+                propertyDetails.attributes.civicAddressId = $stateParams.location;
+                propertyDetails.zoningCard = makeZoningCard(properties, propertyDetails.attributes.codelinks);
+                propertyDetails.ownerCard = makeOwnerCard(propertyDetails.attributes);
+                propertyDetails.template = 'property';
                 $scope.propertyDetails = propertyDetails;
               });
+          }else if($scope.report.category === 'sanitation'){
+            console.log(properties.sanitation);
+            $scope.showFooter = false;
+            $scope.sanitation = properties.sanitation;
+            $scope.sanitation.template = 'sanitation';
+            $scope.sanitation.recyclingSchedule = Details.getRecyclingSchedule(properties.sanitation.recycling);
+            $scope.sanitation.brushSchedule = Details.getBrushSchedule($scope.sanitation.recyclingSchedule, properties.sanitation.trash);
           }else{
             $scope.loading = true;
             Details.getFilteredDetails()
               .then(function(filteredDetails){
                 $scope.filteredDetails = filteredDetails;
-                
+                console.log('$scope.filteredDetails');
+                console.log($scope.filteredDetails);
                 $scope.isEmpty = isEmpty(filteredDetails.summary);
                 if($stateParams.filter === 'summary'){
                   $scope.showSummary = true;
@@ -77,7 +99,9 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
       $scope.openShareModal = function(){
         $('#shareModal').modal({'backdrop' : false});
       };
-
+      $scope.showSummaryTable = function(){
+        $state.go('main.location.category.time.extent.filter.details', {filter : 'summary'});
+      }
       $scope.download = function(downloadType, details){
         console.log(details);
         var csvString =  'data:text/csv;charset=utf-8,';

@@ -1,0 +1,19 @@
+<div>
+	<h4>Zoning</h4>
+	<h5 ng-if = "card.codelinks === 'disable'">
+		<strong>Zoning District</strong>
+		: 
+		<span>{{card.zoning}}</span>
+	</h5>
+	<h5 ng-if = "card.codelinks !== 'disable'">
+		<strong>Zoning District</strong>
+		:
+		<span>{{card.zoning}} </span>
+		<a style = "" target = "_blank" href="{{card.codelinks[card.zoning]}}"> <i class="fa fa-lg fa-external-link-square"></i></a>
+	</h5>
+	<h5>
+		<strong>Zoning Overlay</strong>
+		:
+		<span>{{card.zoningOverlays}}</span>
+	</h5>
+</div>

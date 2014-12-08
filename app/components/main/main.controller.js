@@ -1,5 +1,5 @@
-app.controller('MainCtrl', ['$scope', '$state', '$location', '$http', '$timeout', 'ArcGisServer', 'LocationProperties',
-  function ($scope, $state, $location, $http, $timeout, ArcGisServer, LocationProperties) {
+app.controller('MainCtrl', ['$scope', '$state', '$stateParams', '$location', '$http', '$timeout', 'ArcGisServer', 'LocationProperties',
+  function ($scope, $state, $stateParams, $location, $http, $timeout, ArcGisServer, LocationProperties) {
     
     //***TODO: Get address canidates as user enters an address***//
     $scope.typedLocation = '';
@@ -32,12 +32,14 @@ app.controller('MainCtrl', ['$scope', '$state', '$location', '$http', '$timeout'
         $scope.typedLocation = location.address;
         LocationProperties.properties(location)
           .then(function(){
-            $state.go('main.location.questions', {location : location.attributes.Ref_ID});
+            $state.go('main.location.questions', {location : location.attributes.User_fld});
           });
     };
 
     $scope.goHome = function(){
     	$location.path('');
     };
+
+
 
 }]);

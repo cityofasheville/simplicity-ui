@@ -29,6 +29,16 @@ app.factory('Category', ['$http', '$location', '$q', '$filter',
       }
     };
 
+    var sanitationDefinition = {
+      title : 'Sanitation',
+      defaultStates : {
+        'category' : 'sanitation',
+        'time' : 'current',
+        'extent' : 'location',
+        'filter' : 'summary',
+        'details' : 'report'
+      }
+    };
 
     var developmentDefinition = {
       title : 'Development',
@@ -68,7 +78,8 @@ app.factory('Category', ['$http', '$location', '$q', '$filter',
         'crime' : caiCrimeDefinition,
         'property' : propertyDefinition,
         'development' : developmentDefinition,
-        'permits' : permitsDefinition
+        'permits' : permitsDefinition,
+        'sanitation' : sanitationDefinition
       },
       'neighborhood' : {
         'crime' : neighborhoodCrimeDefinition

@@ -39,11 +39,9 @@ app.factory('LocationProperties', ['$http', '$location', '$q', '$filter', '$stat
       };
       ArcGisServer.featureService.query(dataCacheId, queryParams)
         .then(function(dataCacheResults){
-          console.log(dataCacheResults);
           for (var i = 0; i < dataCacheResults.features.length; i++) {
             //assign iterator to attributes to make it easier to read
             var attributes = dataCacheResults.features[i].attributes;
-
             if(attributes.type === 'ADDRESS IN CITY'){
               properties.inTheCity = (attributes.data === 'YES')? true : false;
             }else if(attributes.type === 'CRIME'){
@@ -58,12 +56,28 @@ app.factory('LocationProperties', ['$http', '$location', '$q', '$filter', '$stat
             }else if(attributes.type === 'PERMITS'){
               var value = createArrayFromNullorString(attributes.data, ',');
               assignValueToProperties('development', attributes.distance, value);
+            }else if(attributes.type === 'TRASH DAY'){
+              if(properties.sanitation){
+                properties.sanitation.trash = attributes.data
+              }else{
+                properties.sanitation = {
+                  'trash' : attributes.data
+                }
+              }
+            }else if(attributes.type === 'RECYCLE DAY'){
+              if(properties.sanitation){
+                properties.sanitation.recycling = attributes.data
+              }else{
+                properties.sanitation = {
+                  'recycling' : attributes.data
+                }
+              }
+            }else if(attributes.type === 'ZONING OVERLAYS'){
+              properties.zoningOverlays = attributes.data;
             }else{
               //Do nothing
             }
           }
-          console.log('properties');
-          console.log(properties);
           q.resolve(properties);
         });
         return q.promise;
@@ -142,7 +156,6 @@ app.factory('LocationProperties', ['$http', '$location', '$q', '$filter', '$stat
             $state.go('main');
           }
         }else{
-          console.log(properties);
           q.resolve(properties);
         }
         

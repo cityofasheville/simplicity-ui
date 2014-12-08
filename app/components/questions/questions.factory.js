@@ -44,7 +44,11 @@ app.factory('Questions', [function(){
         ],
         'zoning' : 
         [
-          {'question' : 'Do you want to know about the zoning?', 'category' : 'zoning', 'detail' : 'zoning'}
+          {'question' : 'Do you want to know about the zoning?', 'category' : 'property', 'detail' : 'zoning'}
+        ],
+        'sanitation' : [
+          {'question' : 'Do you want to know about trash collection?', 'category' : 'sanitation', 'detail' : 'summary'},
+          {'question' : 'Do you want to know about recycling collection?', 'category' : 'sanitation', 'detail' : 'summary'}
         ]
     };
 
