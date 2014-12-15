@@ -1,5 +1,5 @@
-app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', '$timeout', 'Details', 'Extent', 'LocationProperties',
-  function($compile, $filter, $state, $stateParams, $q, $timeout, Details, Extent, LocationProperties){
+app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', '$timeout', 'Details', 'Extent', 'IdProperties',
+  function($compile, $filter, $state, $stateParams, $q, $timeout, Details, Extent, IdProperties){
   return {
     //Restrict the directive to attribute ep-form on an element 
     restrict: 'A',
@@ -74,13 +74,27 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', '$time
         return geoJson;
     };
 
+    var createGeoJsonFromArcGisFeatureServicePolyLine = function(arcGISFeatureService){
+      var geoJson = [];
+      for (var i = 0; i < arcGISFeatureService.features.length; i++) {
+        var feature = {
+            'type':'LineString',
+            'coordinates': arcGISFeatureService.features[i].geometry.paths[0],
+            'properties': arcGISFeatureService.features[i].attributes
+        };
+        geoJson.push(feature);
+      };
+      console.log(geoJson);
+      return geoJson;
+    };
+
 
     var createGeoJson = function(data, style){
       return L.geoJson(data, {
           style: function (feature) {
             if(style){
                 return style;
-            }   
+            }
           },
           onEachFeature: function (feature, layer) {
 
@@ -118,11 +132,11 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', '$time
     var layerControl = L.control.layers(baseMaps).addTo(map);
     $(".leaflet-control-attribution").css("maxWidth", "90%")
 
-    LocationProperties.properties()
+    IdProperties.properties()
       .then(function(properties){
-        $scope.locationProperties = properties;
+        $scope.IdProperties = properties;
         if($scope.map.category === 'property'){
-          Details.getPropertyDetails($scope.map.location)
+          Details.getPropertyDetails($scope.map.id)
             .then(function(propertyDetails){
               if(properties.zoningOverlays){
                 Details.getZoningOverlays(properties.zoningOverlays)
@@ -142,15 +156,33 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', '$time
         }else{
           Details.getFilteredDetails()
             .then(function(filteredDetails){
-              var radiusInFeet = Extent.filterValue();
-              var radiusInMeters = radiusInFeet*0.3048;
-              L.marker([properties.address.location.y, properties.address.location.x]).addTo(map);
-              var circle = L.circle([properties.address.location.y, properties.address.location.x], radiusInMeters, {
-                'fillOpacity' : 0
-              });
-              circle.addTo(map);
-              var circleBounds = circle.getBounds();
-              map.fitBounds(circleBounds);
+              if(properties.address.attributes.Loc_name === 'street_name'){
+                Details.getStreetDetails(properties)
+                  .then(function(streetDetails){
+                    var streetGeoJson = createGeoJsonFromArcGisFeatureServicePolyLine(streetDetails);
+                    var style= {
+                        "color": "#073F97",
+                        "weight": 5,
+                        "opacity": 0.8
+                    };
+                    
+                    var streetLayer = createGeoJson(streetGeoJson, style);
+                    streetLayer.addTo(map);
+                    map.fitBounds(streetLayer);
+                  });
+                
+              }else{
+                var radiusInFeet = Extent.filterValue();
+                var radiusInMeters = radiusInFeet*0.3048;
+                L.marker([properties.address.location.y, properties.address.location.x]).addTo(map);
+                var circle = L.circle([properties.address.location.y, properties.address.location.x], radiusInMeters, {
+                  'fillOpacity' : 0
+                });
+                circle.addTo(map);
+                var circleBounds = circle.getBounds();
+                map.fitBounds(circleBounds);
+              }
+              
               var geojson = createPointGeoJsonFromFilteredDetails(filteredDetails)
               var geoJsonLayer = createGeoJsonMarkers(geojson);
               geoJsonLayer.addTo(map);  
@@ -172,7 +204,7 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', '$time
       };
 
       $scope.goTo = function(detailsLocation){
-        $state.go('main.location.category.time.extent.filter.details', {'details' : 'report'});
+        $state.go('main.type.id.category.time.extent.filter.details', {'details' : 'report'});
       };
       
       

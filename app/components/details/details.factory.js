@@ -1,6 +1,6 @@
 
-app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', 'ArcGisServer', 'LayerDefintion','LocationProperties', 'Time', 'Extent', 'Filter',
-  function($http, $location, $q, $filter, $stateParams, ArcGisServer, LayerDefintion, LocationProperties, Time, Extent, Filter){
+app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', 'ArcGisServer', 'LayerDefintion','IdProperties', 'Time', 'Extent', 'Filter',
+  function($http, $location, $q, $filter, $stateParams, ArcGisServer, LayerDefintion, IdProperties, Time, Extent, Filter){
 
     //****Create the factory object****//
     var Details = {};
@@ -40,7 +40,7 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
         .then(function(features){
           
           //this is being assigned wrong
-          detailsCache[$stateParams.location] = features;
+          detailsCache[$stateParams.id] = features;
           q.resolve(features);
         });
       return q.promise;
@@ -118,6 +118,54 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
       return q.promise;
     };
 
+    Details.getPropertiesDetails = function(properties){
+      var q = $q.defer();
+      //We need to cross-reference the civic address id to get the PIN(to look up the property)
+      var crossRefTableId = ArcGisServer.featureService.getId('coagis.gisowner.coa_civicaddress_pinnum_centerline_xref_view', 'table');
+      var queryParams = {
+        'where' : 'centerline_id in (' + properties.address.attributes.User_fld + ')',
+        'f' : 'json',
+        'outFields' : 'pinnum'
+      };
+      ArcGisServer.featureService.query(crossRefTableId, queryParams)
+        .then(function(crossRef){
+          var arrayOfPINs = [];
+          for (var i = 0; i < crossRef.features.length; i++) {
+            arrayOfPINs.push(String(crossRef.features[i].attributes.pinnum));
+          };
+          var propertyLayerId = ArcGisServer.featureService.getId('coagis.gisowner.coa_opendata_property', 'layer');
+          var queryParams = {
+            'where' : 'pinnum in (' + arrayOfPINs.join(',') + ')',
+            'f' : 'json',
+            'outFields' : '*'
+          };
+          ArcGisServer.featureService.query(propertyLayerId, queryParams)
+            .then(function(propertiesDetails){
+              for (var i = 0; i < propertiesDetails.features.length; i++) {
+                propertiesDetails.features[i].attributes.codelinks = LayerDefintion.get('codelinks');
+              };
+              q.resolve(propertiesDetails);
+            });
+        });
+      return q.promise;
+    }
+
+    Details.getStreetDetails = function(properties){
+      var q = $q.defer();
+      var streeetLayerId = ArcGisServer.featureService.getId('coagis.gisowner.coa_opendata_streets', 'layer');
+      var queryParams = {
+        'where' : 'centerline_id in (' + properties.address.attributes.User_fld + ')',
+        'f' : 'json',
+        'outFields' : '*'
+      };
+      ArcGisServer.featureService.query(streeetLayerId, queryParams)
+        .then(function(streetDetails){
+          console.log(streetDetails);
+          q.resolve(streetDetails);
+        });
+      return q.promise;
+    }
+
     Details.getZoningOverlays = function(zoningOverlays){
       var zoningOverlaysSplit = zoningOverlays.split('-');
       var q = $q.defer();
@@ -141,7 +189,7 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
 
       var category = $stateParams.category;
       //Get Location Properties
-      LocationProperties.properties()
+      IdProperties.properties()
         .then(function(properties){
           //Get the features based on the category and the extent 
           getFeaturesFromAnArrayOfLayerIds(properties[category][Extent.filterValue()])
@@ -200,7 +248,7 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
               };
               q.resolve(filteredDetails);
             })//END getFeaturesFromAnArrayOfLayerIds Callback
-        })//END LocationProperties Callback
+        })//END IdProperties Callback
       return q.promise;
     };
 

@@ -1,17 +1,17 @@
 
-app.controller('QuestionsCtrl', ['$scope','$state', '$stateParams', 'Category', 'Questions', 'LocationProperties', 
-    function ($scope, $state, $stateParams,  Category, Questions, LocationProperties) {
+app.controller('QuestionsCtrl', ['$scope','$state', '$stateParams', 'Category', 'Questions', 'IdProperties', 
+    function ($scope, $state, $stateParams,  Category, Questions, IdProperties) {
     var questions = [];
-    LocationProperties.properties()
+    IdProperties.properties()
         .then(function(properties){
-            $scope.locationProperties = properties;
+            $scope.IdProperties = properties;
             var dataCacheKeyArray = [];
             for(var key in properties){
                 dataCacheKeyArray.push(key);
             }
             //Get a list of questions for the current location
             //****This could be an HTTP request****//
-            questions = Questions.get(dataCacheKeyArray);
+            questions = Questions.get($stateParams.type, dataCacheKeyArray);
 
             //Get the top 2 questions
             $scope.questions = questions.slice(0,3);
@@ -50,7 +50,7 @@ app.controller('QuestionsCtrl', ['$scope','$state', '$stateParams', 'Category', 
     //if active, call on left arrow key press also
     $scope.getAnswer = function(question){
         $scope.category = Category.getDefinition(question.category);
-        $state.go('main.location.category.time.extent.filter.details', $scope.category.defaultStates);  
+        $state.go('main.type.id.category.time.extent.filter.details', $scope.category.defaultStates);  
     };
 
 

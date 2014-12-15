@@ -21,25 +21,35 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
           }]
         }
       })
-      //location can be a CAI (civic address id) or an neighborhood
-      .state('main.location', {
-        url: '/:location',
+      .state('main.type', {
+        url: '/:type',
         template: '<div ui-view style = "z-index : 100" class = "slide"></div>',
-        controller: 'LocationCtrl',
+        controller: 'TypeCtrl',
         resolve:  {
           location: ['$stateParams', function($stateParams){
-                return $stateParams.location;
+                return $stateParams.id;
           }]
         }
       })
-      //list of question for a location
-      .state('main.location.questions', {
+      //id can be a CAI (civic address id) or an neighborhood
+      .state('main.type.id', {
+        url: '/:id',
+        template: '<div ui-view></div>',
+        controller: 'IdCtrl',
+        resolve:  {
+          id: ['$stateParams', function($stateParams){
+                return $stateParams.id;
+          }]
+        }
+      })
+      //list of question for a id
+      .state('main.type.id.questions', {
         url: '/questions',
         templateUrl: 'questions/questions.html',
         controller: 'QuestionsCtrl',
       })
       //category is a data category such as property, crime, or development
-      .state('main.location.category', {
+      .state('main.type.id.category', {
         url: '/:category',
         templateUrl: 'category/category.html',
         controller: 'CategoryCtrl',
@@ -53,7 +63,7 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
       //can be a 4 digit number year (e.g. 2014) or
       //unix timestamps seperated by commas (e.g. 1199145600000,1230768000000)
       //for categories that do not have a time component (e.g. property) use the keyword 'current'
-      .state('main.location.category.time', {
+      .state('main.type.id.category.time', {
         url: '/:time',
         templateUrl: 'time/time.html',
         controller: 'TimeCtrl',
@@ -68,7 +78,7 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
       //Could also support a list of coordinates or value.unit syntax
       //if the extent is a point, use the keyword 'location'
       //if the extent is a neighborhood, use the keyword 'neighborhood'
-      .state('main.location.category.time.extent', {
+      .state('main.type.id.category.time.extent', {
         url: '/:extent',
         templateUrl: 'extent/extent.html',
         controller: 'ExtentCtrl',
@@ -81,7 +91,7 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
       //filter is the keyword/s that is used to filter a category by in sub-components
       //(e.g. filter could be zoning for a property or aggrevated assault for crime)
       //if there is no filter use summary
-      .state('main.location.category.time.extent.filter', {
+      .state('main.type.id.category.time.extent.filter', {
         url: '/:filter',
         templateUrl: 'filter/filter.html',
         controller: 'FilterCtrl',
@@ -93,7 +103,7 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
       })
       //details is a keyword that defines the how details will be displayed
       //possible values 'report', 'map', and maybe 'chart'
-      .state('main.location.category.time.extent.filter.details', {
+      .state('main.type.id.category.time.extent.filter.details', {
         url: '/:details',
         templateUrl: 'details/details.html',
         controller: 'DetailsCtrl',

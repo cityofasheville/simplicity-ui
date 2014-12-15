@@ -13,7 +13,7 @@ app.controller('TimeCtrl', ['$scope', '$stateParams', '$state', 'Time',
 		}
 	}
 	$scope.onChangeTimeValue = function(){
-		$state.go('main.location.category.time.extent.filter.details', {time : $scope.timeValue.value});
+		$state.go('main.type.id.category.time.extent.filter.details', {time : $scope.timeValue.value});
 	};
 
 

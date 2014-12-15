@@ -8,13 +8,14 @@
 		<h3>{{category.title}}</h3>
 	</div>
 		<div class="col-xs-6">
-			<address class = "pull-right" style = "margin-top: 12px;">
-			  <strong>{{locationProperties.address.attributes.House}} {{locationProperties.address.attributes.preType}} {{locationProperties.address.attributes.StreetName}} {{locationProperties.address.attributes.SufType}} {{locationProperties.address.attributes.SufDir}} 
-			  	<span ng-if= "locationProperties.address.attributes.User_fld !== ''">UNIT: {{locationProperties.address.attributes.User_fld}}</span>
+			<!-- <address class = "pull-right" style = "margin-top: 12px;">
+			  <strong>{{IdProperties.address.attributes.House}} {{IdProperties.address.attributes.preType}} {{IdProperties.address.attributes.StreetName}} {{IdProperties.address.attributes.SufType}} {{IdProperties.address.attributes.SufDir}} 
+			  	<span ng-if= "IdProperties.address.attributes.User_fld !== ''">UNIT: {{IdProperties.address.attributes.User_fld}}</span>
 			  </strong><br>
-			  <span ng-if = "locationProperties.inTheCity">Asheville, NC</span>
-			  {{locationProperties.address.attributes.ZIP}}
-			</address>
+			  <span ng-if = "IdProperties.inTheCity">Asheville, NC</span>
+			  {{IdProperties.address.attributes.ZIP}}
+			</address> -->
+			<address class = "pull-right" style = "margin-top: 12px;">{{IdProperties.address.attributes.Match_addr}}</address>
 		</div>
 	<div ui-view></div>
 </div>

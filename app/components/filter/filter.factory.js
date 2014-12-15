@@ -10,6 +10,10 @@ app.factory('Filter', [function(){
       {'value' : 'summary', 'label' : 'Property Summary'}
     ];
 
+    var propertiesFilterOptions = [
+      {'value' : 'summary', 'label' : 'Property Summary'}
+    ];
+
     var crimeFilterOptions = [
       {'value' : 'summary', 'label' : 'Crime Summary'}
     ];
@@ -25,6 +29,7 @@ app.factory('Filter', [function(){
     var filterOptions = {
       'crime' : crimeFilterOptions,
       'property' : propertyFilterOptions,
+      'properties' : propertiesFilterOptions,
       'development' : developmentFilterOptions,
       'sanitation' : sanitationFilterOptions
     };

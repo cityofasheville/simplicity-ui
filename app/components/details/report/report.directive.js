@@ -1,5 +1,5 @@
-app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$timeout','Details', 'LocationProperties', 'Filter',
-  function($compile, $filter, $state, $stateParams, $q, $timeout, Details, LocationProperties, Filter){
+app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$timeout','Details', 'IdProperties', 'Filter',
+  function($compile, $filter, $state, $stateParams, $q, $timeout, Details, IdProperties, Filter){
   return {
     //Restrict the directive to attribute ep-form on an element 
     restrict: 'A',
@@ -47,19 +47,36 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
         return ownerCard;
       };
 
-      LocationProperties.properties()
+      IdProperties.properties()
         .then(function(properties){
-          $scope.locationProperties = properties;
+          console.log('properties');
+          console.log(properties);
+          $scope.IdProperties = properties;
           if($scope.report.category === 'property'){
-            Details.getPropertyDetails($scope.report.location)
+            Details.getPropertyDetails($scope.report.id)
               .then(function(propertyDetails){
                 console.log(propertyDetails);
-                propertyDetails.attributes.civicAddressId = $stateParams.location;
+                propertyDetails.attributes.civicAddressId = $stateParams.id;
                 propertyDetails.zoningCard = makeZoningCard(properties, propertyDetails.attributes.codelinks);
                 propertyDetails.ownerCard = makeOwnerCard(propertyDetails.attributes);
                 propertyDetails.template = 'property';
                 $scope.propertyDetails = propertyDetails;
               });
+          }else if($scope.report.category === 'properties'){
+            
+            Details.getPropertiesDetails(properties)
+              .then(function(propertiesDetails){
+                $scope.propertiesDetails = {'template' : 'properties'}
+              })
+            // Details.getPropertyDetails($scope.report.id)
+            //   .then(function(propertyDetails){
+            //     console.log(propertyDetails);
+            //     propertyDetails.attributes.civicAddressId = $stateParams.id;
+            //     propertyDetails.zoningCard = makeZoningCard(properties, propertyDetails.attributes.codelinks);
+            //     propertyDetails.ownerCard = makeOwnerCard(propertyDetails.attributes);
+            //     propertyDetails.template = 'property';
+            //     $scope.propertyDetails = propertyDetails;
+            //   });
           }else if($scope.report.category === 'sanitation'){
             console.log(properties.sanitation);
             $scope.showFooter = false;
@@ -90,7 +107,7 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
         return templates[$scope.report.category];
       };
       $scope.goTo = function(detailsLocation){
-        $state.go('main.location.category.time.extent.filter.details', {'details' : 'map'});
+        $state.go('main.type.id.category.time.extent.filter.details', {'details' : 'map'});
       };
 
       $scope.openDownloadModal = function(){
@@ -100,7 +117,7 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
         $('#shareModal').modal({'backdrop' : false});
       };
       $scope.showSummaryTable = function(){
-        $state.go('main.location.category.time.extent.filter.details', {filter : 'summary'});
+        $state.go('main.type.id.category.time.extent.filter.details', {filter : 'summary'});
       }
       $scope.download = function(downloadType, details){
         console.log(details);

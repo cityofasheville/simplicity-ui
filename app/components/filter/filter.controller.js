@@ -38,7 +38,7 @@ app.controller('FilterCtrl', ['$scope', '$stateParams', '$state', 'Filter', func
 
 	
 	$scope.onChangeFilterValue = function(){
-		$state.go('main.location.category.time.extent.filter.details', {filter : $scope.filterValue.value});
+		$state.go('main.type.id.category.time.extent.filter.details', {filter : $scope.filterValue.value});
 	};
 
 

@@ -1,5 +1,5 @@
-app.directive('card', ['$compile','$templateCache', '$filter','$state', '$stateParams','$q', '$timeout','Details', 'LocationProperties', 'Filter',
-  function($compile, $templateCache, $filter, $state, $stateParams, $q, $timeout, Details, LocationProperties, Filter){
+app.directive('card', ['$compile','$templateCache', '$filter','$state', '$stateParams','$q', '$timeout','Details', 'IdProperties', 'Filter',
+  function($compile, $templateCache, $filter, $state, $stateParams, $q, $timeout, Details, IdProperties, Filter){
   return {
     //Restrict the directive to attribute ep-form on an element 
     restrict: 'A',
@@ -20,6 +20,7 @@ app.directive('card', ['$compile','$templateCache', '$filter','$state', '$stateP
         'owner' : 'details/cards/property.owner.card.html',
         'summary' : 'details/cards/summary.table.card.html',
         'property' : 'details/cards/property.card.html',
+        'properties' : 'details/cards/properties.card.html',
         'sanitation' : 'details/cards/sanitation.card.html'
       };
 
@@ -37,7 +38,7 @@ app.directive('card', ['$compile','$templateCache', '$filter','$state', '$stateP
       scope.getDetails = function(typeString){
         var typeStringWithHyphens = typeString.toLowerCase().replace(/ /g, '-');
         console.log(typeStringWithHyphens);
-        $state.go('main.location.category.time.extent.filter.details', {filter : typeStringWithHyphens});
+        $state.go('main.type.id.category.time.extent.filter.details', {filter : typeStringWithHyphens});
       };
 
     }//END card Directive Controller function

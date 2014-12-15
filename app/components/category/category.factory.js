@@ -29,6 +29,17 @@ app.factory('Category', ['$http', '$location', '$q', '$filter',
       }
     };
 
+    var propertiesDefinition = {
+      title : 'Properties',
+      defaultStates : {
+        'category' : 'properties',
+        'time' : 'current',
+        'extent' : 'within-an-eighth-of-a-mile',
+        'filter' : 'summary',
+        'details' : 'report'
+      }
+    };
+
     var sanitationDefinition = {
       title : 'Sanitation',
       defaultStates : {
@@ -79,7 +90,8 @@ app.factory('Category', ['$http', '$location', '$q', '$filter',
         'property' : propertyDefinition,
         'development' : developmentDefinition,
         'permits' : permitsDefinition,
-        'sanitation' : sanitationDefinition
+        'sanitation' : sanitationDefinition,
+        'properties' : propertiesDefinition
       },
       'neighborhood' : {
         'crime' : neighborhoodCrimeDefinition
@@ -93,7 +105,7 @@ app.factory('Category', ['$http', '$location', '$q', '$filter',
       return categoryDefinitions.cai[category];
       //******TODO******//
       //if cai do something if neighborhood do something else
-      // if(locationProperties.locationType === 'cai'){
+      // if(IdProperties.locationType === 'cai'){
       //   return categoryDefinitions.cai[category];
       // }else{
       //   return categoryDefinitions.neighborhood[category];

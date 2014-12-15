@@ -14,6 +14,6 @@ app.controller('ExtentCtrl', ['$scope', '$stateParams', '$state', 'Extent',
 		}
 	}
 	$scope.onChangeExtentValue = function(){
-		$state.go('main.location.category.time.extent.filter.details', {extent : $scope.extentValue.value});
+		$state.go('main.type.id.category.time.extent.filter.details', {extent : $scope.extentValue.value});
 	};
 }]);
