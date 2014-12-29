@@ -4436,36 +4436,6 @@ table .success, table .warning, table .danger, table .info, .table .success, .ta
   -o-transform: rotatey(180deg);
   /* Opera */ }
 
-.slide-container {
-  position: absolute;
-  margin: 0 auto; }
-
-.slide-container.ng-enter, .slide-container.ng-leave {
-  -webkit-transition: 0.5s ease all;
-  -moz-transition: 0.5s ease all;
-  -o-transition: 0.5s ease all;
-  transition: 0.5s ease all; }
-
-.slide-container.ng-enter {
-  -webkit-transform: translate(100%, 0);
-  transform: translate(100%, 0); }
-
-.slide-container.ng-leave.ng-leave-active {
-  -webkit-transform: translate(100%, 0);
-  transform: translate(100%, 0); }
-
-.back.slide-container.ng-enter {
-  -webkit-transform: translate(-100%, 0%);
-  transform: translate(-100%, 0%); }
-
-.back.slide-container.ng-leave.ng-leave-active {
-  -webkit-transform: translate(-100%, 0%);
-  transform: translate(-100%, 0%); }
-
-.slide-container.ng-leave, .slide-container.ng-enter.ng-enter-active {
-  -webkit-transform: translate(0, 0);
-  transform: translate(0, 0); }
-
 .slide {
   position: absolute;
   left: 0;
@@ -4490,12 +4460,6 @@ table .success, table .warning, table .danger, table .info, .table .success, .ta
 
 .slide.ng-leave-active {
   left: -100%; }
-
-.back.slide.ng-enter {
-  right: -100%; }
-
-.back.slide.ng-leave.ng-leave-active {
-  right: 100%; }
 
 .slidedown {
   position: absolute;
