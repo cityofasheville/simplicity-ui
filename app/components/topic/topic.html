@@ -1,0 +1,41 @@
+<div >
+    <div ng-include = "headerTemplate"></div>
+    <div ng-include = "viewTemplate"></div>
+    <div class = "list-item-panel col-xs-12" style = "margin-top : 20px">
+      <h2 class = "pull-left" style = "margin-right : 10px">Table View </h2>
+      <div class="btn-group pull-right" role="group" aria-label="..." style= "margin-top : 15px">
+        <div class="btn-group" role="group" >
+            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+                Change View
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                <li class = "text-primary" role="presentation"><a role="menuitem" tabindex="-1"><i class="fa fa-lg fa-map-marker fa-fw"></i> Map</a></li>
+                <li class = "text-primary" role="presentation"><a role="menuitem" tabindex="-1"><i class="fa fa-lg fa-table fa-fw"></i> Table</a></li>
+                <li class = "text-primary" role="presentation"><a role="menuitem" tabindex="-1"><i class="fa fa-lg fa-list-alt fa-fw"></i> List</a></li>
+            </ul>
+        </div>
+        <button type="button" class="btn btn-primary"><i class="fa fa-lg fa-share"></i></button>
+        <button type="button" class="btn btn-primary"><i class="fa fa-lg fa-cloud-download"></i></button>
+    </div>
+    <table class="table table-hover ng-scope">
+      <thead>
+        <tr><th>Type</th><th class="text-center">Count</th></tr>
+      </thead>
+      <tbody>
+        <tr class="ng-scope">
+          <td ng-click="getDetails(key)" style="cursor : pointer" class="ng-binding"><i class="fa fa-circle" style="color: #FF0000"></i> Aggravated Assault<br><p class="text-muted ng-binding"></p></td><td class="text-center ng-binding">1</td>
+        </tr><!-- end ngRepeat: (key, value) in card.table -->
+        <tr ng-repeat="(key, value) in card.table" class="ng-scope">
+          <td ng-click="getDetails(key)" style="cursor : pointer" class="ng-binding"><i class="fa fa-circle" style="color: #FFF000"></i> Burglary<br><p class="text-muted ng-binding"></p></td><td class="text-center ng-binding">1</td>
+        </tr>
+        <tr class="ng-scope">
+          <td ng-click="getDetails(key)" style="cursor : pointer" class="ng-binding"><i class="fa fa-circle" style="color: #00FFFF"></i> Larceny<br><p class="text-muted ng-binding"></p></td><td class="text-center ng-binding">1</td>
+        </tr>
+        <tr class="ng-scope"><td ng-click="getDetails(key)" style="cursor : pointer" class="ng-binding"><i class="fa fa-circle" style="color: #000080"></i> Larceny of Motor Vehicle<br><p class="text-muted ng-binding"></p></td><td class="text-center ng-binding">2</td>
+        </tr>
+        <tr class="ng-scope"><td ng-click="getDetails(key)" style="cursor : pointer" class="ng-binding"><i class="fa fa-circle" style="color: #7FFFD4"></i> Vandalism<br><p class="text-muted ng-binding"></p></td><td class="text-center ng-binding">4</td></tr>
+      </tbody>
+    </table>
+    </div>
+</div>

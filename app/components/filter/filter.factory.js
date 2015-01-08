@@ -44,7 +44,7 @@ app.factory('Filter', [function(){
 
     Filter.options = function(categeory, newFilterOptions){
       if(newFilterOptions){
-        return filterOptions[categeory] = newFilterOptions;
+        filterOptions[categeory] = newFilterOptions;
       }
       return filterOptions[categeory];
     };

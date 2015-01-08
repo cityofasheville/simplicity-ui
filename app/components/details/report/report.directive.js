@@ -1,7 +1,7 @@
 app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$timeout','Details', 'IdProperties', 'Filter',
   function($compile, $filter, $state, $stateParams, $q, $timeout, Details, IdProperties, Filter){
   return {
-    //Restrict the directive to attribute ep-form on an element 
+    //Restrict the directive to attribute report on an element 
     restrict: 'A',
     //Defines the scope object for the directive 
     scope:{
@@ -34,7 +34,7 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
         if(properties.zoningOverlays){
           zoningCard.zoningOverlays = properties.zoningOverlays;
         }else{
-          zoningCard.zoningOverlays = 'No Zoning Overlays'
+          zoningCard.zoningOverlays = 'No Zoning Overlays';
         }
         return zoningCard;
       };
@@ -66,8 +66,8 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
             
             Details.getPropertiesDetails(properties)
               .then(function(propertiesDetails){
-                $scope.propertiesDetails = {'template' : 'properties'}
-              })
+                $scope.propertiesDetails = {'template' : 'properties'};
+              });
             // Details.getPropertyDetails($scope.report.id)
             //   .then(function(propertyDetails){
             //     console.log(propertyDetails);
@@ -103,9 +103,9 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
         });
 
       //
-      $scope.getTemplate = function(){
-        return templates[$scope.report.category];
-      };
+      // $scope.getTemplate = function(){
+      //   return templates[$scope.report.category];
+      // };
       $scope.goTo = function(detailsLocation){
         $state.go('main.type.id.category.time.extent.filter.details', {'details' : 'map'});
       };
@@ -118,7 +118,7 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
       };
       $scope.showSummaryTable = function(){
         $state.go('main.type.id.category.time.extent.filter.details', {filter : 'summary'});
-      }
+      };
       $scope.download = function(downloadType, details){
         console.log(details);
         var csvString =  'data:text/csv;charset=utf-8,';
@@ -132,11 +132,11 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
         }else{
           var headerArray = [];
           
-          for(var key in details.features[0].attributes){
-            headerArray.push(key);
+          for(var attributeKey in details.features[0].attributes){
+            headerArray.push(attributeKey);
           }
-          for(var key in details.features[0].geometry){
-            headerArray.push(key);
+          for(var geometryKey in details.features[0].geometry){
+            headerArray.push(geometryKey);
           }
           csvString += headerArray.join(',') + '\n';
           for (var i = 0; i < details.features.length; i++) {
@@ -150,16 +150,16 @@ app.directive('report', ['$compile','$filter','$state', '$stateParams','$q', '$t
               }else{
                 rowArray.push('NULL');
               }
-            };
+            }
             console.log(rowArray);
             csvString += rowArray.join(',') + '\n';
-          };
+          }
         }
         var encodedUri = encodeURI(csvString);
         window.open(encodedUri);
-      }
+      };
       $scope.currentUrl = window.location.href;
-      $scope.iframeText = '<iframe width="100%" height="100%" style = "overflow-y" src="'+window.location.href+'" frameborder="0" ></iframe>'
+      $scope.iframeText = '<iframe width="100%" height="100%" style = "overflow-y" src="'+window.location.href+'" frameborder="0" ></iframe>';
       
     }]//END report Directive Controller function
   };//END returned object

@@ -99,7 +99,7 @@ app.factory('Questions', [function(){
       'place' : {
 
       }
-    }
+    };
 
     // var neighborhoodQuestions = [
     //   {'question' : 'Do you want to know about crime?', 'category' : 'crime', 'detail' : 'quarter-mile'},
@@ -111,14 +111,14 @@ app.factory('Questions', [function(){
 
     Questions.get = function(type, dataCacheKeyArray){
       dataCacheKeyArray.sort();
-      var questions = questionsLookupObj[type]['base'];
+      var questions = questionsLookupObj[type].base;
       for (var i = 0; i < dataCacheKeyArray.length; i++) {
         if(questionsLookupObj[type][dataCacheKeyArray[i]]){
-          questions = questions.concat(questionsLookupObj[type][dataCacheKeyArray[i]])  
+          questions = questions.concat(questionsLookupObj[type][dataCacheKeyArray[i]]);
         }
-      };
+      }
       //We should sort the questions by some value eventually
-      return questions
+      return questions;
     };
 
     //****Return the factory object****//

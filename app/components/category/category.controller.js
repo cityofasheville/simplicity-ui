@@ -13,6 +13,6 @@ app.controller('CategoryCtrl', ['$scope', '$stateParams', '$state', 'Category', 
     }
     
     $scope.goBack = function(){
-        $state.go('main.type.id.questions');
+        $state.go('type.id.questions');
       };  
 }]);

@@ -1,7 +1,7 @@
 app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', '$timeout', 'Details', 'Extent', 'IdProperties',
   function($compile, $filter, $state, $stateParams, $q, $timeout, Details, Extent, IdProperties){
   return {
-    //Restrict the directive to attribute ep-form on an element 
+    //Restrict the directive to attribute map on an element 
     restrict: 'A',
     //Defines the scope object for the directive 
     scope:{
@@ -83,7 +83,7 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', '$time
             'properties': arcGISFeatureService.features[i].attributes
         };
         geoJson.push(feature);
-      };
+      }
       console.log(geoJson);
       return geoJson;
     };
@@ -130,7 +130,7 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', '$time
 
 
     var layerControl = L.control.layers(baseMaps).addTo(map);
-    $(".leaflet-control-attribution").css("maxWidth", "90%")
+    $(".leaflet-control-attribution").css("maxWidth", "90%");
 
     IdProperties.properties()
       .then(function(properties){
@@ -183,16 +183,16 @@ app.directive('map', ['$compile','$filter','$state', '$stateParams','$q', '$time
                 map.fitBounds(circleBounds);
               }
               
-              var geojson = createPointGeoJsonFromFilteredDetails(filteredDetails)
+              var geojson = createPointGeoJsonFromFilteredDetails(filteredDetails);
               var geoJsonLayer = createGeoJsonMarkers(geojson);
               geoJsonLayer.addTo(map);  
             });
         }
       });
-      $scope.crime = true
+      $scope.crime = true;
       if($stateParams.category !== 'crime'){
-        $scope.crime = false
-      };
+        $scope.crime = false;
+      }
       $scope.showMarkerDetails = false;
 
       $scope.getPointDetails = function(pointProperties){

@@ -50,7 +50,7 @@ app.controller('QuestionsCtrl', ['$scope','$state', '$stateParams', 'Category', 
     //if active, call on left arrow key press also
     $scope.getAnswer = function(question){
         $scope.category = Category.getDefinition(question.category);
-        $state.go('main.type.id.category.time.extent.filter.details', $scope.category.defaultStates);  
+        $state.go('type.id.category.time.extent.filter.details', $scope.category.defaultStates);  
     };
 
 

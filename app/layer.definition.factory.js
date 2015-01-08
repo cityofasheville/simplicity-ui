@@ -230,11 +230,11 @@ app.factory('LayerDefintion', ['$http', '$location', '$q', '$filter', '$state', 
       }
     };
     LayerDefintion.colors = function(){
-      return colors
+      return colors;
     };
 
     LayerDefintion.get = function(property){
-      return layerDefinitions[$stateParams.category][property]
+      return layerDefinitions[$stateParams.category][property];
     };
 
     //****Return the factory object****//

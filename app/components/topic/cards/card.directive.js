@@ -1,7 +1,7 @@
 app.directive('card', ['$compile','$templateCache', '$filter','$state', '$stateParams','$q', '$timeout','Details', 'IdProperties', 'Filter',
   function($compile, $templateCache, $filter, $state, $stateParams, $q, $timeout, Details, IdProperties, Filter){
   return {
-    //Restrict the directive to attribute ep-form on an element 
+    //Restrict the directive to attribute search on an element 
     restrict: 'A',
     //Defines the scope object for the directive 
     scope:{
@@ -32,7 +32,7 @@ app.directive('card', ['$compile','$templateCache', '$filter','$state', '$stateP
       
       var template = $templateCache.get(templates[scope.card.template]);
       element.replaceWith(element.html(template));
-      $compile(element.contents())(scope)
+      $compile(element.contents())(scope);
       
       
       scope.getDetails = function(typeString){

@@ -25,12 +25,12 @@
 				</h5>
 			</div>
 		</div>
-			<div class="col-xs-12 list-item-panel" ng-cloak>
-				<div ng-if = "card.ownerCard" card = "card.ownerCard"></div>
-			</div>
-			<div class="col-xs-12 list-item-panel" ng-cloak>
-				<div ng-if = "card.zoningCard" card = "card.zoningCard"></div>
-			</div>
+		
+			<!-- owner	card --> 
+			<div ng-include = "topic/cards/owner.card.html"></div>
+			<!-- zoning card -->
+			<div ng-include = "topic/cards/zoning.card.html"></div>
+
 			<div class="col-xs-12 list-item-panel">
 				<h4>Tax Details</h4>
 				<p ng-if= "card.attributes.exempt === null">

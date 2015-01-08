@@ -22,7 +22,7 @@ app.factory('IdProperties', ['$http', '$location', '$q', '$filter', '$state', '$
     //
     var createArrayFromNullorString = function(value, delimter){
       if(value === null){
-          return []
+          return [];
       }else{
         return value.split(delimter);
       }
@@ -45,8 +45,7 @@ app.factory('IdProperties', ['$http', '$location', '$q', '$filter', '$state', '$
             if(attributes.type === 'ADDRESS IN CITY'){
               properties.inTheCity = (attributes.data === 'YES')? true : false;
             }else if(attributes.type === 'CRIME'){
-              var value = createArrayFromNullorString(attributes.data, ',');
-              assignValueToProperties('crime', attributes.distance, value);
+              assignValueToProperties('crime', attributes.distance, createArrayFromNullorString(attributes.data, ','));
             }else if(attributes.type === 'ZONING'){
               if(attributes.data === null){
                 properties.zoning = [];
@@ -54,23 +53,22 @@ app.factory('IdProperties', ['$http', '$location', '$q', '$filter', '$state', '$
                 properties.zoning = attributes.data.split(',');
               }
             }else if(attributes.type === 'PERMITS'){
-              var value = createArrayFromNullorString(attributes.data, ',');
-              assignValueToProperties('development', attributes.distance, value);
+              assignValueToProperties('development', attributes.distance, createArrayFromNullorString(attributes.data, ','));
             }else if(attributes.type === 'TRASH DAY'){
               if(properties.sanitation){
-                properties.sanitation.trash = attributes.data
+                properties.sanitation.trash = attributes.data;
               }else{
                 properties.sanitation = {
                   'trash' : attributes.data
-                }
+                };
               }
             }else if(attributes.type === 'RECYCLE DAY'){
               if(properties.sanitation){
-                properties.sanitation.recycling = attributes.data
+                properties.sanitation.recycling = attributes.data;
               }else{
                 properties.sanitation = {
                   'recycling' : attributes.data
-                }
+                };
               }
             }else if(attributes.type === 'ZONING OVERLAYS'){
               properties.zoningOverlays = attributes.data;
@@ -91,7 +89,7 @@ app.factory('IdProperties', ['$http', '$location', '$q', '$filter', '$state', '$
     };
 
     var setPropertiesWithACommaSeperatedStringOfCenterlineIds = function(stringOfCenterlineIds){
-      console.log('doing setPropertiesWithACommaSeperatedStringOfCenterlineIds')
+      console.log('doing setPropertiesWithACommaSeperatedStringOfCenterlineIds');
       console.log(stringOfCenterlineIds);
       var q = $q.defer();
       //get civicaddressid's along the street using xref table
@@ -103,11 +101,11 @@ app.factory('IdProperties', ['$http', '$location', '$q', '$filter', '$state', '$
       };
       ArcGisServer.featureService.query(xrefTableId, queryParams)
         .then(function(xrefResults){
-          console.log(xrefResults)
+          console.log(xrefResults);
           var civicAddressIdsAlongTheStreet = [];
           for (var i = 0; i < xrefResults.features.length; i++) {
-            civicAddressIdsAlongTheStreet.push(xrefResults.features[i].attributes.civicaddress_id)
-          };
+            civicAddressIdsAlongTheStreet.push(xrefResults.features[i].attributes.civicaddress_id);
+          }
           //with civicaddressid's, query data cache for each address
           var dataCacheId = ArcGisServer.featureService.getId('coagis.gisowner.coa_overlay_data_cache', 'table');
           var queryParams = {
@@ -121,7 +119,7 @@ app.factory('IdProperties', ['$http', '$location', '$q', '$filter', '$state', '$
               var development = {};
               for (var i = 0; i < dataCacheResults.features.length; i++) {
                 var attributes = dataCacheResults.features[i].attributes;
-                console.log(dataCacheResults.features[i])
+                console.log(dataCacheResults.features[i]);
                 if(attributes.type === 'CRIME'){
                   if(crime[attributes.distance] === undefined){
                     crime[attributes.distance] = {};
@@ -131,39 +129,34 @@ app.factory('IdProperties', ['$http', '$location', '$q', '$filter', '$state', '$
                     if(!crime[attributes.distance][crimeArray[x]]){
                       crime[attributes.distance][crimeArray[x]] = 'crime';
                     }
-                  }; 
+                  }
                 }else if(attributes.type === 'PERMITS'){
                   if(development[attributes.distance] === undefined){
                     development[attributes.distance] = {};
                   }
                   var developmentArray = createArrayFromNullorString(attributes.data, ',');
-                  for (var x = 0; x < developmentArray.length; x++) {
-                    if(!development[attributes.distance][developmentArray[x]]){
-                      development[attributes.distance][developmentArray[x]] = 'development';
+                  for (var y = 0;y < developmentArray.length; y++) {
+                    if(!development[attributes.distance][developmentArray[y]]){
+                      development[attributes.distance][developmentArray[y]] = 'development';
                     }
-                  };
+                  }
                 }
-              };
-              console.log('crime');
-              console.log(crime);
+              }
               //put unique values in an array for crime and development
-              for(var key in crime){
-                var tempArray = [];
-                for(var subkey in crime[key]){
-                  tempArray.push([subkey])
+              for(var crimeKey in crime){
+                var crimeTempArray = [];
+                for(var crimeSubkey in crime[crimeKey]){
+                  crimeTempArray.push([crimeSubkey]);
                 }
-
-                assignValueToProperties('crime', key, tempArray);
+                assignValueToProperties('crime', crimeKey, crimeTempArray);
               }
-              for(var key in development){
-                var tempArray = [];
-                for(var subkey in development[key]){
-                  tempArray.push([subkey])
+              for(var devKey in development){
+                var devTempArray = [];
+                for(var devSubkey in development[devKey]){
+                  devTempArray.push([devSubkey]);
                 }
-                assignValueToProperties('development', key, tempArray);
+                assignValueToProperties('development', devKey, devTempArray);
               }
-              console.log('properties');
-              console.log(properties);
               q.resolve(properties);
             });
 
@@ -282,7 +275,7 @@ app.factory('IdProperties', ['$http', '$location', '$q', '$filter', '$state', '$
             rebuildPropertiesFromATypeAndAnId($stateParams.id)
               .then(function(properties){
                 q.resolve(properties);
-              })
+              });
           }else{
             $state.go('main');
           }

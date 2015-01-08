@@ -13,7 +13,7 @@ app.factory('Time', ['$stateParams', function($stateParams){
       'last-5-years': d.setFullYear(d.getFullYear()-5),
       'last-10-years': d.setFullYear(d.getFullYear()-10),
       'all-time' : d.setFullYear(d.getFullYear()-100)
-    }
+    };
 
     //****Private variables*****//
     var timeOptions = [

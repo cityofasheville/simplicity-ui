@@ -11,7 +11,7 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
       if($stateParams.category === 'property'){
 
       }else if($stateParams.category === 'crime'){
-        return 'pid in (' + arrayOfIds + ')'
+        return 'pid in (' + arrayOfIds + ')';
       }else if($stateParams.category === 'development'){
         var stringOfDevelopmentIds = '';
         for (var i = 0; i < arrayOfIds.length; i++) {
@@ -51,12 +51,12 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
       var t = d.getTime() - (1000*60*60*24*3); // milliseconds since Jan 4 1970 Sunday
       var w = Math.floor(t / (1000*60*60*24*7)); // weeks since Jan 4 1970  
       var o = w % 2; // equals 0 for even (B weeks) numbered weeks, 1 for odd numbered weeks 
-      if(o == 0){
-        return 'B'
+      if(o === 0){
+        return 'B';
       }else{ // do your odd numbered week stuff 
-        return 'A'
+        return 'A';
       }
-    }
+    };
 
     Details.getRecyclingSchedule = function(recyclingString){
       var recyclingArray = recyclingString.split(' ');
@@ -90,7 +90,7 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
           return {'when' : 'next week'};
         }
       }
-    }
+    };
 
     Details.getPropertyDetails = function(civicAddressId){
       var q = $q.defer();
@@ -132,7 +132,7 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
           var arrayOfPINs = [];
           for (var i = 0; i < crossRef.features.length; i++) {
             arrayOfPINs.push(String(crossRef.features[i].attributes.pinnum));
-          };
+          }
           var propertyLayerId = ArcGisServer.featureService.getId('coagis.gisowner.coa_opendata_property', 'layer');
           var queryParams = {
             'where' : 'pinnum in (' + arrayOfPINs.join(',') + ')',
@@ -143,12 +143,12 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
             .then(function(propertiesDetails){
               for (var i = 0; i < propertiesDetails.features.length; i++) {
                 propertiesDetails.features[i].attributes.codelinks = LayerDefintion.get('codelinks');
-              };
+              }
               q.resolve(propertiesDetails);
             });
         });
       return q.promise;
-    }
+    };
 
     Details.getStreetDetails = function(properties){
       var q = $q.defer();
@@ -164,7 +164,7 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
           q.resolve(streetDetails);
         });
       return q.promise;
-    }
+    };
 
     Details.getZoningOverlays = function(zoningOverlays){
       var zoningOverlaysSplit = zoningOverlays.split('-');
@@ -233,7 +233,7 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
                   }
                   
                 }
-              };
+              }
 
               //Update filter options based on filter summary
               var filterOptions = [];
@@ -247,8 +247,8 @@ app.factory('Details', ['$http', '$location', '$q', '$filter', '$stateParams', '
                 'summary' : filteredFeaturesSummary
               };
               q.resolve(filteredDetails);
-            })//END getFeaturesFromAnArrayOfLayerIds Callback
-        })//END IdProperties Callback
+            });//END getFeaturesFromAnArrayOfLayerIds Callback
+        });//END IdProperties Callback
       return q.promise;
     };
 
