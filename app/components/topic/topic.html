@@ -1,41 +1,141 @@
-<div >
+<div>
+    <div class="col-xs-12 btn-group btn-group-justified" style = "margin-top : 15px">
+      <a href = "#/search/composite" class="btn btn-primary"><i class="fa fa-search"></i> <strong> Search</strong></a>
+      <a ng-click = "goToTopics()" class="btn btn-primary"><i class="fa fa-list"></i> <strong> View Topics</strong> </a>
+    </div>
+    <div class="col-xs-12">
+      <hr>
+    </div>
+    
+    
+    <!-- header template for topic -->
     <div ng-include = "headerTemplate"></div>
-    <div ng-include = "viewTemplate"></div>
-    <div class = "list-item-panel col-xs-12" style = "margin-top : 20px">
-      <h2 class = "pull-left" style = "margin-right : 10px">Table View </h2>
-      <div class="btn-group pull-right" role="group" aria-label="..." style= "margin-top : 15px">
-        <div class="btn-group" role="group" >
-            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-                Change View
-                <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                <li class = "text-primary" role="presentation"><a role="menuitem" tabindex="-1"><i class="fa fa-lg fa-map-marker fa-fw"></i> Map</a></li>
-                <li class = "text-primary" role="presentation"><a role="menuitem" tabindex="-1"><i class="fa fa-lg fa-table fa-fw"></i> Table</a></li>
-                <li class = "text-primary" role="presentation"><a role="menuitem" tabindex="-1"><i class="fa fa-lg fa-list-alt fa-fw"></i> List</a></li>
-            </ul>
+
+    <div class="col-xs-12" style = "height : 200px; text-align : center; margin-top : 30px" ng-show = "loading">
+      <i class="fa fa-5x fa-spinner fa-spin"></i>
+    </div>
+
+    <!-- views -->
+    <div class="col-xs-12 list-item-panel" ng-show = "!loading">
+
+            <!-- view header -->
+      <div ng-if = "stateParams.view !== 'simple'" ng-include = "'topic/topic.view.header.html'"></div>
+      <!-- simple -->
+      <div 
+        ng-if = "topicPropteries.simpleViewTemplate !== null" 
+        ng-show = "stateParams.view === 'simple'" 
+        ng-include = "topicProperties.simpleViewTemplate">
+      </div>
+
+      <!-- details -->
+      <div 
+        ng-if = "topicPropteries.detailsViewTemplate !== null" 
+        ng-show = "stateParams.view === 'details'" 
+        ng-include = "topicProperties.detailsViewTemplate">
+      </div>
+
+      <!-- list -->
+      <div 
+        ng-if = "topicPropteries.listViewTemplate !== null" 
+        ng-show = "stateParams.view === 'list'" 
+        ng-include = "topicProperties.listViewTemplate">
+      </div>
+
+      <!-- table -->
+      <div 
+        ng-if = "topicPropteries.tableViewTemplate !== null" 
+        ng-show = "stateParams.view === 'table'" 
+        ng-include = "topicProperties.tableViewTemplate">
+      </div>
+
+      <!-- map -->
+      <div 
+        ng-show = "stateParams.view === 'map'"
+        class = "col-xs-12" 
+        style = "height : 400px; margin-bottom : 20px" 
+        id="map">
+        <div ng-if = "topic.summary.table !== undefined">
+          <div  style = "position : absolute; top : 50px; right : 10px; height : 36px; width : 36px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7">
+            <i ng-init = "showLegend = false" ng-click = "showLegend = !showLegend" ng-mouseenter = "showLegend = !showLegend" ng-mouseleave = "showLegend = !showLegend" class="fa fa-2x fa-question text-primary" style = "margin-top: 6px;margin-left: 10px"></i>
+          </div>
+          <div ng-show = "showLegend" style = "position : absolute; top : 50px; right : 50px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7">
+            <table ng-if = "topic.features.length !== 0" class="table table-hover" >
+              <thead>
+                <tr>
+                  <th>Type <i class = "pull-right text-muted fa fa-lg fa-times" ng-click = "showLegend = !showLegend"></i></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat = "(key, value) in topic.summary.table">
+                  <td ng-click = "getDetails(key)" style = "cursor : pointer">
+                    <i class="fa fa-circle" style = "color: #{{value.color}}"></i> {{key}}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
         </div>
-        <button type="button" class="btn btn-primary"><i class="fa fa-lg fa-share"></i></button>
-        <button type="button" class="btn btn-primary"><i class="fa fa-lg fa-cloud-download"></i></button>
+      </div>
+      
     </div>
-    <table class="table table-hover ng-scope">
-      <thead>
-        <tr><th>Type</th><th class="text-center">Count</th></tr>
-      </thead>
-      <tbody>
-        <tr class="ng-scope">
-          <td ng-click="getDetails(key)" style="cursor : pointer" class="ng-binding"><i class="fa fa-circle" style="color: #FF0000"></i> Aggravated Assault<br><p class="text-muted ng-binding"></p></td><td class="text-center ng-binding">1</td>
-        </tr><!-- end ngRepeat: (key, value) in card.table -->
-        <tr ng-repeat="(key, value) in card.table" class="ng-scope">
-          <td ng-click="getDetails(key)" style="cursor : pointer" class="ng-binding"><i class="fa fa-circle" style="color: #FFF000"></i> Burglary<br><p class="text-muted ng-binding"></p></td><td class="text-center ng-binding">1</td>
-        </tr>
-        <tr class="ng-scope">
-          <td ng-click="getDetails(key)" style="cursor : pointer" class="ng-binding"><i class="fa fa-circle" style="color: #00FFFF"></i> Larceny<br><p class="text-muted ng-binding"></p></td><td class="text-center ng-binding">1</td>
-        </tr>
-        <tr class="ng-scope"><td ng-click="getDetails(key)" style="cursor : pointer" class="ng-binding"><i class="fa fa-circle" style="color: #000080"></i> Larceny of Motor Vehicle<br><p class="text-muted ng-binding"></p></td><td class="text-center ng-binding">2</td>
-        </tr>
-        <tr class="ng-scope"><td ng-click="getDetails(key)" style="cursor : pointer" class="ng-binding"><i class="fa fa-circle" style="color: #7FFFD4"></i> Vandalism<br><p class="text-muted ng-binding"></p></td><td class="text-center ng-binding">4</td></tr>
-      </tbody>
-    </table>
+
+    <!-- RELATED LINKS -->
+    <div class="col-xs-12 list-item-panel" style = "margin-top : 30px">
+      <h2>Related Links</h2>
+      <div class="list-group" style = "margin-top : 20px">
+        <a class="row list-group-item list-item-panel" href = '{{linkTopic.linkTo}}' style = "margin-bottom : 5px" ng-repeat = "linkTopic in linkTopics">
+          <!-- mobile -->
+          <span class="visible-xs col-xs-8"><p class="text-primary text-center"> {{linkTopic.question}}</p></span>
+          <i ng-class="linkTopic.iconClass" class = "visible-xs pull-left col-xs-3 text-primary" ></i>
+          <div ng-class="linkTopic.iconClass" class = "hidden-xs col-sm-2 text-primary" ></div>
+          <!-- desktop -->
+          <h4 class="hidden-xs col-sm-9 text-primary" style = "margin-top : 20px">{{linkTopic.question}}</h4>
+          <h4 class="col-sm-1 hidden-xs"><i  class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4>
+        </a>
+      </div>
+      <div class="col-xs-12 text-center">
+        List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a>
+     under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.
+      </div>
     </div>
+
+    <!-- DETAILS MODAL -->
+    <div id = "detailsModal" class="modal fade" >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button ng-click = "closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Point Details</h4>
+          </div>
+          <div class="modal-body" >
+            <div ng-include = "topicProperties.listViewTemplate"></div>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+
+    <!-- DOWNLOAD MODAL -->
+    <div id = "downloadModal" class="modal fade" style = "z-index : 3000">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title">Download</h4>
+          </div>
+          <div class="modal-body">
+            <div ng-if= "stateParams.topic === 'property'">
+              <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)">Property Details <i class="fa fa-cloud-download"></i></button>
+            </div>
+            <div ng-if = "stateParams.topic === 'crime' || stateParams.topic === 'development'">
+              <button class="btn btn-primary col-xs-12" ng-click = "download('summary', topic)">Summary Table <i class="fa fa-cloud-download"></i></button>
+              <button class="btn btn-primary col-xs-12" style = "margin-top : 3px" ng-click = "download('complete', topic)">Complete records <i class="fa fa-cloud-download"></i></button>
+              <p class = "text-muted text-center">based on selected filters</p>
+            </div>
+          </div>
+        </div><!-- /download modal-content -->
+      </div><!-- /download modal-dialog -->
+    </div><!-- /download modal -->
+    
 </div>

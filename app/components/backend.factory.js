@@ -1,5 +1,5 @@
-app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', 'Topic',
-  function($http, $location, $q, $filter, $stateParams, Topic){
+app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
+  function($http, $location, $q, $filter, $stateParams){
 
 
 
@@ -71,21 +71,34 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
 
     //filterValues are the actual values used to filter the topic
     //filterValues are numberic form of the text values from options
-    var filterValues = {
-      'extent' : {
-        'within-about-a-block' : 330,
-        'within-an-eighth-of-a-mile' : 660,
-        'within-a-quarter-mile' : 1320,
-      },
-      'timeframe' : {
-        'last-30-days' : d.setMonth(d.getMonth() - 1),
-        'last-6-months' : d.setMonth(d.getMonth() - 6),
-        'last-year' : d.setFullYear(d.getFullYear()-1),
-        'last-5-years': d.setFullYear(d.getFullYear()-5),
-        'last-10-years': d.setFullYear(d.getFullYear()-10),
-        'all-time' : d.setFullYear(d.getFullYear()-100)
-      }
+    var options = {
+      'extent' : [
+        {'value' : 82.5, 'label' : 'a quarter block (27.5 yards)'},
+        {'value' : 165, 'label' : 'half a block (55 yards)'},
+        {'value' : 330, 'label' : 'a city block (110 yards)'},
+        {'value' : 660, 'label' : 'a couple city blocks (1/8 mile)'},
+        {'value' : 1320, 'label' : 'a quarter mile'}   
+      ],
+      'timeframe' : [
+        {'value' : 'last-30-days', 'label' : 'the last 30 days'},
+        {'value' : 'last-6-months', 'label' : 'the last 6 months'},
+        {'value' : 'last-year', 'label' : 'the last year'},
+        {'value' : 'last-5-years', 'label' : 'the last 5 years'},
+        {'value' : 'last-10-years', 'label' : 'the last 10 years'},
+        {'value' : 'all-time', 'label' : 'all time'}
+      ],
+      'type' : {}
     };
+
+    var timeframeLookup = {
+      'last-30-days' : d.setMonth(d.getMonth() - 1),
+      'last-6-months' : d.setMonth(d.getMonth() - 6),
+      'last-year' : d.setFullYear(d.getFullYear()-1),
+      'last-5-years': d.setFullYear(d.getFullYear()-5),
+      'last-10-years': d.setFullYear(d.getFullYear()-10),
+      'all-time' : d.setFullYear(d.getFullYear()-100)
+    };
+
 
     var colors = {
       'crime' : {
@@ -247,9 +260,9 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
     // |d|a|t|a|C|a|c|h|e|
     // +-+-+-+-+-+-+-+-+-+
 
-    //On the dataCachedProperties object, this function either creates a parent property 
+    //On the dataCacheProperties object, this function either creates a parent property 
     //if none exist and then assign a property with a value to the parent property
-    //Or just assigns a property with a value to the parent property on the dataCachedProperties object
+    //Or just assigns a property with a value to the parent property on the dataCacheProperties object
     var assignValueToDataCacheProperties = function(parentPropertyName, thisPropertyName, value){
       //check if parent property already exist
       if(dataCacheProperties[parentPropertyName]){
@@ -261,6 +274,71 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
         //assign property with value to parent property
         dataCacheProperties[parentPropertyName][thisPropertyName] = value;
       }
+    };
+
+    //
+
+    var addGeoJsonForSearchToDataCacheFromEsriJson = function(esriJson){
+      var features = [];
+          for (var i = 0; i < esriJson.features.length; i++) {
+            features.push(L.esri.Util.arcgisToGeojson(esriJson.features[i], 'id'));
+          }
+          var geojson = {
+            type: 'FeatureCollection',
+            features: features
+          };
+          dataCacheProperties.searchGeojson = geojson;
+    };
+
+    var addGeoJsonForSearchToDataCache = function(idArray){
+      //use $q promises to handle the http request asynchronously
+      var q = $q.defer();
+      if($stateParams.searchby === 'address'){
+        //build query params for the request with a where clause
+        var addressQueryParams = {
+          'where' : 'civicaddress_id in (' + idArray.join() + ')',
+          'f' : 'json',
+          'outFields' : '*'
+        };
+        queryBackend(featureService.address, addressQueryParams)
+        //callback when request is complete
+        .then(function(addressResults){
+          addGeoJsonForSearchToDataCacheFromEsriJson(addressResults);
+          q.resolve();
+        });
+      }else if($stateParams.searchby === "street_name"){
+        //build query params for the request with a where clause
+       var streetQueryParams = {
+          'where' : "centerline_id in (" + idArray.join() + ")", 
+          'f' : 'json',
+          'outFields' : '*'
+        };
+        queryBackend(featureService.street, streetQueryParams)
+        //callback when request is complete
+        .then(function(streetResults){
+          addGeoJsonForSearchToDataCacheFromEsriJson(streetResults);
+          q.resolve();
+        });
+      }else if($stateParams.searchby === "neighborhood"){
+        //build query params for the request with a where clause
+       var neighborhoodQueryParams = {
+          'where' : "name in ('" + idArray.join() + "')", 
+          'f' : 'json',
+          'outFields' : '*'
+        };
+        queryBackend(featureService.neighborhood, neighborhoodQueryParams)
+        //callback when request is complete
+        .then(function(neighborhoodResults){
+          addGeoJsonForSearchToDataCacheFromEsriJson(neighborhoodResults);
+          q.resolve();
+        });
+      }else if($stateParams.searchby === "pinnum"){
+        //build query params for the request with a where clause
+        q.resolve();
+      }
+        
+        
+      return q.promise;
     };
 
     //Queries backend data cache for a single civicaddress id, updates the dataCacheProperties variable, and return updated dataCacheProperties variable
@@ -299,13 +377,16 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
               //Do nothing
             }
           }
+          console.log(dataCacheProperties);
           q.resolve(dataCacheProperties);
+          
         });
         return q.promise;
     };//END queryDataCacheWithASingleId function
 
     //Queries backend data cache with an array of civicaddress ids, updates the dataCacheProperties variable, and return updated dataCacheProperties variable
     var queryDataCacheWithAnArrayOfIds = function(ids){
+
       //use $q promises to handle the http request asynchronously
       var q = $q.defer();
       //build query params for the request with a 'where in' clause
@@ -320,7 +401,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
           var development = {};
           for (var i = 0; i < dataCacheResults.features.length; i++) {
             var attributes = dataCacheResults.features[i].attributes;
-            console.log(dataCacheResults.features[i]);
             if(attributes.type === 'CRIME'){
               if(crime[attributes.distance] === undefined){
                 crime[attributes.distance] = {};
@@ -358,8 +438,10 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
             }
             assignValueToDataCacheProperties('development', devKey, devTempArray);
           }
-          q.resolve(properties);
+         
+          q.resolve(dataCacheProperties);
         });
+      return q.promise;
     };//END queryDataCacheWithAnArrayOfIds function
 
 
@@ -453,9 +535,9 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
           searchGroups[j].results = tempTabArray;
         }            
       }
-      console.log(searchGroups)
+
       return searchGroups;
-    }//END formatEsriCompositeGeocoderResults function
+    };//END formatEsriCompositeGeocoderResults function
 
 
 
@@ -472,9 +554,8 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
     Topic.property = function(){
       var q = $q.defer();
       //It only makes sense to the get the property information about a single address
-      if($stateParams.address !== 'address'){
-        //!!!throw an error
-      }
+      if($stateParams.searchby === 'address'){
+        
       //build query params for the request with a where clause
       var queryParams = {
         'where' : 'civicaddress_id=' + Number($stateParams.id),
@@ -491,11 +572,54 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
           };
           queryBackend(featureService.property, queryParams)
             .then(function(property){
-              property.features[0].attributes.codelinks = codelinks;
-              q.resolve(property.features[0]);
-            })
-
-        })
+              console.log('property');
+              console.log(property);
+              property.features[0].attributes.zoning = dataCacheProperties.zoning;
+              property.features[0].attributes.zoningOverlays = dataCacheProperties.zoningOverlays;
+              if(codelinks[dataCacheProperties.zoning] === undefined){
+                property.features[0].attributes.codelink = 'disable';
+              }else{
+                property.features[0].attributes.codelink = codelinks[dataCacheProperties.zoning];
+              }
+              
+              var idField = property.fields[0].name;
+              var feature = L.esri.Util.arcgisToGeojson(property.features[0], idField);
+              var geojson = {
+                type: 'FeatureCollection',
+                features: [feature]
+              };
+              console.log(geojson);
+              q.resolve(geojson);
+            });
+        });
+      }else if ($stateParams.searchby === 'pinnum'){
+        var pinParams = {
+          'where' : "pinnum='" + $stateParams.id + "'",
+          'f' : 'json',
+          'outFields' : '*'
+        };
+        queryBackend(featureService.property, pinParams)
+          .then(function(property){
+            console.log('property');
+            console.log(property);
+            property.features[0].attributes.zoning = dataCacheProperties.zoning;
+            property.features[0].attributes.zoningOverlays = dataCacheProperties.zoningOverlays;
+            if(codelinks[dataCacheProperties.zoning] === undefined){
+              property.features[0].attributes.codelink = 'disable';
+            }else{
+              property.features[0].attributes.codelink = codelinks[dataCacheProperties.zoning];
+            }
+            
+            var idField = property.fields[0].name;
+            var feature = L.esri.Util.arcgisToGeojson(property.features[0], idField);
+            var geojson = {
+              type: 'FeatureCollection',
+              features: [feature]
+            };
+            console.log(geojson);
+            q.resolve(geojson);
+          });
+      }
       return q.promise;
     };//END property function
 
@@ -507,6 +631,9 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
     // +-+-+-+-+-+
 
     var formatCrimeData = function(crimes){
+      console.log('crimes');
+      console.log(crimes);
+      console.log($stateParams.type);
 
       //object that holds a summary of the feature {filterValue : count}
       //e.g. for crime {'Bulgary' : 12, 'Larceny' : 2}
@@ -518,23 +645,29 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
       var filterdFeaturesArray = [];
 
       for (var i = 0; i < crimes.features.length; i++) {
+
         //filter by time
-        if(crimes.features[i].attributes.thedate >= filterValues.timeframe[$stateParams.timeframe]){
+      
+        if(crimes.features[i].attributes.thedate >= timeframeLookup[$stateParams.timeframe]){
           //set color by offense
-          crimes.features[i].attributes.color = colors[crimes.features[i].attributes.offense];          
+          crimes.features[i].attributes.color = colors.crime[crimes.features[i].attributes.offense]; 
           //build a summary object
           if(filteredFeaturesSummary.table[crimes.features[i].attributes.offense] === undefined){
 
-            filteredFeaturesSummary.table[crimes.features[i].attributes.offense] = {'color' : colors[crimes.features[i].attributes.offense], 'count' : 1 };
+            filteredFeaturesSummary.table[crimes.features[i].attributes.offense] = {'color' : colors.crime[crimes.features[i].attributes.offense], 'count' : 1 };
 
           }else{
             filteredFeaturesSummary.table[crimes.features[i].attributes.offense].count = filteredFeaturesSummary.table[crimes.features[i].attributes.offense].count + 1;
           }
+          console.log(crimes.features[i]);
+          console.log($stateParams.type);
           //add filtered features to array
-          if($stateParams.type === null || crimes.features[i].attributes.offense.toLowerCase().replace(/ /g, '-') === $stateParams.filter){
-            crimes.features[i].template = $stateParams.category;
-            filterdFeaturesArray.push(crimes.features[i]);
-          }
+          // if($stateParams.type === 'null' || $stateParams.type === null || $stateParams.type === crimes.features[i].attributes.offense.toLowerCase().replace(/ /g, '-')){
+          //   console.log('crimes.features[i]');
+          //   console.log(crimes.features[i]);
+            
+          // }
+          filterdFeaturesArray.push(L.esri.Util.arcgisToGeojson(crimes.features[i], 'id'));
           
         }
       }
@@ -545,12 +678,15 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
       for (var key in filteredFeaturesSummary.table) {
         filterOptions.push({'value' : key.toLowerCase().replace(/ /g, '-'), 'label' : key});
       }
-      Topic.typeOptions(filterOptions);
-      var filteredDetails = {
-        'features' : filterdFeaturesArray,
-        'summary' : filteredFeaturesSummary
+      options.type = filterOptions;
+      var geojson = {
+        'type' : 'FeatureCollection',
+        'summary' : filteredFeaturesSummary,
+        'searchGeojson' : dataCacheProperties.searchGeojson,
+        'features' : filterdFeaturesArray
       };
-      return filteredDetails;
+
+      return geojson;
 
     };//END formatCrimeData
     
@@ -564,10 +700,10 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
       //Crime 'pids' should be accessible through the dataCacheProperties object for addresses
       if($stateParams.searchby === 'address'){
         //we only want the crimes for extent specified as a $stateParams
-        //use the filterValues variable (above) to lookup the extent value based on $stateParams.extent
-        //!!!We should probably filter by date in the where clause; Need to format the date for ESRI, can't use a timestamp
+        //use $stateParams.extent
+        //!!! We should probably filter by date in the where clause; Need to format the date for ESRI, can't use a timestamp
         var addressQueryParams = {
-          'where' : 'pid in (' + dataCacheProperties.crime[filterValues.extent[$stateParams.extent]] + ')',
+          'where' : 'pid in (' + dataCacheProperties.crime[Number($stateParams.extent)] + ')',
           'f' : 'json',
           'outFields' : '*'
         };
@@ -579,7 +715,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
 
       //Crime 'pids' should be accessible through the dataCacheProperties object streets but we want to hardcode the extent
       //to limit searches to smallest extent
-      }else if($stateParams.searchby === 'street'){
+      }else if($stateParams.searchby === 'street_name'){
         //we only want the smallest extent for each address next to the street
         //!!!We should probably filter by date in the where clause; Need to format the date for ESRI, can't use a timestamp
         var streetQueryParams = {
@@ -596,7 +732,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
       //For neighborhoods, lookup the crimes directly from the crimes table using the neighborhood name
       }else if($stateParams.searchby === 'neighborhood'){
         var neighborhoodQueryParams = {
-          'where' : 'neighborhood=' + $stateParams.id,
+          'where' : "neighborhood='" + $stateParams.id + "'",
           'f' : 'json',
           'outFields' : '*'
         };
@@ -617,7 +753,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
     // +-+-+-+-+-+-+-+-+-+-+-+
 
     var formatDevelopmentData = function(development){
-
+      console.log(development);
       //object that holds a summary of the feature {filterValue : count}
       //e.g. for development {'Level 1' : 12, 'Level 1' : 2}
       var filteredFeaturesSummary= {
@@ -629,21 +765,23 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
 
       for (var i = 0; i < development.features.length; i++) {
         //filter by time
-        if(development.features[i].attributes.date_opened >= filterValues.timeframe[$stateParams.timeframe]){
+        if(development.features[i].attributes.date_opened >= Number(timeframeLookup[$stateParams.timeframe])){
           //set color by record_type
-          development.features[i].attributes.color = colors[development.features[i].attributes.record_type];          
+          development.features[i].attributes.color = colors.development[development.features[i].attributes.record_type];          
           //build a summary object
           if(filteredFeaturesSummary.table[development.features[i].attributes.record_type] === undefined){
 
-            filteredFeaturesSummary.table[development.features[i].attributes.record_type] = {'color' : colors[development.features[i].attributes.record_type], 'count' : 1 };
+            filteredFeaturesSummary.table[development.features[i].attributes.record_type] = {'color' : colors.development[development.features[i].attributes.record_type], 'count' : 1 };
 
           }else{
             filteredFeaturesSummary.table[development.features[i].attributes.record_type].count = filteredFeaturesSummary.table[development.features[i].attributes.record_type].count + 1;
           }
           //add filtered features to array
-          if($stateParams.type === null || development.features[i].attributes.record_type.toLowerCase().replace(/ /g, '-') === $stateParams.filter){
-            development.features[i].template = $stateParams.category;
-            filterdFeaturesArray.push(development.features[i]);
+          if($stateParams.type === 'null' || $stateParams.type === null || $stateParams.type === development.features[i].attributes.record_type.toLowerCase().replace(/ /g, '-')){
+            if(development.features[i].attributes.record_comments){
+                development.features[i].attributes.commentsArray = development.features[i].attributes.record_comments.split('[NEXTCOMMENT]');
+              }
+            filterdFeaturesArray.push(L.esri.Util.arcgisToGeojson(development.features[i], 'id'));
           }
           
         }
@@ -655,12 +793,15 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
       for (var key in filteredFeaturesSummary.table) {
         filterOptions.push({'value' : key.toLowerCase().replace(/ /g, '-'), 'label' : key});
       }
-      Topic.typeOptions(filterOptions);
-      var filteredDetails = {
-        'features' : filterdFeaturesArray,
-        'summary' : filteredFeaturesSummary
+
+      options.type = filterOptions;
+      var geojson = {
+        'type' : 'FeatureCollection',
+        'summary' : filteredFeaturesSummary,
+        'searchGeojson' : dataCacheProperties.searchGeojson,
+        'features' : filterdFeaturesArray
       };
-      return filteredDetails;
+      return geojson;
 
     };//END formatDevelopmentData
     
@@ -670,18 +811,27 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
       if(!dataCacheProperties.development){
         //!!!throw an error
       }
-
+      var stringOfDevelopmentIds = '';
       //Crime 'pids' should be accessible through the dataCacheProperties object for addresses
       if($stateParams.searchby === 'address'){
         //we only want the development for extent specified as a $stateParams
-        //use the filterValues variable (above) to lookup the extent value based on $stateParams.extent
+        //use $stateParams.extent
         //!!!We should probably filter by date in the where clause; Need to format the date for ESRI, can't use a timestamp
+        stringOfDevelopmentIds = '';
+        for (var i = 0; i < dataCacheProperties.development[$stateParams.extent].length; i++) {
+          if(i === 0){
+            stringOfDevelopmentIds = stringOfDevelopmentIds + "'" + dataCacheProperties.development[$stateParams.extent][i] + "'";
+          }else{
+            stringOfDevelopmentIds = stringOfDevelopmentIds + ",'" + dataCacheProperties.development[$stateParams.extent][i] + "'";
+          }         
+        }
+        console.log(stringOfDevelopmentIds);
         var addressQueryParams = {
-          'where' : "apn in (" + dataCacheProperties.development[filterValues.extent[$stateParams.extent]] + ") and record_module = 'Planning' and record_type_type = 'Development'",
+          'where' : "apn in (" + stringOfDevelopmentIds + ") and record_module = 'Planning' and record_type_type = 'Development'",
           'f' : 'json',
           'outFields' : '*'
         };
-        queryBackend(featureService.development, addressQueryParams)
+        queryBackend(featureService.permit, addressQueryParams)
           .then(function(development){
             q.resolve(formatDevelopmentData(development));
           });
@@ -689,15 +839,23 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
 
       //Crime 'pids' should be accessible through the dataCacheProperties object streets but we want to hardcode the extent
       //to limit searches to smallest extent
-      }else if($stateParams.searchby === 'street'){
+      }else if($stateParams.searchby === 'street_name'){
         //we only want the smallest extent for each address next to the street
         //!!!We should probably filter by date in the where clause; Need to format the date for ESRI, can't use a timestamp
+        stringOfDevelopmentIds = '';
+        for (var sid = 0; sid < dataCacheProperties.development[82.5].length; sid++) {
+          if(sid === 0){
+            stringOfDevelopmentIds = stringOfDevelopmentIds + "'" + dataCacheProperties.development[$stateParams.extent][sid] + "'";
+          }else{
+            stringOfDevelopmentIds = stringOfDevelopmentIds + ",'" + dataCacheProperties.development[$stateParams.extent][sid] + "'";
+          }         
+        }
         var streetQueryParams = {
-          'where' : 'pid in (' + "apn in (" + dataCacheProperties.development['82.5'] + ") and record_module = 'Planning' and record_type_type = 'Development'", 
+          'where' : "apn in (" + stringOfDevelopmentIds + ") and record_module = 'Planning' and record_type_type = 'Development'", 
           'f' : 'json',
           'outFields' : '*'
         };
-        queryBackend(featureService.development, streetQueryParams)
+        queryBackend(featureService.permit, streetQueryParams)
           .then(function(development){
             q.resolve(formatDevelopmentData(development));
           });
@@ -705,12 +863,12 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
 
       //For neighborhoods, lookup the development directly from the development table using the neighborhood name
       }else if($stateParams.searchby === 'neighborhood'){
-        var streetQueryParams = {
-          'where' : 'neighborhood=' + $stateParams.id,
+        var neighborhoodQueryParams = {
+          'where' : "neighborhood= '" + $stateParams.id + "' and record_module = 'Planning' and record_type_type = 'Development'",
           'f' : 'json',
           'outFields' : '*'
         };
-        queryBackend(featureService.development, streetQueryParams)
+        queryBackend(featureService.permit, neighborhoodQueryParams)
           .then(function(development){
             q.resolve(formatDevelopmentData(development));
           });
@@ -728,7 +886,11 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
 
     Topic.trash = function(){
       var q = $q.defer();
-      q.resolve(dataCacheProperties.trash);
+      var trash = {
+        'trash' : dataCacheProperties.trash,
+        'searchGeojson' : dataCacheProperties.searchGeojson
+      };
+      q.resolve(trash);
       return q.promise;
     };
 
@@ -755,19 +917,24 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
       var q = $q.defer();
       var recyclingArray = dataCacheProperties.recycling.split(' ');
       var currentRecyclingWeek = getCurrentRecyclingWeek();
+      var recycling = {
+        'recyclingDay' : dataCacheProperties.recycling,
+        'searchGeojson' : dataCacheProperties.searchGeojson
+      };
       if(recyclingArray[3] === 'A)'){
         if(getCurrentRecyclingWeek() === 'A'){
-          q.resolve({'week' : 'A', 'when' : 'this week'});
+          recycling.recyclingSchedule = {'week' : 'A', 'when' : 'this week'};
         }else{
-          q.resolve({'week' : 'A', 'when' : 'next week'});
+          recycling.recyclingSchedule = {'week' : 'A', 'when' : 'next week'};
         }
       }else{
         if(getCurrentRecyclingWeek() === 'B'){
-          q.resolve({'week' : 'B', 'when' : 'this week'});
+          recycling.recyclingSchedule = {'week' : 'B', 'when' : 'this week'};
         }else{
-          q.resolve({'week' : 'B', 'when' : 'next week'});
+          recycling.recyclingSchedule = {'week' : 'B', 'when' : 'next week'};
         }
       }
+      q.resolve(recycling);
       return q.promise;
     };
 
@@ -779,23 +946,23 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
     // +-+-+-+-+ +-+-+-+ +-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+
 
     Topic.leafAndBrushCollection = function(){
-      var q = $q.defer();
-      var trashDay = trash();
-      var recyclingSchedule = recycling();
-      if(trashDay === 'MONDAY' || trashDay === 'TUESDAY'){
-        if(recyclingSchedule.week === 'B' && recyclingSchedule.when === 'this week'){
-          q.resolve({'when' : 'this week'});
-        }else{
-          q.resolve({'when' : 'next week'});
-        }
-      }else{
-        if(recyclingSchedule.week === 'A' && recyclingSchedule.when === 'this week'){
-          q.resolve({'when' : 'this week'});
-        }else{
-          q.resolve({'when' : 'next week'});
-        }
-      }
-      return q.promise;
+      // var q = $q.defer();
+      // var trashDay = trash();
+      // var recyclingSchedule = recycling();
+      // if(trashDay === 'MONDAY' || trashDay === 'TUESDAY'){
+      //   if(recyclingSchedule.week === 'B' && recyclingSchedule.when === 'this week'){
+      //     q.resolve({'when' : 'this week'});
+      //   }else{
+      //     q.resolve({'when' : 'next week'});
+      //   }
+      // }else{
+      //   if(recyclingSchedule.week === 'A' && recyclingSchedule.when === 'this week'){
+      //     q.resolve({'when' : 'this week'});
+      //   }else{
+      //     q.resolve({'when' : 'next week'});
+      //   }
+      // }
+      // return q.promise;
     };
 
 
@@ -806,34 +973,34 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
     // +-+-+-+-+-+-+
 
     Topic.zoning = function(){
-      var q = $q.defer();
-      if(featureService.zoningOverlays){
-        var zoningOverlaysSplit = featureService.zoningOverlays.split('-');
-        var queryParams = {
-          'where' : "name='" + zoningOverlaysSplit[0] + "'",
-          'f' : 'json',
-          'outFields' : '*'
-        };
-        queryBackend(zoningOverlay, queryParams)
-              .then(function(zoningOverlayLayer){
-                var zoningProperties = {
-                  'zoning' : featureService.zoning,
-                  'codelink' : codelinks[featureService.zoning],
-                  'zoningOverlays' : zoningOverlayLayer.features[0]
-                };
-                q.resolve(zoningProperties);
-              });
-      }else{
+      // var q = $q.defer();
+      // if(featureService.zoningOverlays){
+      //   var zoningOverlaysSplit = featureService.zoningOverlays.split('-');
+      //   var queryParams = {
+      //     'where' : "name='" + zoningOverlaysSplit[0] + "'",
+      //     'f' : 'json',
+      //     'outFields' : '*'
+      //   };
+      //   queryBackend(zoningOverlay, queryParams)
+      //         .then(function(zoningOverlayLayer){
+      //           var zoningProperties = {
+      //             'zoning' : featureService.zoning,
+      //             'codelink' : codelinks[featureService.zoning],
+      //             'zoningOverlays' : zoningOverlayLayer.features[0]
+      //           };
+      //           q.resolve(zoningProperties);
+      //         });
+      // }else{
 
-        var zoningProperties = {
-          'zoning' : featureService.zoning,
-          'codelink' : codelinks[featureService.zoning],
-          'zoningOverlays' : 'disable'
-        };
-        q.resolve(zoningProperties);
-      }
+      //   var zoningProperties = {
+      //     'zoning' : featureService.zoning,
+      //     'codelink' : codelinks[featureService.zoning],
+      //     'zoningOverlays' : 'disable'
+      //   };
+      //   q.resolve(zoningProperties);
+      // }
       
-      return q.promise;
+      // return q.promise;
     };
 
 
@@ -878,18 +1045,75 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
 
 
     //id can be a single civicaddress id or an array of civicaddress ids
-    Backend.dataCache = function(id){
+    Backend.dataCache = function(){
       var q = $q.defer();
       var queryParams = {};
-      //if id is an array use a 'where in' sql statement
-      if(id.construtor === Array){
-        q.resolve(queryDataCacheWithAnArrayOfIds(id));
-      //otherwise just use a 'where' sql statement
-      }else{
-        q.resolve(queryDataCacheWithASingleId(id));
-      }
+      var id = $stateParams.id;
+      var splitId = id.split(',');
+      if($stateParams.searchby === 'address'){
+        console.log('here');
+        addGeoJsonForSearchToDataCache([$stateParams.id])
+          .then(function(){
+            q.resolve(queryDataCacheWithASingleId($stateParams.id));
+          });
+        
+      }else if($stateParams.searchby === 'street_name'){
+        var idArray = $stateParams.id.split(',');
+        for (var i = 0; i < idArray.length; i++) {
+          idArray[i] = Number(idArray[i]);
+        }
+        var streetQueryParams = {
+          'where' : "centerline_id in (" + idArray.join() + ")", 
+          'f' : 'json',
+          'outFields' : 'civicaddress_id'
+        };
+        queryBackend(featureService.xref, streetQueryParams)
+          .then(function(xrefResults){
+            var civicaddressIdArray = [];
+            for (var i = 0; i < xrefResults.features.length; i++) {
+              civicaddressIdArray.push(xrefResults.features[i].attributes.civicaddress_id);
+            }
+            addGeoJsonForSearchToDataCache(idArray)
+              .then(function(){
+                q.resolve(queryDataCacheWithAnArrayOfIds(civicaddressIdArray));
+              });
+          });
+          
+        
+      }else if($stateParams.searchby === 'neighborhood'){
+        addGeoJsonForSearchToDataCache([$stateParams.id])
+          .then(function(){
+            q.resolve();
+          });
+      }else if($stateParams.searchby === 'pinnum'){
+        console.log('pinnum');
+        var pinQueryParams = {
+          'where' : "pinnum = '" + $stateParams.id + "'", 
+          'f' : 'json',
+          'outFields' : 'civicaddress_id'
+        };
+        queryBackend(featureService.xref, pinQueryParams)
+          .then(function(pinXrefResults){
+            var civicaddressIdArray = [];
+            for (var i = 0; i < pinXrefResults.features.length; i++) {
+              civicaddressIdArray.push(pinXrefResults.features[i].attributes.civicaddress_id);
+            }
+            addGeoJsonForSearchToDataCache(idArray)
+              .then(function(){
+                q.resolve(queryDataCacheWithASingleId(civicaddressIdArray[0]));
+              });
+
+            
+          });
+        //q.resolve();
+        }
+        
+      
+
       return q.promise;
     };
+
+    var searchLabel = "";
 
     // +-+-+-+-+-+
     // |t|o|p|i|c|
@@ -898,8 +1122,12 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams', '
 
     Backend.topic = function(){
       var q = $q.defer();
-      q.resolve(Topic[$stateParams.topic]())
+      q.resolve(Topic[$stateParams.topic]());
       return q.promise;
+    };
+
+    Backend.options = function(param){
+      return options[param];
     };
     
 

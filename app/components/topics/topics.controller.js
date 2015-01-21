@@ -1,6 +1,6 @@
-app.controller('TopicsCtrl', ['$scope', '$stateParams', '$state', 'Filter', 'Topics',
- function ($scope, $stateParams, $state, Filter, Topics) {
-    console.log('Topics')
+app.controller('TopicsCtrl', ['$scope', '$stateParams', '$state', 'Topics',
+ function ($scope, $stateParams, $state, Topics) {
+    $("html, body").animate({'scrollTop' : "0px"});
     $scope.$on('$stateChangeSuccess', function (event, toState) {
         if (toState.name === 'main.topics') {           
             $scope.back = true; 
@@ -11,17 +11,20 @@ app.controller('TopicsCtrl', ['$scope', '$stateParams', '$state', 'Filter', 'Top
 
     //you can't have more tha
     $scope.heading = 'What are you looking for...';
-    if($stateParams.filter === 'address'){
-      $scope.heading =  'What are you looking for at ' + $stateParams.id + '?';
-    }else if($stateParams.filter === 'street'){
-      $scope.heading = 'What are you looking for on ' + $stateParams.id + '?';
-    }else if($stateParams.filter === 'neighborhood'){
-      $scope.heading = 'What are you looking for in ' + $stateParams.id + '?';
+    if($stateParams.searchby === 'address'){
+      $scope.heading =  'What are you looking for at ';
+    }else if($stateParams.searchby === 'street_name'){
+      $scope.heading = 'What are you looking for on ';
+    }else if($stateParams.searchby === 'neighborhood'){
+      $scope.heading = 'What are you looking for in ';
+    }else if($stateParams.searchby === 'pinnum'){
+      $scope.heading = 'What are you looking for with the PIN ';
     }
- 
+
+    $scope.searchText = $stateParams.searchtext + '?';
 
     $scope.topics = Topics.getTopics($stateParams);
-    console.log($scope.topics);
+    
 
 
 

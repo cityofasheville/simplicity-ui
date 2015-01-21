@@ -1,5 +1,5 @@
-app.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout','Filter', 'Backend',
- function ($scope, $stateParams, $state, $timeout, Filter, Backend) {
+app.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'Backend',
+ function ($scope, $stateParams, $state, $timeout, Backend) {
     var getType = function(unformattedType){
         var nameKey = {
             'street_name' : 'street',
@@ -12,7 +12,6 @@ app.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout','Fi
         return nameKey[unformattedType];
     };
 
-    console.log('SearchCtrl');
 
     $scope.searchText = '';
 
@@ -29,12 +28,12 @@ app.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout','Fi
 
     //Geocodes the search results     
     $scope.doSearch = function(searchText, event){
-        document.body.scrollTop = $('#inputSearch').offset().top;
+        var offset = $('#inputSearch').offset().top - 20;
+        $("html, body").animate({'scrollTop' : offset + "px"});
         //we don't want to start search until the user has input 3 characters
         if(searchText.length < 3){
             return;
         }
-        console.log("doing search");
 
         //if the user hits enter while after text search text
         //show a message that tells them to click on one of the results below
@@ -65,24 +64,14 @@ app.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout','Fi
     //groupOrderArray.splice(groupOrderPosition, 0, data.candidates[i].attributes.Loc_name);
 
     $scope.goToTopics = function(candidate, event){
-        console.log(candidate);
-        $state.go('main.topics.')
+        if(candidate.type === 'civicaddressid'){
+            candidate.type = "address";
+        }
+
+        $state.go('main.topics.list', {'searchtext' : candidate.label, 'searchby' : candidate.type, 'id' : candidate.id});
     };
 
-    $scope.getIdProperties = function(idProperties, event){
-        console.log('getIdProperties');
-        $scope.tabs = []; 
-        $scope.typedLocation = idProperties.address;
-        IdProperties.properties(idProperties)
-        .then(function(){
-            console.log('state go');
-            $state.go('type.id.questions', {type: getType(idProperties.attributes.Loc_name), id : idProperties.attributes.User_fld});
-        });
-    };
 
-    $scope.goHome = function(){
-        $location.path('');
-    };
 
 
 }]);

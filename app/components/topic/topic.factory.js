@@ -14,9 +14,9 @@ app.factory('Topic', ['$stateParams', function($stateParams){
     //The values should match any url params
     var options = {
       'extent' : [
-        {'value' : 'within-about-a-block', 'label' : 'a city block (110 yards)'},
-        {'value' : 'within-an-eighth-of-a-mile', 'label' : 'a couple city blocks (1/8 mile)'},
-        {'value' : 'within-a-quarter-mile', 'label' : 'a quarter mile'}   
+        {'value' : 330, 'label' : 'a city block (110 yards)'},
+        {'value' : 660, 'label' : 'a couple city blocks (1/8 mile)'},
+        {'value' : 1320, 'label' : 'a quarter mile'}   
       ],
       'timeframe' : [
         {'value' : 'last-30-days', 'label' : 'the last 30 days'},

@@ -1,5 +1,5 @@
-app.controller('MainCtrl', ['$scope', '$state', '$stateParams', '$location', '$http', '$timeout', 'ArcGisServer', 'IdProperties',
-  function ($scope, $state, $stateParams, $location, $http, $timeout, ArcGisServer, IdProperties) {
+app.controller('MainCtrl', ['$scope', '$state', '$stateParams', '$location', '$http', '$timeout',
+  function ($scope, $state, $stateParams, $location, $http, $timeout) {
 
 
     $scope.goHome = function(){

@@ -6,9 +6,10 @@
 	<div class="input-group">
 		<input id = "inputSearch" groupindex = '1' type="text" autocomplete = "on" class="form-control" placeholder = "Enter a location..." style = "z-index: 0" ng-model = "searchText" ng-focus = "doSearch(searchText, $event)" ng-keyup = "doSearch(searchText, $event)">
 		<span class="input-group-btn">
-			<button class="btn btn-primary" type="button" style = "box-shadow : none"><i class="fa fa-search"></i></button>
+			<button class="btn btn-primary" type="button" style = "box-shadow : none; font-size : 17px"><i class="fa fa-search"></i></button>
 		</span>
 	</div>
+	
 	<div class="" ng-show = "errorMessage.show || helperMessage.show || searchGroups.length > 0">
 		<p ng-show = "errorMessage.show" class="text-danger">{{errorMessage.message}}</p>
 		<p ng-show = "helperMessage.show" class="text-success">{{helperMessage.message}}</p>
@@ -51,4 +52,5 @@
 		</div>
 		<p ng-show = "errorMessage.show" class="text-danger">{{errorMessage.message}}</p>
 	</div>
+	<!-- <a><p class="text-center">Or view a list of topics</p></a> -->
 </div>
