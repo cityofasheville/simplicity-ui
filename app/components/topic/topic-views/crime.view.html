@@ -1,0 +1,46 @@
+<div ng-repeat = "feature in topic.features | orderBy:'-properties.thedate' | filter:filterText" class="col-xs-12 list-item-panel" style = "margin-bottom : 20px">
+	<div class="col-xs-12">
+		<h3 class = 'hidden-xs'><strong class = "text-muted">{{feature.properties.offense}}</strong></h3>
+		<h3 class = 'visible-xs text-center'><strong class = "text-muted">{{feature.properties.offense}}</strong></h3>
+		<hr>
+		<div class="col-xs-12 col-sm-6">
+			<h4 class = 'pull-left hidden-xs'>{{feature.properties.address}}</h4>
+			<h4 class = 'text-center visible-xs'>{{feature.properties.address}}</h4>
+		</div>
+		<div class="col-xs-12 col-sm-6">
+			<h4 class = 'pull-right hidden-xs'>{{feature.properties.thedate|date}}</h4>
+			<h4 class = 'text-center visible-xs'>{{feature.properties.thedate|date}}</h4>
+		</div>
+	</div>
+
+	<div class="col-xs-12 hidden-xs">
+		<div class="col-sm-4">
+			<p class = "text-center"> <strong >Case Number</strong></p>
+			<p class = "text-center">{{feature.properties.casenumber}}</p>
+		</div>
+		<div class="col-sm-4">
+			<p class = "text-center"><strong>Law Beat</strong></p>
+			<p class = "text-center">{{feature.properties.law_beat}}</p>
+		</div>
+		<div class="col-sm-4">
+			<p class = "text-center"><strong >Severity</strong></p>
+			<p class = "text-center">{{feature.properties.severity}}</p>
+		</div>
+	</div>
+	<div class="col-xs-12 visible-xs">
+		<div class="col-xs-12">
+			<p class = "text-center"> <strong >Case Number:</strong> {{feature.properties.casenumber}}</p>
+		</div>
+		<div class="col-xs-12">
+			<p class = "text-center"><strong>Law Beat:</strong> {{feature.properties.law_beat}}</p>
+			<p class = "text-center"></p>
+		</div>
+		<div class="col-xs-12">
+			<p class = "text-center"><strong >Severity:</strong> {{feature.properties.severity}}</p>
+		</div>
+	</div>
+	<a  ng-click = "showMore = !showMore">
+		<p class = 'text-center' ng-if = 'showMore'>Show More</p>
+		<p class = 'text-center' ng-if = 'showMore'>Show Less</p>
+	</a>
+</div>

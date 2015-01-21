@@ -20,7 +20,7 @@
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
 
-    <div class="container" ui-view>
+    <div ng-controller = "AppCtrl" class="col-xs-12 container" ng-class = '{back : back}' ui-view>
       <!-- all views will be injected here -->
     </div>
 

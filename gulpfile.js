@@ -186,7 +186,7 @@ gulp.task('js', function () {
 });
 
 //Copies fonts while flattening directory stucture
-gulp.task('fonts', function () {
+gulp.task('fonts', ['clean:dev', 'clean:dist'], function () {
   return gulp.src('app/assets/fonts/*.{eot,svg,ttf,woff}')
     .pipe(flatten())
     .pipe(gulp.dest('dev/fonts'))
@@ -204,7 +204,7 @@ gulp.task('images', ['clean:dev', 'clean:dist'],function () {
 });
 
 //Injects dev CSS and JS depenencies into index.html as script and link tags
-gulp.task('inject:dev', ['images', 'copy-indexes', 'styles', 'js'], function(){
+gulp.task('inject:dev', ['fonts','images', 'copy-indexes', 'styles', 'js'], function(){
 	var sources = gulp.src(['dev/*.js', 'dev/*.css'], {read: false});
 	return gulp.src('dev/index.html')
 		.pipe(inject(sources, {relative: true}))
@@ -212,7 +212,7 @@ gulp.task('inject:dev', ['images', 'copy-indexes', 'styles', 'js'], function(){
 });
 
 //Injects dist CSS and JS depenencies into index.html as script and link tags
-gulp.task('inject:dist', [ 'images','copy-indexes', 'styles', 'js'], function(){
+gulp.task('inject:dist', [ 'fonts','images','copy-indexes', 'styles', 'js'], function(){
 	var sources = gulp.src(['dist/*.js', 'dist/*.css'], {read: false});
 	return gulp.src('dist/index.html')
 		.pipe(inject(sources, {relative: true}))

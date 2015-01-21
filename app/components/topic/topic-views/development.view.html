@@ -1,0 +1,57 @@
+<div ng-repeat = "feature in topic.features | orderBy:'-properties.thedate' | filter:filterText" class="col-xs-12 list-item-panel" style = "margin-bottom : 20px">
+	<h3 class = 'text-center text-muted'><strong>{{feature.properties.record_type}}</strong></h3>
+	<h3 class = 'text-center'>{{feature.properties.address}}</h3>
+	<div class="col-xs-12">
+		<h4 class="col-xs-12 col-sm-4 text-center">
+			<strong class = "text-muted">Opened</strong>
+			<p>{{feature.properties.date_opened|date}}</p>
+		</h4>
+		<h4 class="col-xs-12 col-sm-4 text-center">
+			<strong class = "text-muted">Updated</strong>
+			<p>{{feature.properties.date_statused|date}}</p>
+		</h4>
+		<h4 class="col-xs-12 col-sm-4 text-center">
+			<strong class = "text-muted">Status</strong>
+			<p>{{feature.properties.record_status}}</p>
+		</h4>
+	</div>
+	<h4 class="col-xs-12">
+		<p><strong class = "text-muted">Description: </strong> {{feature.properties.description}}</p>
+	</h4>
+	<div class = "col-xs-12 list-item-panel" ng-init = 'showMore = false' ng-show = 'showMore'>
+		<div class="col-xs-12">
+			<h4 class="col-sm-6 text-center">
+				<strong class = "text-muted">Record Id</strong>
+				<p>{{feature.properties.record_id}}</p>
+			</h4>
+			<h4 class="col-sm-6 text-center">
+				<strong class = "text-muted">License Number</strong>
+				<p>{{feature.properties.license_number}}</p>
+			</h4>
+		</div>
+		<div class="col-xs-12">
+			<h4 class="col-sm-6 text-center">
+				<strong class = "text-muted">Record Name</strong>
+				<p>{{feature.properties.record_name}}</p>
+			</h4>
+			<h4 class="col-sm-6 text-center">
+				<strong class = "text-muted">Business Name</strong>
+				<p>{{feature.properties.business_name}}</p>
+			</h4>
+		</div>
+		<div class = "col-xs-12" ng-init = 'showComments = false' ng-show = 'showComments'>
+			<h4><strong class = "text-muted">Comments</strong></h4>
+			<ul class="list-group" style = "overflow : scroll">
+				<li class = "list-group-item list-card-panel" ng-repeat = "comment in feature.properties.commentsArray">{{comment}}</li>
+			</ul>
+		</div>
+		<a  ng-click = "showComments = !showComments">
+			<h4 class = 'text-center' ng-if = '!showComments'>Show Comments</h4>
+			<h4 class = 'text-center' ng-if = 'showComments'>Hide Comments</h4>
+		</a>
+	</div>
+	<a  ng-click = "showMore = !showMore">
+		<h4 class = 'text-center' ng-if = '!showMore'>Show More</h4>
+		<h4 class = 'text-center' ng-if = 'showMore'>Show Less</h4>
+	</a>
+</div>

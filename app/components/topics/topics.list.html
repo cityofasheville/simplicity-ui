@@ -1,0 +1,27 @@
+<div>
+  <div class="col-xs-12 btn-group btn-group-justified" style = "margin-top : 15px">
+    <a href = "#/search/composite" class="btn btn-primary"><i class="fa fa-search"></i> <strong> Search</strong></a>
+
+  </div>
+  <div class="col-xs-12">
+    <hr>
+  </div>
+  <h2 class="text-muted text-center">
+    {{heading}}
+  </h2>
+  <h1 class="text-muted text-center">
+    {{searchText}}
+  </h1>
+  <div class="list-group" style = "margin-top : 20px">
+        <a class="row list-group-item list-item-panel" href = '{{topic.linkTo}}' style = "margin-bottom : 5px" ng-repeat = "topic in topics">
+          <!-- mobile -->
+          <span class="visible-xs col-xs-8"><p class="text-primary text-center"> {{topic.question}}</p></span>
+          <i ng-class="topic.iconClass" class = "visible-xs pull-left col-xs-3 text-primary" ></i>
+          <div ng-class="topic.iconClass" class = "hidden-xs col-sm-2 text-primary" ></div>
+          <!-- desktop -->
+          <h4 class="hidden-xs col-sm-9 text-primary" style = "margin-top : 20px">{{topic.question}}</h4>
+          <h4 class="col-sm-1 hidden-xs"><i  class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4>
+        </a>
+      </div>
+</div>
+
