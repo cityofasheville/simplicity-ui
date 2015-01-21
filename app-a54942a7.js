@@ -4,7 +4,7 @@
 var app = angular.module('simplicity', ['ui.router', 'ngAnimate']);
  
 //Configure application states and routes
-app.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
+app.config(["$stateProvider", "$urlRouterProvider", "$httpProvider", function ($stateProvider, $urlRouterProvider, $httpProvider) {
     //Needed to set this header to get gulp browser sync to work
     //$httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
@@ -50,7 +50,7 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
           templateUrl: 'topic/topic.html',
           controller: 'TopicCtrl'
         });
-  });//END config
+  }]);//END config
 
 //template is defined inline in app.config.js
 app.controller('AppCtrl', ['$scope', '$location', function ($scope, $location) {
