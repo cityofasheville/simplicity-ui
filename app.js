@@ -38,7 +38,7 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
       .state('main.topics', {
         url: '/topics',
         abstract: true,
-        template: '<div ui-view></div>'
+        template: "<div ui-view></div>"
       })
         .state('main.topics.list', {
           url: '/list?searchtext&searchby&id',
@@ -54,7 +54,7 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
 
 //template is defined inline in app.config.js
 app.controller('AppCtrl', ['$scope', '$location', function ($scope, $location) {
-	console.log('app');
+	
 	$scope.$on('$stateChangeSuccess', function (event, toState) {
         if (toState.name === 'main') {
         	
@@ -443,7 +443,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
               //Do nothing
             }
           }
-          console.log(dataCacheProperties);
           q.resolve(dataCacheProperties);
           
         });
@@ -638,8 +637,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
           };
           queryBackend(featureService.property, queryParams)
             .then(function(property){
-              console.log('property');
-              console.log(property);
               property.features[0].attributes.zoning = dataCacheProperties.zoning;
               property.features[0].attributes.zoningOverlays = dataCacheProperties.zoningOverlays;
               if(codelinks[dataCacheProperties.zoning] === undefined){
@@ -654,7 +651,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
                 type: 'FeatureCollection',
                 features: [feature]
               };
-              console.log(geojson);
               q.resolve(geojson);
             });
         });
@@ -666,8 +662,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
         };
         queryBackend(featureService.property, pinParams)
           .then(function(property){
-            console.log('property');
-            console.log(property);
             property.features[0].attributes.zoning = dataCacheProperties.zoning;
             property.features[0].attributes.zoningOverlays = dataCacheProperties.zoningOverlays;
             if(codelinks[dataCacheProperties.zoning] === undefined){
@@ -682,7 +676,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
               type: 'FeatureCollection',
               features: [feature]
             };
-            console.log(geojson);
             q.resolve(geojson);
           });
       }
@@ -697,10 +690,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
     // +-+-+-+-+-+
 
     var formatCrimeData = function(crimes){
-      console.log('crimes');
-      console.log(crimes);
-      console.log($stateParams.type);
-
       //object that holds a summary of the feature {filterValue : count}
       //e.g. for crime {'Bulgary' : 12, 'Larceny' : 2}
       var filteredFeaturesSummary= {
@@ -725,14 +714,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
           }else{
             filteredFeaturesSummary.table[crimes.features[i].attributes.offense].count = filteredFeaturesSummary.table[crimes.features[i].attributes.offense].count + 1;
           }
-          console.log(crimes.features[i]);
-          console.log($stateParams.type);
-          //add filtered features to array
-          // if($stateParams.type === 'null' || $stateParams.type === null || $stateParams.type === crimes.features[i].attributes.offense.toLowerCase().replace(/ /g, '-')){
-          //   console.log('crimes.features[i]');
-          //   console.log(crimes.features[i]);
-            
-          // }
           filterdFeaturesArray.push(L.esri.Util.arcgisToGeojson(crimes.features[i], 'id'));
           
         }
@@ -819,7 +800,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
     // +-+-+-+-+-+-+-+-+-+-+-+
 
     var formatDevelopmentData = function(development){
-      console.log(development);
       //object that holds a summary of the feature {filterValue : count}
       //e.g. for development {'Level 1' : 12, 'Level 1' : 2}
       var filteredFeaturesSummary= {
@@ -891,7 +871,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
             stringOfDevelopmentIds = stringOfDevelopmentIds + ",'" + dataCacheProperties.development[$stateParams.extent][i] + "'";
           }         
         }
-        console.log(stringOfDevelopmentIds);
+
         var addressQueryParams = {
           'where' : "apn in (" + stringOfDevelopmentIds + ") and record_module = 'Planning' and record_type_type = 'Development'",
           'f' : 'json',
@@ -1117,7 +1097,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
       var id = $stateParams.id;
       var splitId = id.split(',');
       if($stateParams.searchby === 'address'){
-        console.log('here');
         addGeoJsonForSearchToDataCache([$stateParams.id])
           .then(function(){
             q.resolve(queryDataCacheWithASingleId($stateParams.id));
@@ -1152,7 +1131,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
             q.resolve();
           });
       }else if($stateParams.searchby === 'pinnum'){
-        console.log('pinnum');
         var pinQueryParams = {
           'where' : "pinnum = '" + $stateParams.id + "'", 
           'f' : 'json',
@@ -1479,7 +1457,6 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
       $scope.filterText = "";
     }else{
       $scope.filterText = $stateParams.type;
-      console.log($scope.filterText);
     }
     
     var returnToFullscreen = false;
@@ -1507,14 +1484,31 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
         },
         onEachFeature: function (feature, layer) {
           layer.on('click', function(){
-              $scope.filterText = feature.properties.objectid;
-              $scope.$apply();
-              console.log($scope.filterText);
-              if(map.isFullscreen()){
-                returnToFullscreen = true;
-                map.toggleFullscreen();
-              }           
-              $('#detailsModal').modal({'backdrop' : 'static'});
+              if(feature.geometry.type === "Point"){
+                $scope.filterText = feature.properties.objectid;
+                $scope.$apply();
+                $('#detailsModal').modal({'backdrop' : 'static'});
+                if (
+                    document.fullscreenElement ||
+                    document.webkitFullscreenElement ||
+                    document.mozFullScreenElement ||
+                    document.msFullscreenElement
+                ) {
+                  returnToFullscreen = true;
+                }
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                
+
+                
+              }     
           });
         }
       });
@@ -1556,13 +1550,8 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
 
     Backend.dataCache()
       .then(function(data){
-        
-        console.log('data');
-        console.log(data);
         Backend.topic()
           .then(function(topic){
-            console.log('topic');
-            console.log(topic);
             $scope.topic = topic;
             $scope.loading = false;
             if(topic.searchGeojson){
@@ -1597,8 +1586,19 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
 
 
     $scope.closeModal = function(){
-      if(returnToFullscreen){
-        map.toggleFullscreen();
+      if(returnToFullscreen === true){
+        var m = document.getElementById("map");
+ 
+        // go full-screen
+        if (m.requestFullscreen) {
+            m.requestFullscreen();
+        } else if (m.webkitRequestFullscreen) {
+            m.webkitRequestFullscreen();
+        } else if (m.mozRequestFullScreen) {
+            m.mozRequestFullScreen();
+        } else if (m.msRequestFullscreen) {
+            m.msRequestFullscreen();
+        }
         returnToFullscreen = false;
       }
     };
@@ -1607,6 +1607,8 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
     $scope.openDownloadModal = function(){
       $('#downloadModal').modal({'backdrop' : false});
     };
+
+
     $scope.download = function(downloadType, topic){
       var csvString =  'data:text/csv;charset=utf-8,';
       if(downloadType === 'summary'){
@@ -1615,7 +1617,6 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
           var summaryItemString = key + ',' + topic.summary.table[key].count;
           csvString += summaryItemString + '\n';
         }
-        console.log(csvString);
       }else if (downloadType === 'complete'){
         var headerArray = [];
         
@@ -1637,7 +1638,6 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
               rowArray.push('NULL');
             }
           }
-          console.log(rowArray);
           csvString += rowArray.join(',') + '\n';
         }
       }
@@ -2131,7 +2131,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('main/main.html',
-    '<div class="col-lg-8 col-lg-offset-2 col-md-6 col-md-offset-3"><div class="col-xs-12"><div class="col-xs-6"><div class="pull-left"><h2 style="color : #073F97;" class="text-center">SimpliCity</h2><h5 class="text-center">city data simplified</h5></div></div><div class="col-xs-6" style="margin-top : 10px"><img class="pull-right" style="height : 80px;" src="http://123graffitifree.com/images/citylogo-flatblue.png"></div></div><div ui-view=""></div></div>');
+    '<div class="col-lg-8 col-lg-offset-2 col-md-6 col-md-offset-3"><div class="col-xs-12"><div class="col-xs-6"><div class="pull-left" ng-click="goHome()" style="cursor : pointer"><h2 style="color : #073F97;" class="text-center">SimpliCity</h2><h5 class="text-center">city data simplified</h5></div></div><div class="col-xs-6" style="margin-top : 10px"><a href="http://www.ashevillenc.gov/" target="_blank"><img class="pull-right" style="height : 80px;" src="http://123graffitifree.com/images/citylogo-flatblue.png"></a></div></div><div ui-view=""></div></div>');
 }]);
 })();
 
@@ -2143,7 +2143,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('search/composite.search.html',
-    '<div style="min-height : 1000px"><div class="col-xs-12"><p class="text-muted text-center lead" style="margin-bottom : 0px; margin-top : 20px">Discover city data about places in your community.</p><p class="text-muted text-center lead">Search for an address, street, neighborhood, or property to get started!</p></div><div class="input-group"><input id="inputSearch" groupindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location..." style="z-index: 0" ng-model="searchText" ng-focus="doSearch(searchText, $event)" ng-keyup="doSearch(searchText, $event)"> <span class="input-group-btn"><button class="btn btn-primary" type="button" style="box-shadow : none; font-size : 17px"><i class="fa fa-search"></i></button></span></div><div class="" ng-show="errorMessage.show || helperMessage.show || searchGroups.length > 0"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-success">{{helperMessage.message}}</p><div ng-repeat="group in searchGroups"><div class="col-xs-12" style="margin-top : 10px; margin-bottom : 10px"><h4 class="row text-muted"><span class="fa-stack fa-lg" ng-click="goBack()"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span> <strong>{{group.label}}</strong> <span class="badge" style="background : #999">{{group.results.length}}</span></h4><div class="list-group" ng-repeat="candidate in group.results | limitTo : group.offset"><a ng-click="goToTopics(candidate, $event)" ng-keypress="goToTopics(candidate, $event)" class="row list-group-item"><span class="col-xs-2 col-lg-1"><span class="fa-stack fa-lg text-primary"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span></span><p class="col-xs-8 col-lg-9 pull-left text-primary" style="margin-top : 8px">{{candidate.label}}</p><h4 class="col-xs-2 col-lg-2"><i class="fa fa-lg fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="list-group" ng-if="group.results.length > 3"><a ng-click="group.offset = group.offset + 3" class="row list-group-item"><h4 class="col-xs-10 text-primary"><strong>More</strong></h4><h4 class="col-xs-2"><i class="fa fa-lg fa-chevron-down text-primary pull-right"></i></h4></a></div></div></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div></div>');
+    '<div style="min-height : 1000px"><div class="col-xs-12"><p class="text-muted text-center lead" style="margin-bottom : 0px; margin-top : 20px">Discover city data about places in your community.</p><p class="text-muted text-center lead">Search for an address, street, neighborhood, or property to get started!</p></div><div class="col-xs-12"><div class="input-group"><input id="inputSearch" groupindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location..." style="z-index: 0" ng-model="searchText" ng-focus="doSearch(searchText, $event)" ng-keyup="doSearch(searchText, $event)"> <span class="input-group-btn"><button class="btn btn-primary" type="button" style="box-shadow : none; font-size : 17px"><i class="fa fa-search"></i></button></span></div></div><div class="" ng-show="errorMessage.show || helperMessage.show || searchGroups.length > 0"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-success">{{helperMessage.message}}</p><div ng-repeat="group in searchGroups"><div class="col-xs-12" style="margin-top : 10px; margin-bottom : 10px"><h4 class="row text-muted"><span class="fa-stack fa-lg" ng-click="goBack()"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span> <strong>{{group.label}}</strong> <span class="badge" style="background : #999">{{group.results.length}}</span></h4><div class="list-group" ng-repeat="candidate in group.results | limitTo : group.offset"><a ng-click="goToTopics(candidate, $event)" ng-keypress="goToTopics(candidate, $event)" class="row list-group-item"><span class="col-xs-2 col-lg-1"><span class="fa-stack fa-lg text-primary"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span></span><p class="col-xs-8 col-lg-9 pull-left text-primary" style="margin-top : 8px">{{candidate.label}}</p><h4 class="col-xs-2 col-lg-2"><i class="fa fa-lg fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="list-group" ng-if="group.results.length > 3"><a ng-click="group.offset = group.offset + 3" class="row list-group-item"><h4 class="col-xs-10 text-primary"><strong>More</strong></h4><h4 class="col-xs-2"><i class="fa fa-lg fa-chevron-down text-primary pull-right"></i></h4></a></div></div></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div></div>');
 }]);
 })();
 
@@ -2215,7 +2215,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topics.list.html',
-    '<div><div class="col-xs-12 btn-group btn-group-justified" style="margin-top : 15px"><a href="#/search/composite" class="btn btn-primary"><i class="fa fa-search"></i> <strong>Search</strong></a></div><div class="col-xs-12"><hr></div><h2 class="text-muted text-center">{{heading}}</h2><h1 class="text-muted text-center">{{searchText}}</h1><div class="list-group" style="margin-top : 20px"><a class="row list-group-item list-item-panel" href="{{topic.linkTo}}" style="margin-bottom : 5px" ng-repeat="topic in topics"><span class="visible-xs col-xs-8"><p class="text-primary text-center">{{topic.question}}</p></span> <i ng-class="topic.iconClass" class="visible-xs pull-left col-xs-3 text-primary"></i><div ng-class="topic.iconClass" class="hidden-xs col-sm-2 text-primary"></div><h4 class="hidden-xs col-sm-9 text-primary" style="margin-top : 20px">{{topic.question}}</h4><h4 class="col-sm-1 hidden-xs"><i class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4></a></div></div>');
+    '<div><div class="col-xs-12 btn-group btn-group-justified" style="margin-top : 15px"><a href="#/search/composite" class="btn btn-primary"><i class="fa fa-search"></i> <strong>Search</strong></a></div><div class="col-xs-12"><hr></div><h2 class="text-muted text-center">{{heading}}</h2><h1 class="text-muted text-center">{{searchText}}</h1><div class="list-group" style="margin-top : 20px"><a class="row list-group-item list-item-panel" href="{{topic.linkTo}}" style="margin-bottom : 5px" ng-repeat="topic in topics"><span class="visible-xs col-xs-8"><p class="text-primary text-center">{{topic.question}}</p></span> <i ng-class="topic.iconClass" class="visible-xs pull-left col-xs-3 text-primary"></i><div ng-class="topic.iconClass" class="hidden-xs col-sm-2 text-primary"></div><h4 class="hidden-xs col-sm-9 text-primary" style="margin-top : 20px">{{topic.question}}</h4><h4 class="col-sm-1 hidden-xs"><i class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="col-xs-12 text-center">List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a> under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.</div></div>');
 }]);
 })();
 
@@ -2347,7 +2347,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topic/topic-views/table.view.html',
-    '<div><div class="col-xs-12" ng-if="topic.features.length === 0"><div class="col-xs-12"><hr></div><h3 class="text-muted text-center"><strong>We couldn\'t find any results.</strong></h3><h4 class="text-muted text-center"><strong>Try expanding the time frame or extent of your search.</strong></h4></div><table ng-if="topic.features.length !== 0" class="table table-hover"><thead><tr><th>Type</th><th class="text-center">Count</th></tr></thead><tbody><tr ng-repeat="(key, value) in topic.summary.table"><td ng-click="getDetails(key)" style="cursor : pointer"><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}<br><p class="text-muted">{{developmentExplanations[key]}}</p></td><td class="text-center">{{value.count}}</td></tr></tbody></table></div>');
+    '<div><div class="col-xs-12" ng-if="topic.features.length === 0"><div class="col-xs-12"><hr></div><h3 class="text-muted text-center"><strong>We couldn\'t find any results.</strong></h3><h4 class="text-muted text-center"><strong>Try expanding the time frame or extent of your search.</strong></h4></div><table ng-if="topic.features.length !== 0" class="table table-hover col-xs-12"><thead><tr><th>Type</th><th class="text-center">Count</th></tr></thead><tbody><tr ng-repeat="(key, value) in topic.summary.table"><td ng-click="getDetails(key)" style="cursor : pointer"><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}<br><p class="text-muted">{{developmentExplanations[key]}}</p></td><td class="text-center">{{value.count}}</td></tr></tbody></table></div>');
 }]);
 })();
 
