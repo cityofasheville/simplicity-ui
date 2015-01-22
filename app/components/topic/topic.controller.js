@@ -147,7 +147,6 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
       $scope.filterText = "";
     }else{
       $scope.filterText = $stateParams.type;
-      console.log($scope.filterText);
     }
     
     var returnToFullscreen = false;
@@ -175,14 +174,31 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
         },
         onEachFeature: function (feature, layer) {
           layer.on('click', function(){
-              $scope.filterText = feature.properties.objectid;
-              $scope.$apply();
-              console.log($scope.filterText);
-              if(map.isFullscreen()){
-                returnToFullscreen = true;
-                map.toggleFullscreen();
-              }           
-              $('#detailsModal').modal({'backdrop' : 'static'});
+              if(feature.geometry.type === "Point"){
+                $scope.filterText = feature.properties.objectid;
+                $scope.$apply();
+                $('#detailsModal').modal({'backdrop' : 'static'});
+                if (
+                    document.fullscreenElement ||
+                    document.webkitFullscreenElement ||
+                    document.mozFullScreenElement ||
+                    document.msFullscreenElement
+                ) {
+                  returnToFullscreen = true;
+                }
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                
+
+                
+              }     
           });
         }
       });
@@ -224,13 +240,8 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
 
     Backend.dataCache()
       .then(function(data){
-        
-        console.log('data');
-        console.log(data);
         Backend.topic()
           .then(function(topic){
-            console.log('topic');
-            console.log(topic);
             $scope.topic = topic;
             $scope.loading = false;
             if(topic.searchGeojson){
@@ -265,8 +276,19 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
 
 
     $scope.closeModal = function(){
-      if(returnToFullscreen){
-        map.toggleFullscreen();
+      if(returnToFullscreen === true){
+        var m = document.getElementById("map");
+ 
+        // go full-screen
+        if (m.requestFullscreen) {
+            m.requestFullscreen();
+        } else if (m.webkitRequestFullscreen) {
+            m.webkitRequestFullscreen();
+        } else if (m.mozRequestFullScreen) {
+            m.mozRequestFullScreen();
+        } else if (m.msRequestFullscreen) {
+            m.msRequestFullscreen();
+        }
         returnToFullscreen = false;
       }
     };
@@ -275,6 +297,8 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
     $scope.openDownloadModal = function(){
       $('#downloadModal').modal({'backdrop' : false});
     };
+
+
     $scope.download = function(downloadType, topic){
       var csvString =  'data:text/csv;charset=utf-8,';
       if(downloadType === 'summary'){
@@ -283,7 +307,6 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
           var summaryItemString = key + ',' + topic.summary.table[key].count;
           csvString += summaryItemString + '\n';
         }
-        console.log(csvString);
       }else if (downloadType === 'complete'){
         var headerArray = [];
         
@@ -305,7 +328,6 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
               rowArray.push('NULL');
             }
           }
-          console.log(rowArray);
           csvString += rowArray.join(',') + '\n';
         }
       }
