@@ -209,72 +209,72 @@ app.factory('Topics', ['$stateParams', function($stateParams){
         //  / / (_) | | | | | | | | (_| |
         // /___\___/|_| |_|_|_| |_|\__, |
         //                         |___/ 
-        {
-            'name' : 'zoning',
-            'title' : 'Zoning',
-            'position' : 6,
-            'searchby' : {
-                'address' : {
-                    'params' : {},
-                    'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
-                }
-            },
-            'viewTemplate' : 'topic/topic-views/zoning.view.html',
-            'views' : ['details'],
-            'iconClass' : 'flaticon-map104'
-        },
+        // {
+        //     'name' : 'zoning',
+        //     'title' : 'Zoning',
+        //     'position' : 6,
+        //     'searchby' : {
+        //         'address' : {
+        //             'params' : {},
+        //             'requiredParams' : [],
+        //             'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
+        //         }
+        //     },
+        //     'viewTemplate' : 'topic/topic-views/zoning.view.html',
+        //     'views' : ['details'],
+        //     'iconClass' : 'flaticon-map104'
+        // },
         //      _                 _                     _       _                                 
         //  ___| |_ _ __ ___  ___| |_   _ __ ___   __ _(_)_ __ | |_ ___ _ __   ___ _ __   ___ ___ 
         // / __| __| '__/ _ \/ _ \ __| | '_ ` _ \ / _` | | '_ \| __/ _ \ '_ \ / _ \ '_ \ / __/ _ \
         // \__ \ |_| | |  __/  __/ |_  | | | | | | (_| | | | | | ||  __/ | | |  __/ | | | (_|  __/
         // |___/\__|_|  \___|\___|\__| |_| |_| |_|\__,_|_|_| |_|\__\___|_| |_|\___|_| |_|\___\___|                                                                           
-        {
-            'name' : 'street-maintenance',
-            'title' : 'Street Mainenance',
-            'position' : 7,
-            'searchby' : {
-                'address' : {
-                    'params' : {},
-                    'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.during.within.of.html',
-                },
-                'street_name' : {
-                    'params' : {},
-                    'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.during.along.html',
-                }
-            },
-            'viewTemplate' : 'topic/cards/street-maintenance.card.html',
-            'views' : ['details', 'map'],
-            'iconClass' : 'flaticon-location38'
-        },
+        // {
+        //     'name' : 'street-maintenance',
+        //     'title' : 'Street Mainenance',
+        //     'position' : 7,
+        //     'searchby' : {
+        //         'address' : {
+        //             'params' : {},
+        //             'requiredParams' : [],
+        //             'headerTemplate' : 'topic/topic-headers/topic.header.during.within.of.html',
+        //         },
+        //         'street_name' : {
+        //             'params' : {},
+        //             'requiredParams' : [],
+        //             'headerTemplate' : 'topic/topic-headers/topic.header.during.along.html',
+        //         }
+        //     },
+        //     'viewTemplate' : 'topic/cards/street-maintenance.card.html',
+        //     'views' : ['details', 'map'],
+        //     'iconClass' : 'flaticon-location38'
+        // },
         //            _     _                     _ _     _       
         //   __ _  __| | __| |_ __ ___  ___ ___  | (_)___| |_ ___ 
         //  / _` |/ _` |/ _` | '__/ _ \/ __/ __| | | / __| __/ __|
         // | (_| | (_| | (_| | | |  __/\__ \__ \ | | \__ \ |_\__ \
         //  \__,_|\__,_|\__,_|_|  \___||___/___/ |_|_|___/\__|___/                                                   
-        {
-            'name' : 'address-lists',
-            'title' : 'Address Lists',
-            'position' : 8,
-            'searchby' : {
-                'street_name' : {
-                    'params' : {},
-                    'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.during.along.html',
-                },
-                'neighborhood' : {
-                    'params' : {},
-                    'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.during.in.html',
-                }
-            },
-            'viewTemplate' : 'topic/cards/address-lists.card.html',
-            'views' : ['details', 'map'],
-            'defaultView' : 'card',
-            'iconClass' : 'flaticon-address7'
-        }
+        // {
+        //     'name' : 'address-lists',
+        //     'title' : 'Address Lists',
+        //     'position' : 8,
+        //     'searchby' : {
+        //         'street_name' : {
+        //             'params' : {},
+        //             'requiredParams' : [],
+        //             'headerTemplate' : 'topic/topic-headers/topic.header.during.along.html',
+        //         },
+        //         'neighborhood' : {
+        //             'params' : {},
+        //             'requiredParams' : [],
+        //             'headerTemplate' : 'topic/topic-headers/topic.header.during.in.html',
+        //         }
+        //     },
+        //     'viewTemplate' : 'topic/cards/address-lists.card.html',
+        //     'views' : ['details', 'map'],
+        //     'defaultView' : 'card',
+        //     'iconClass' : 'flaticon-address7'
+        // }
     ];
 
     var questions = {
@@ -302,21 +302,21 @@ app.factory('Topics', ['$stateParams', function($stateParams){
         'recycling' : {
             'topic' : 'Do you want to know when recycling is collected?',
             'address' : 'Do you want to know when recycling is collected at this address?'
-        },
-        'zoning' : {
-            'topic' :  'Do you want to know about a zoning?', 
-            'address' :  'Do you want to know about the zoning at this address?'
-        },
-        'street-maintenance' : {
-            'topic' :  'Do you want to know who is responsible for maintaining a street?',
-            'address' :  'Do you want to know who is responsible for maintaining a street this address?',
-            'street_name' : 'Do you want to know who is responsible for maintaining this street?'
-        },
-        'address-lists' : {
-            'topic' :  'Do you want a list of addresses?',
-            'street_name' : 'Do you want a list of addresses along this street?',
-            'neighborhood' :  'Do you want a list of addresses in this neighborhood?'
         }
+        // 'zoning' : {
+        //     'topic' :  'Do you want to know about a zoning?', 
+        //     'address' :  'Do you want to know about the zoning at this address?'
+        // },
+        // 'street-maintenance' : {
+        //     'topic' :  'Do you want to know who is responsible for maintaining a street?',
+        //     'address' :  'Do you want to know who is responsible for maintaining a street this address?',
+        //     'street_name' : 'Do you want to know who is responsible for maintaining this street?'
+        // },
+        // 'address-lists' : {
+        //     'topic' :  'Do you want a list of addresses?',
+        //     'street_name' : 'Do you want a list of addresses along this street?',
+        //     'neighborhood' :  'Do you want a list of addresses in this neighborhood?'
+        // }
     };
 
 
