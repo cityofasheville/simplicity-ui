@@ -1957,72 +1957,72 @@ app.factory('Topics', ['$stateParams', function($stateParams){
         //  / / (_) | | | | | | | | (_| |
         // /___\___/|_| |_|_|_| |_|\__, |
         //                         |___/ 
-        {
-            'name' : 'zoning',
-            'title' : 'Zoning',
-            'position' : 6,
-            'searchby' : {
-                'address' : {
-                    'params' : {},
-                    'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
-                }
-            },
-            'viewTemplate' : 'topic/topic-views/zoning.view.html',
-            'views' : ['details'],
-            'iconClass' : 'flaticon-map104'
-        },
+        // {
+        //     'name' : 'zoning',
+        //     'title' : 'Zoning',
+        //     'position' : 6,
+        //     'searchby' : {
+        //         'address' : {
+        //             'params' : {},
+        //             'requiredParams' : [],
+        //             'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
+        //         }
+        //     },
+        //     'viewTemplate' : 'topic/topic-views/zoning.view.html',
+        //     'views' : ['details'],
+        //     'iconClass' : 'flaticon-map104'
+        // },
         //      _                 _                     _       _                                 
         //  ___| |_ _ __ ___  ___| |_   _ __ ___   __ _(_)_ __ | |_ ___ _ __   ___ _ __   ___ ___ 
         // / __| __| '__/ _ \/ _ \ __| | '_ ` _ \ / _` | | '_ \| __/ _ \ '_ \ / _ \ '_ \ / __/ _ \
         // \__ \ |_| | |  __/  __/ |_  | | | | | | (_| | | | | | ||  __/ | | |  __/ | | | (_|  __/
         // |___/\__|_|  \___|\___|\__| |_| |_| |_|\__,_|_|_| |_|\__\___|_| |_|\___|_| |_|\___\___|                                                                           
-        {
-            'name' : 'street-maintenance',
-            'title' : 'Street Mainenance',
-            'position' : 7,
-            'searchby' : {
-                'address' : {
-                    'params' : {},
-                    'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.during.within.of.html',
-                },
-                'street_name' : {
-                    'params' : {},
-                    'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.during.along.html',
-                }
-            },
-            'viewTemplate' : 'topic/cards/street-maintenance.card.html',
-            'views' : ['details', 'map'],
-            'iconClass' : 'flaticon-location38'
-        },
+        // {
+        //     'name' : 'street-maintenance',
+        //     'title' : 'Street Mainenance',
+        //     'position' : 7,
+        //     'searchby' : {
+        //         'address' : {
+        //             'params' : {},
+        //             'requiredParams' : [],
+        //             'headerTemplate' : 'topic/topic-headers/topic.header.during.within.of.html',
+        //         },
+        //         'street_name' : {
+        //             'params' : {},
+        //             'requiredParams' : [],
+        //             'headerTemplate' : 'topic/topic-headers/topic.header.during.along.html',
+        //         }
+        //     },
+        //     'viewTemplate' : 'topic/cards/street-maintenance.card.html',
+        //     'views' : ['details', 'map'],
+        //     'iconClass' : 'flaticon-location38'
+        // },
         //            _     _                     _ _     _       
         //   __ _  __| | __| |_ __ ___  ___ ___  | (_)___| |_ ___ 
         //  / _` |/ _` |/ _` | '__/ _ \/ __/ __| | | / __| __/ __|
         // | (_| | (_| | (_| | | |  __/\__ \__ \ | | \__ \ |_\__ \
         //  \__,_|\__,_|\__,_|_|  \___||___/___/ |_|_|___/\__|___/                                                   
-        {
-            'name' : 'address-lists',
-            'title' : 'Address Lists',
-            'position' : 8,
-            'searchby' : {
-                'street_name' : {
-                    'params' : {},
-                    'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.during.along.html',
-                },
-                'neighborhood' : {
-                    'params' : {},
-                    'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.during.in.html',
-                }
-            },
-            'viewTemplate' : 'topic/cards/address-lists.card.html',
-            'views' : ['details', 'map'],
-            'defaultView' : 'card',
-            'iconClass' : 'flaticon-address7'
-        }
+        // {
+        //     'name' : 'address-lists',
+        //     'title' : 'Address Lists',
+        //     'position' : 8,
+        //     'searchby' : {
+        //         'street_name' : {
+        //             'params' : {},
+        //             'requiredParams' : [],
+        //             'headerTemplate' : 'topic/topic-headers/topic.header.during.along.html',
+        //         },
+        //         'neighborhood' : {
+        //             'params' : {},
+        //             'requiredParams' : [],
+        //             'headerTemplate' : 'topic/topic-headers/topic.header.during.in.html',
+        //         }
+        //     },
+        //     'viewTemplate' : 'topic/cards/address-lists.card.html',
+        //     'views' : ['details', 'map'],
+        //     'defaultView' : 'card',
+        //     'iconClass' : 'flaticon-address7'
+        // }
     ];
 
     var questions = {
@@ -2050,21 +2050,21 @@ app.factory('Topics', ['$stateParams', function($stateParams){
         'recycling' : {
             'topic' : 'Do you want to know when recycling is collected?',
             'address' : 'Do you want to know when recycling is collected at this address?'
-        },
-        'zoning' : {
-            'topic' :  'Do you want to know about a zoning?', 
-            'address' :  'Do you want to know about the zoning at this address?'
-        },
-        'street-maintenance' : {
-            'topic' :  'Do you want to know who is responsible for maintaining a street?',
-            'address' :  'Do you want to know who is responsible for maintaining a street this address?',
-            'street_name' : 'Do you want to know who is responsible for maintaining this street?'
-        },
-        'address-lists' : {
-            'topic' :  'Do you want a list of addresses?',
-            'street_name' : 'Do you want a list of addresses along this street?',
-            'neighborhood' :  'Do you want a list of addresses in this neighborhood?'
         }
+        // 'zoning' : {
+        //     'topic' :  'Do you want to know about a zoning?', 
+        //     'address' :  'Do you want to know about the zoning at this address?'
+        // },
+        // 'street-maintenance' : {
+        //     'topic' :  'Do you want to know who is responsible for maintaining a street?',
+        //     'address' :  'Do you want to know who is responsible for maintaining a street this address?',
+        //     'street_name' : 'Do you want to know who is responsible for maintaining this street?'
+        // },
+        // 'address-lists' : {
+        //     'topic' :  'Do you want a list of addresses?',
+        //     'street_name' : 'Do you want a list of addresses along this street?',
+        //     'neighborhood' :  'Do you want a list of addresses in this neighborhood?'
+        // }
     };
 
 
@@ -2143,7 +2143,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('search/composite.search.html',
-    '<div style="min-height : 1000px"><div class="col-xs-12"><p class=" text-muted text-center lead" style="margin-bottom : 0px; margin-top : 20px">Discover city data about places in your community.</p><p class=" text-muted text-center lead">Search for an address, street, neighborhood, or property to get started!</p></div><div class="input-group"><input id="inputSearch" groupindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location..." style="z-index: 0" ng-model="searchText" ng-focus="doSearch(searchText, $event)" ng-keyup="doSearch(searchText, $event)"> <span class="input-group-btn"><button class="btn btn-primary" type="button" style="box-shadow : none; font-size : 17px"><i class="fa fa-search"></i></button></span></div><div class="" ng-show="errorMessage.show || helperMessage.show || searchGroups.length > 0"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-success">{{helperMessage.message}}</p><div ng-repeat="group in searchGroups"><div class="col-xs-12" style="margin-top : 10px; margin-bottom : 10px"><h4 class="row text-muted"><span class="fa-stack fa-lg" ng-click="goBack()"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span> <strong>{{group.label}}</strong> <span class="badge" style="background : #999">{{group.results.length}}</span></h4><div class="list-group" ng-repeat="candidate in group.results | limitTo : group.offset"><a ng-click="goToTopics(candidate, $event)" ng-keypress="goToTopics(candidate, $event)" class="row list-group-item"><span class="col-xs-2 col-lg-1"><span class="fa-stack fa-lg text-primary"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span></span><p class="col-xs-8 col-lg-9 pull-left text-primary" style="margin-top : 8px">{{candidate.label}}</p><h4 class="col-xs-2 col-lg-2"><i class="fa fa-lg fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="list-group" ng-if="group.results.length > 3"><a ng-click="group.offset = group.offset + 3" class="row list-group-item"><h4 class="col-xs-10 text-primary"><strong>More</strong></h4><h4 class="col-xs-2"><i class="fa fa-lg fa-chevron-down text-primary pull-right"></i></h4></a></div></div></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div></div>');
+    '<div style="min-height : 1000px"><div class="col-xs-12"><p class="text-muted text-center lead" style="margin-bottom : 0px; margin-top : 20px">Discover city data about places in your community.</p><p class="text-muted text-center lead">Search for an address, street, neighborhood, or property to get started!</p></div><div class="input-group"><input id="inputSearch" groupindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location..." style="z-index: 0" ng-model="searchText" ng-focus="doSearch(searchText, $event)" ng-keyup="doSearch(searchText, $event)"> <span class="input-group-btn"><button class="btn btn-primary" type="button" style="box-shadow : none; font-size : 17px"><i class="fa fa-search"></i></button></span></div><div class="" ng-show="errorMessage.show || helperMessage.show || searchGroups.length > 0"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-success">{{helperMessage.message}}</p><div ng-repeat="group in searchGroups"><div class="col-xs-12" style="margin-top : 10px; margin-bottom : 10px"><h4 class="row text-muted"><span class="fa-stack fa-lg" ng-click="goBack()"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span> <strong>{{group.label}}</strong> <span class="badge" style="background : #999">{{group.results.length}}</span></h4><div class="list-group" ng-repeat="candidate in group.results | limitTo : group.offset"><a ng-click="goToTopics(candidate, $event)" ng-keypress="goToTopics(candidate, $event)" class="row list-group-item"><span class="col-xs-2 col-lg-1"><span class="fa-stack fa-lg text-primary"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span></span><p class="col-xs-8 col-lg-9 pull-left text-primary" style="margin-top : 8px">{{candidate.label}}</p><h4 class="col-xs-2 col-lg-2"><i class="fa fa-lg fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="list-group" ng-if="group.results.length > 3"><a ng-click="group.offset = group.offset + 3" class="row list-group-item"><h4 class="col-xs-10 text-primary"><strong>More</strong></h4><h4 class="col-xs-2"><i class="fa fa-lg fa-chevron-down text-primary pull-right"></i></h4></a></div></div></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div></div>');
 }]);
 })();
 
@@ -2311,7 +2311,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topic/topic-views/property.view.html',
-    '<div ng-repeat="feature in topic.features"><div><div class="col-xs-12"><div class="col-xs-12 col-sm-6"><h4><strong class="text-muted">Civic Address Id</strong> : <span>{{stateParams.id}}</span></h4><h4><strong class="text-muted">PIN</strong> : <span>{{feature.properties.pinnum}}</span></h4></div><div class="col-xs-12 col-sm-6"><h4 ng-if="feature.properties.isincity === \'Yes\'" class="text-muted"><i class="fa fa-lg fa-check-circle text-success pull-left"></i> <strong>It\'s in the city!</strong></h4><h4 ng-if="feature.properties.isincity === \'No\'" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger pull-left"></i> <strong>It\'s not in the city!</strong></h4><h4 ng-if="feature.properties.iscityowned === \'Yes\'" class="text-muted"><i class="fa fa-lg fa-check-circle text-success pull-left"></i> <strong>It\'s city owned!</strong></h4><h4 ng-if="feature.properties.iscityowned === \'No\'" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger pull-left"></i> <strong>It\'s not city owned!</strong></h4></div></div></div><div ng-include="\'topic/topic-views/owner.view.html\'"></div><div ng-include="\'topic/topic-views/zoning.view.html\'"></div><div class="col-xs-12 list-item-panel"><h4>Property and Tax Value</h4><table class="table "><thead><tr><th>Value Type</th><th>Amount</th></tr></thead><tbody><tr><td>Building Value</td><td>${{feature.properties.buildingvalue|number}}</td></tr><tr><td>Land Value</td><td>${{feature.properties.landvalue|number}}</td></tr><tr><td>Appraised Value</td><td>${{feature.properties.appraisedvalue|number}}</td></tr><tr><td>Tax Value</td><td>${{feature.properties.taxvalue|number}}</td></tr><tr><td>Total Market Value</td><td>${{feature.properties.totalmarketvalue|number}}</td></tr></tbody></table></div><div class="col-xs-12 list-item-panel"><h4>Other Details</h4><p class="col-sm-6" ng-if="feature.properties.exempt === null">Tax exempt : <span>NO</span></p><p class="col-sm-6" ng-if="feature.properties.exempt !== null">Tax exempt : <span>YES</span></p><p class="col-sm-6" ng-if="feature.properties.improved === \'Y\'">Improved : <span>YES (${{feature.properties.improvementvalue|number}})</span></p><p class="col-sm-6">Appraisal Area : {{feature.properties.appraisalarea}}</p><p class="col-sm-6">Acreage : {{feature.properties.acreage}} acres</p></div><div class="col-xs-12 list-item-panel"><br><a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.deed_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Deed</a> <a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.plat_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Plat</a> <a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.proptopic_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Property Card</a><br></div></div>');
+    '<div ng-repeat="feature in topic.features"><div><div class="col-xs-12"><div class="col-xs-12 col-sm-6"><h4><strong class="text-muted">Civic Address Id</strong> : <span>{{stateParams.id}}</span></h4><h4><strong class="text-muted">PIN</strong> : <span>{{feature.properties.pinnum}}</span></h4></div><div class="col-xs-12 col-sm-6"><h4 ng-if="feature.properties.isincity === \'Yes\'" class="text-muted"><i class="fa fa-lg fa-check-circle text-success pull-left"></i> <strong>It\'s in the city!</strong></h4><h4 ng-if="feature.properties.isincity === \'No\'" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger pull-left"></i> <strong>It\'s not in the city!</strong></h4><h4 ng-if="feature.properties.iscityowned === \'Yes\'" class="text-muted"><i class="fa fa-lg fa-check-circle text-success pull-left"></i> <strong>It\'s city owned!</strong></h4><h4 ng-if="feature.properties.iscityowned === \'No\'" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger pull-left"></i> <strong>It\'s not city owned!</strong></h4></div></div></div><div ng-include="\'topic/topic-views/owner.view.html\'"></div><div ng-include="\'topic/topic-views/zoning.view.html\'"></div><div class="col-xs-12 list-item-panel"><h4>Property and Tax Value</h4><table class="table"><thead><tr><th>Value Type</th><th>Amount</th></tr></thead><tbody><tr><td>Building Value</td><td>${{feature.properties.buildingvalue|number}}</td></tr><tr><td>Land Value</td><td>${{feature.properties.landvalue|number}}</td></tr><tr><td>Appraised Value</td><td>${{feature.properties.appraisedvalue|number}}</td></tr><tr><td>Tax Value</td><td>${{feature.properties.taxvalue|number}}</td></tr><tr><td>Total Market Value</td><td>${{feature.properties.totalmarketvalue|number}}</td></tr></tbody></table></div><div class="col-xs-12 list-item-panel"><h4>Other Details</h4><p class="col-sm-6" ng-if="feature.properties.exempt === null">Tax exempt : <span>NO</span></p><p class="col-sm-6" ng-if="feature.properties.exempt !== null">Tax exempt : <span>YES</span></p><p class="col-sm-6" ng-if="feature.properties.improved === \'Y\'">Improved : <span>YES (${{feature.properties.improvementvalue|number}})</span></p><p class="col-sm-6">Appraisal Area : {{feature.properties.appraisalarea}}</p><p class="col-sm-6">Acreage : {{feature.properties.acreage}} acres</p></div><div class="col-xs-12 list-item-panel"><br><a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.deed_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Deed</a> <a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.plat_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Plat</a> <a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.proptopic_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Property Card</a><br></div></div>');
 }]);
 })();
 
