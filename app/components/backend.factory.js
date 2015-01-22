@@ -377,7 +377,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
               //Do nothing
             }
           }
-          console.log(dataCacheProperties);
           q.resolve(dataCacheProperties);
           
         });
@@ -572,8 +571,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
           };
           queryBackend(featureService.property, queryParams)
             .then(function(property){
-              console.log('property');
-              console.log(property);
               property.features[0].attributes.zoning = dataCacheProperties.zoning;
               property.features[0].attributes.zoningOverlays = dataCacheProperties.zoningOverlays;
               if(codelinks[dataCacheProperties.zoning] === undefined){
@@ -588,7 +585,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
                 type: 'FeatureCollection',
                 features: [feature]
               };
-              console.log(geojson);
               q.resolve(geojson);
             });
         });
@@ -600,8 +596,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
         };
         queryBackend(featureService.property, pinParams)
           .then(function(property){
-            console.log('property');
-            console.log(property);
             property.features[0].attributes.zoning = dataCacheProperties.zoning;
             property.features[0].attributes.zoningOverlays = dataCacheProperties.zoningOverlays;
             if(codelinks[dataCacheProperties.zoning] === undefined){
@@ -616,7 +610,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
               type: 'FeatureCollection',
               features: [feature]
             };
-            console.log(geojson);
             q.resolve(geojson);
           });
       }
@@ -631,10 +624,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
     // +-+-+-+-+-+
 
     var formatCrimeData = function(crimes){
-      console.log('crimes');
-      console.log(crimes);
-      console.log($stateParams.type);
-
       //object that holds a summary of the feature {filterValue : count}
       //e.g. for crime {'Bulgary' : 12, 'Larceny' : 2}
       var filteredFeaturesSummary= {
@@ -659,14 +648,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
           }else{
             filteredFeaturesSummary.table[crimes.features[i].attributes.offense].count = filteredFeaturesSummary.table[crimes.features[i].attributes.offense].count + 1;
           }
-          console.log(crimes.features[i]);
-          console.log($stateParams.type);
-          //add filtered features to array
-          // if($stateParams.type === 'null' || $stateParams.type === null || $stateParams.type === crimes.features[i].attributes.offense.toLowerCase().replace(/ /g, '-')){
-          //   console.log('crimes.features[i]');
-          //   console.log(crimes.features[i]);
-            
-          // }
           filterdFeaturesArray.push(L.esri.Util.arcgisToGeojson(crimes.features[i], 'id'));
           
         }
@@ -753,7 +734,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
     // +-+-+-+-+-+-+-+-+-+-+-+
 
     var formatDevelopmentData = function(development){
-      console.log(development);
       //object that holds a summary of the feature {filterValue : count}
       //e.g. for development {'Level 1' : 12, 'Level 1' : 2}
       var filteredFeaturesSummary= {
@@ -825,7 +805,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
             stringOfDevelopmentIds = stringOfDevelopmentIds + ",'" + dataCacheProperties.development[$stateParams.extent][i] + "'";
           }         
         }
-        console.log(stringOfDevelopmentIds);
+
         var addressQueryParams = {
           'where' : "apn in (" + stringOfDevelopmentIds + ") and record_module = 'Planning' and record_type_type = 'Development'",
           'f' : 'json',
@@ -1051,7 +1031,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
       var id = $stateParams.id;
       var splitId = id.split(',');
       if($stateParams.searchby === 'address'){
-        console.log('here');
         addGeoJsonForSearchToDataCache([$stateParams.id])
           .then(function(){
             q.resolve(queryDataCacheWithASingleId($stateParams.id));
@@ -1086,7 +1065,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
             q.resolve();
           });
       }else if($stateParams.searchby === 'pinnum'){
-        console.log('pinnum');
         var pinQueryParams = {
           'where' : "pinnum = '" + $stateParams.id + "'", 
           'f' : 'json',
