@@ -38,7 +38,7 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
       .state('main.topics', {
         url: '/topics',
         abstract: true,
-        template: '<div ui-view></div>'
+        template: "<div ui-view></div>"
       })
         .state('main.topics.list', {
           url: '/list?searchtext&searchby&id',

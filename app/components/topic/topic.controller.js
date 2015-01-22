@@ -177,11 +177,27 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
               if(feature.geometry.type === "Point"){
                 $scope.filterText = feature.properties.objectid;
                 $scope.$apply();
-                if(map.isFullscreen()){
-                  returnToFullscreen = true;
-                  map.toggleFullscreen();
-                }           
                 $('#detailsModal').modal({'backdrop' : 'static'});
+                if (
+                    document.fullscreenElement ||
+                    document.webkitFullscreenElement ||
+                    document.mozFullScreenElement ||
+                    document.msFullscreenElement
+                ) {
+                  returnToFullscreen = true;
+                }
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                
+
+                
               }     
           });
         }
@@ -261,7 +277,18 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
 
     $scope.closeModal = function(){
       if(returnToFullscreen === true){
-        map.toggleFullscreen();
+        var m = document.getElementById("map");
+ 
+        // go full-screen
+        if (m.requestFullscreen) {
+            m.requestFullscreen();
+        } else if (m.webkitRequestFullscreen) {
+            m.webkitRequestFullscreen();
+        } else if (m.mozRequestFullScreen) {
+            m.mozRequestFullScreen();
+        } else if (m.msRequestFullscreen) {
+            m.msRequestFullscreen();
+        }
         returnToFullscreen = false;
       }
     };

@@ -1,14 +1,17 @@
 <div style = "min-height : 1000px">
 	<div class = "col-xs-12">
-        <p class=" text-muted text-center lead" style = "margin-bottom : 0px; margin-top : 20px">Discover city data about places in your community.</p>
-        <p class=" text-muted text-center lead">Search for an address, street, neighborhood, or property to get started!</p>
-    </div>
-	<div class="input-group">
+     <p class=" text-muted text-center lead" style = "margin-bottom : 0px; margin-top : 20px">Discover city data about places in your community.</p>
+     <p class=" text-muted text-center lead">Search for an address, street, neighborhood, or property to get started!</p>
+  </div>
+  <div class="col-xs-12">
+  	<div class="input-group">
 		<input id = "inputSearch" groupindex = '1' type="text" autocomplete = "on" class="form-control" placeholder = "Enter a location..." style = "z-index: 0" ng-model = "searchText" ng-focus = "doSearch(searchText, $event)" ng-keyup = "doSearch(searchText, $event)">
 		<span class="input-group-btn">
 			<button class="btn btn-primary" type="button" style = "box-shadow : none; font-size : 17px"><i class="fa fa-search"></i></button>
 		</span>
 	</div>
+  </div>
+	
 	
 	<div class="" ng-show = "errorMessage.show || helperMessage.show || searchGroups.length > 0">
 		<p ng-show = "errorMessage.show" class="text-danger">{{errorMessage.message}}</p>
