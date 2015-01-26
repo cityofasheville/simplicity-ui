@@ -1,5 +1,5 @@
 
-<div ng-repeat = "feature in topic.features" >
+<div ng-repeat = "feature in topic.features | filter:filterText" >
 
 	<div  >
     <div class="col-xs-12">
@@ -29,6 +29,14 @@
     </div>
 	</div>
 	<div class = "col-xs-12 list-item-panel">
+		<h4>Address</h4>
+		<address class = "text-muted">
+			<strong>{{feature.properties.street_number}} {{feature.properties.street_name}} {{feature.properties.street_type}} 
+			<span ng-if = "feature.properties.unit_number !== null"> Unit {{feature.properties.unit_number}}</span>
+			</strong>
+		</address>
+	</div>
+	<div class = "col-xs-12 list-item-panel">
 		<h4>Owner</h4>
 		<strong class = "text-muted">{{feature.properties.owner}}</strong>
 		<address>{{feature.properties.owner_address}}<br>
@@ -46,7 +54,7 @@
 			:
 			
 			<a ng-if = "feature.properties.zoning.length > 0" ng-repeat = "zoning in feature.properties.zoning" class = ""  target = "_blank" href="{{feature.properties.codelink}}"><strong> {{zoning}}<span ng-if = "$index !==  feature.properties.zoning.length - 1 && feature.properties.zoning.length !== 1">, </span></strong></a>
-			<span ng-if = "feature.properties.zoning.length === 0 || feature.properties.zoning === undefined">None</span>
+			<span ng-if = "feature.properties.zoning.length === 0 || feature.properties.zoning === undefined">No City of Asheville Zoning</span>
 		</h5>
 		<h5 ng-if = "feature.properties.zoningOverlays !== undefined" >
 			<strong>Zoning Overlay</strong>
