@@ -1,5 +1,5 @@
-app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Topics', 'Topic', 'Backend',
- function ($scope, $stateParams, $state, $filter, Topics, Topic, Backend) {
+app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Topics', 'Backend',
+ function ($scope, $stateParams, $state, $filter, Topics, Backend) {
 
     //****Private variables and methods*****//
 
@@ -156,7 +156,7 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
         pointToLayer: function(feature, latlng){
           if(feature.geometry.type === "Point"){
             return L.circleMarker(latlng, {
-              radius: 6,
+              radius: 10,
               fillColor: "#"+feature.properties.color,
               color: "#"+feature.properties.color,
               weight: 1,
@@ -217,7 +217,7 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
           }
         },
         onEachFeature: function (feature, layer) {
-          if(feature.geometry.type === 'Point'){
+          if(feature.geometry.type === 'Point' && $stateParams.extent !== null && $stateParams.extent !== 'null'){
             var radiusInMeters = $stateParams.extent*0.3048;
             var circle = L.circle([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], radiusInMeters, {
               'fillOpacity' : 0,
@@ -233,6 +233,21 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
       });
     };
 
+    var addOverlayGeoJsonToMap = function(data, style){
+      var overlayLayer =  L.geoJson(data, {
+        style: function (feature) {
+          if(style){
+            return style;
+          }
+        },
+        onEachFeature: function (feature, layer) {
+          layerControl.addOverlay(layer, feature.properties.name);
+          
+        }
+      });
+      overlayLayer.addTo(map);
+    };
+
 
 
     $scope.loading = true;
@@ -246,6 +261,9 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
             $scope.loading = false;
             if(topic.searchGeojson){
               addSearchGeoJsonToMap(topic.searchGeojson, {'fillOpacity' : 0,'opacity' : 0.3}).addTo(map);
+            }
+            if(topic.overlays){
+              var overlayLayer = addOverlayGeoJsonToMap(topic.overlays, {'fillOpacity' : 0.1,'opacity' : 0.3})
             }
             if(topic.features){
               if($stateParams.type !== null || $stateParams.type !== 'null'){
@@ -334,5 +352,6 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
       var encodedUri = encodeURI(csvString);
       window.open(encodedUri);
     };
+
 
 }]);

@@ -64,11 +64,18 @@ app.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'B
     //groupOrderArray.splice(groupOrderPosition, 0, data.candidates[i].attributes.Loc_name);
 
     $scope.goToTopics = function(candidate, event){
+        console.log(candidate);
+        var label = ""
+        for (var i = 0; i < candidate.label.length; i++) {
+            if(candidate.label.charAt(i) !== '&'){
+                label = label + candidate.label.charAt(i);
+            } 
+        }
         if(candidate.type === 'civicaddressid'){
             candidate.type = "address";
         }
 
-        $state.go('main.topics.list', {'searchtext' : candidate.label, 'searchby' : candidate.type, 'id' : candidate.id});
+        $state.go('main.topics.list', {'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});
     };
 
 

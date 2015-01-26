@@ -13,7 +13,7 @@
     </thead>
     <tbody>
       <tr ng-repeat = "(key, value) in topic.summary.table">
-        <td ng-click = "getDetails(key)" style = "cursor : pointer">
+        <td ng-click = "filterBy(key)" style = "cursor : pointer">
           <i class="fa fa-circle" style = "color: #{{value.color}}"></i> {{key}}
           <br>
           <p class = 'text-muted'>{{developmentExplanations[key]}}</p>

@@ -1,7 +1,7 @@
 <div>
     <div class="col-xs-12 btn-group btn-group-justified" style = "margin-top : 15px">
-      <a href = "#/search/composite" class="btn btn-primary"><i class="fa fa-search"></i> <strong> Search</strong></a>
-      <a ng-click = "goToTopics()" class="btn btn-primary"><i class="fa fa-list"></i> <strong> View Topics</strong> </a>
+      <a href = "#/search/composite" class="btn btn-primary"><i class="fa fa-search fa-fw"></i> <strong> Search</strong></a>
+      <a ng-click = "goToTopics()" class="btn btn-primary"><i class="fa fa-bars fa-fw"></i> <strong>  View Topics</strong> </a>
     </div>
     <div class="col-xs-12">
       <hr>
@@ -47,37 +47,51 @@
         ng-show = "stateParams.view === 'table'" 
         ng-include = "topicProperties.tableViewTemplate">
       </div>
+      <div>
+        <!-- map -->
+        <div 
+          ng-show = "stateParams.view === 'map'"
+          class = "col-xs-12" 
+          style = "height : 400px; margin-bottom : 20px" 
+          id="map">
+          <div ng-if = "topic.summary.table !== undefined">
+            <div  style = "position : absolute; top : 50px; right : 10px; height : 36px; width : 36px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7">
+              <i ng-init = "showLegend = false" ng-click = "showLegend = !showLegend" ng-mouseenter = "showLegend = !showLegend" ng-mouseleave = "showLegend = !showLegend" class="fa fa-2x fa-question text-primary" style = "margin-top: 6px;margin-left: 10px"></i>
+            </div>
+            <div ng-show = "showLegend" style = "position : absolute; top : 50px; right : 50px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7">
+              <table ng-if = "topic.features.length !== 0" class="table table-hover" >
+                <thead>
+                  <tr>
+                    <th>Type <i class = "pull-right text-muted fa fa-lg fa-times" ng-click = "showLegend = !showLegend"></i></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat = "(key, value) in topic.summary.table">
+                    <td ng-click = "getDetails(key)" style = "cursor : pointer">
+                      <i class="fa fa-circle" style = "color: #{{value.color}}"></i> {{key}}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
-      <!-- map -->
-      <div 
-        ng-show = "stateParams.view === 'map'"
-        class = "col-xs-12" 
-        style = "height : 400px; margin-bottom : 20px" 
-        id="map">
-        <div ng-if = "topic.summary.table !== undefined">
-          <div  style = "position : absolute; top : 50px; right : 10px; height : 36px; width : 36px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7">
-            <i ng-init = "showLegend = false" ng-click = "showLegend = !showLegend" ng-mouseenter = "showLegend = !showLegend" ng-mouseleave = "showLegend = !showLegend" class="fa fa-2x fa-question text-primary" style = "margin-top: 6px;margin-left: 10px"></i>
-          </div>
-          <div ng-show = "showLegend" style = "position : absolute; top : 50px; right : 50px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7">
-            <table ng-if = "topic.features.length !== 0" class="table table-hover" >
-              <thead>
-                <tr>
-                  <th>Type <i class = "pull-right text-muted fa fa-lg fa-times" ng-click = "showLegend = !showLegend"></i></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr ng-repeat = "(key, value) in topic.summary.table">
-                  <td ng-click = "getDetails(key)" style = "cursor : pointer">
-                    <i class="fa fa-circle" style = "color: #{{value.color}}"></i> {{key}}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
+            </div>
           </div>
         </div>
+        <!-- DETAILS MODAL -->
+        <div id = "detailsModal" class="modal fade" >
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button ng-click = "closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Point Details</h4>
+              </div>
+              <div class="modal-body" >
+                <div ng-include = "topicProperties.listViewTemplate"></div>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
       </div>
-      
     </div>
 
     <!-- RELATED LINKS -->
@@ -100,20 +114,7 @@
       </div>
     </div>
 
-    <!-- DETAILS MODAL -->
-    <div id = "detailsModal" class="modal fade" >
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button ng-click = "closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title">Point Details</h4>
-          </div>
-          <div class="modal-body" >
-            <div ng-include = "topicProperties.listViewTemplate"></div>
-          </div>
-        </div><!-- /.modal-content -->
-      </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+    
 
 
     <!-- DOWNLOAD MODAL -->

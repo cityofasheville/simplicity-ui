@@ -35,6 +35,15 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'view' : 'details'
                     },
                     'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
+                },
+                'owner_name' : {
+                    'params' : {
+                        'type' : null,
+                        'timeframe' : null,
+                        'extent' : null,
+                        'view' : 'details'
+                    },
+                    'headerTemplate' : 'topic/topic-headers/topic.header.ownedby.html',
                 }
             },
             'simpleViewTemplate' : null,
@@ -209,21 +218,30 @@ app.factory('Topics', ['$stateParams', function($stateParams){
         //  / / (_) | | | | | | | | (_| |
         // /___\___/|_| |_|_|_| |_|\__, |
         //                         |___/ 
-        // {
-        //     'name' : 'zoning',
-        //     'title' : 'Zoning',
-        //     'position' : 6,
-        //     'searchby' : {
-        //         'address' : {
-        //             'params' : {},
-        //             'requiredParams' : [],
-        //             'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
-        //         }
-        //     },
-        //     'viewTemplate' : 'topic/topic-views/zoning.view.html',
-        //     'views' : ['details'],
-        //     'iconClass' : 'flaticon-map104'
-        // },
+        {
+            'name' : 'zoning',
+            'title' : 'Zoning',
+            'position' : 6,
+            'searchby' : {
+                'address' : {
+                    'params' : {
+                        'type' : null,
+                        'timeframe' : null,
+                        'extent' : null,
+                        'view' : 'details'
+                    },
+                    'requiredParams' : [],
+                    'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
+                }
+            },
+            'simpleViewTemplate' : null,
+            'detailsViewTemplate' : 'topic/topic-views/zoning.view.html',
+            'tableViewTemplate' : null,
+            'listViewTemplate' : null,
+            'defaultView' : 'details',
+            'iconClass' : 'flaticon-map104',
+            'linkTopics' : ['property', 'crime', 'development']
+        }
         //      _                 _                     _       _                                 
         //  ___| |_ _ __ ___  ___| |_   _ __ ___   __ _(_)_ __ | |_ ___ _ __   ___ _ __   ___ ___ 
         // / __| __| '__/ _ \/ _ \ __| | '_ ` _ \ / _` | | '_ \| __/ _ \ '_ \ / _ \ '_ \ / __/ _ \
@@ -281,7 +299,8 @@ app.factory('Topics', ['$stateParams', function($stateParams){
         'property' : {
             'topic' : 'Do you want to know about a property?',
             'address' : 'Do you want to know about the property at this address?',
-            'pinnum' : 'Do you want to know about the property for this PIN?'
+            'pinnum' : 'Do you want to know about the property for this PIN?',
+            'owner_name' : 'Do you want to know about the properties owned by this owner?'
         },
         'crime' : {
             'topic' : 'Do you want to know about crime?',
@@ -302,11 +321,11 @@ app.factory('Topics', ['$stateParams', function($stateParams){
         'recycling' : {
             'topic' : 'Do you want to know when recycling is collected?',
             'address' : 'Do you want to know when recycling is collected at this address?'
+        },
+        'zoning' : {
+            'topic' :  'Do you want to know about a zoning?', 
+            'address' :  'Do you want to know about the zoning at this address?'
         }
-        // 'zoning' : {
-        //     'topic' :  'Do you want to know about a zoning?', 
-        //     'address' :  'Do you want to know about the zoning at this address?'
-        // },
         // 'street-maintenance' : {
         //     'topic' :  'Do you want to know who is responsible for maintaining a street?',
         //     'address' :  'Do you want to know who is responsible for maintaining a street this address?',

@@ -1,4 +1,5 @@
-<div class = "col-xs-12 list-item-panel">
+<div ng-repeat = "feature in topic.features">
+<div class = "col-xs-12 list-item-panel"  style = "margin-bottom : 20px">
 	<h4>Zoning</h4>
 	<h5 class = "text-muted" ng-if = "card.codelink === 'disable'">
 		<strong>District</strong>
@@ -12,8 +13,9 @@
 		<a ng-repeat = "zoning in feature.properties.zoning" class = ""  target = "_blank" href="{{feature.properties.codelink}}"><strong>{{zoning}}</strong></a>
 	</h5>
 	<h5 ng-if = "feature.properties.zoningOverlays !== undefined" >
-		<strong>Zoning Overlay</strong>
+		<strong class = "text-muted">Zoning Overlay</strong>
 		:
 		<span>{{feature.properties.zoningOverlays}}</span>
 	</h5>
+</div>
 </div>

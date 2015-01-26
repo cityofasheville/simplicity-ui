@@ -19,6 +19,8 @@ app.controller('TopicsCtrl', ['$scope', '$stateParams', '$state', 'Topics',
       $scope.heading = 'What are you looking for in ';
     }else if($stateParams.searchby === 'pinnum'){
       $scope.heading = 'What are you looking for with the PIN ';
+    }else if($stateParams.searchby === 'owner_name'){
+      $scope.heading = 'What are you looking for by the owner ';
     }
 
     $scope.searchText = $stateParams.searchtext + '?';

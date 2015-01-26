@@ -65,6 +65,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
 
     //container for data cache properties
     var dataCacheProperties = {};
+    var pinnum2civicaddressid = {};
 
     //We need a date to filter the timeframe, so get today's date
     var d = new Date();
@@ -104,9 +105,9 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
       'crime' : {
         'Aggravated Assault' : 'FF0000',
         'Burglary' : 'FFF000',
-        'Drug Arrest' : 'FFFF00',
+        'Drug Arrest' : 'FFA500',
         'Homicide' : 'FFFFF0',
-        'Larceny' : '00FFFF',
+        'Larceny' : '00FF00',
         'Larceny of Motor Vehicle' : '000080',
         'Rape' : '0000FF',
         'Robbery' : 'FF00FF',
@@ -280,14 +281,14 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
 
     var addGeoJsonForSearchToDataCacheFromEsriJson = function(esriJson){
       var features = [];
-          for (var i = 0; i < esriJson.features.length; i++) {
-            features.push(L.esri.Util.arcgisToGeojson(esriJson.features[i], 'id'));
-          }
-          var geojson = {
-            type: 'FeatureCollection',
-            features: features
-          };
-          dataCacheProperties.searchGeojson = geojson;
+      for (var i = 0; i < esriJson.features.length; i++) {
+        features.push(L.esri.Util.arcgisToGeojson(esriJson.features[i], 'id'));
+      }
+      var geojson = {
+        type: 'FeatureCollection',
+        features: features
+      };
+      dataCacheProperties.searchGeojson = geojson;
     };
 
     var addGeoJsonForSearchToDataCache = function(idArray){
@@ -332,7 +333,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
           addGeoJsonForSearchToDataCacheFromEsriJson(neighborhoodResults);
           q.resolve();
         });
-      }else if($stateParams.searchby === "pinnum"){
+      }else if($stateParams.searchby === "pinnum" || $stateParams.searchby === "owner_name"){
         //build query params for the request with a where clause
         q.resolve();
       }
@@ -385,7 +386,6 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
 
     //Queries backend data cache with an array of civicaddress ids, updates the dataCacheProperties variable, and return updated dataCacheProperties variable
     var queryDataCacheWithAnArrayOfIds = function(ids){
-
       //use $q promises to handle the http request asynchronously
       var q = $q.defer();
       //build query params for the request with a 'where in' clause
@@ -396,11 +396,20 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
       };
       queryBackend(featureService.dataCache, queryParams)
         .then(function(dataCacheResults){
+
           var crime = {};
           var development = {};
           for (var i = 0; i < dataCacheResults.features.length; i++) {
             var attributes = dataCacheResults.features[i].attributes;
-            if(attributes.type === 'CRIME'){
+            if(attributes.type === 'ZONING'){
+              if(dataCacheProperties.zoning !== undefined){
+                dataCacheProperties.zoning[attributes.civicaddress_id] = createArrayFromNullorString(attributes.data, ',');
+              }else{
+                dataCacheProperties.zoning = {};
+                dataCacheProperties.zoning[attributes.civicaddress_id] = createArrayFromNullorString(attributes.data, ',');
+              }
+              //dataCacheProperties.zoning = createArrayFromNullorString(attributes.data, ',');
+            }else if(attributes.type === 'CRIME'){
               if(crime[attributes.distance] === undefined){
                 crime[attributes.distance] = {};
               }
@@ -547,70 +556,109 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
     // |p|r|o|p|e|r|t|y|
     // +-+-+-+-+-+-+-+-+
 
+
+    var formatPropertyData = function(property){
+      console.log(dataCacheProperties);
+      var q = $q.defer();
+      var geojson = {
+        type: 'FeatureCollection',
+        features: []
+      };
+      for (var p = 0; p < property.features.length; p++) {
+
+        if($stateParams.searchby === "address"){
+          property.features[p].attributes.civicaddress_id = $stateParams.id;
+          property.features[p].attributes.zoning = dataCacheProperties.zoning;
+        }else if($stateParams.searchby === 'pinnum' || $stateParams.searchby === 'owner_name'){
+          property.features[p].attributes.civicaddress_id = pinnum2civicaddressid[property.features[p].attributes.pinnum];
+          property.features[p].attributes.zoning = dataCacheProperties.zoning[property.features[p].attributes.civicaddress_id];
+        }
+
+        property.features[p].attributes.zoningOverlays = dataCacheProperties.zoningOverlays;
+        if(codelinks[dataCacheProperties.zoning] === undefined){
+          property.features[p].attributes.codelink = 'disable';
+        }else{
+          property.features[p].attributes.codelink = codelinks[dataCacheProperties.zoning];
+        }
+        
+        // var idField = property.fields[p].name;
+        geojson.features.push(L.esri.Util.arcgisToGeojson(property.features[p], 'id'));
+
+        if(dataCacheProperties.zoningOverlays){
+          var zoningOverlaysSplit = dataCacheProperties.zoningOverlays.split('-');
+          var zoningOverlayParams = {
+            'where' : "name='" + zoningOverlaysSplit[0] + "'",
+            'f' : 'json',
+            'outFields' : '*'
+          };
+           queryBackend(featureService.zoningOverlay, zoningOverlayParams)
+              .then(function(zoningOverlayLayer){
+                console.log(zoningOverlayLayer);
+                var features = [];
+                for (var i = 0; i < zoningOverlayLayer.features.length; i++) {
+                  features.push(L.esri.Util.arcgisToGeojson(zoningOverlayLayer.features[i], 'id'));
+                }
+                var overlayGeojson = {
+                  type: 'FeatureCollection',
+                  features: features
+                };
+                geojson.overlays = overlayGeojson;
+                q.resolve(geojson);
+              });
+        }else{
+          console.log(geojson);
+          q.resolve(geojson);
+        }
+      };
+      return  q.promise;
+    }
+
     //We need to use the pinnum to lookup property information 
     //We can access the pinnum by cross-referencing the cividaddress id in the xref table
     //WE can acess the civicaddress id from the stateParams
     Topic.property = function(){
       var q = $q.defer();
       //It only makes sense to the get the property information about a single address
-      if($stateParams.searchby === 'address'){
-        
-      //build query params for the request with a where clause
-      var queryParams = {
-        'where' : 'civicaddress_id=' + Number($stateParams.id),
-        'f' : 'json',
-        'outFields' : 'pinnum'
-      };
-      queryBackend(featureService.xref, queryParams)
-        .then(function(xRef){
-          //build query params for the request with a where clause
-          var queryParams = {
-            'where' : "pinnum='" + xRef.features[0].attributes.pinnum + "'",
-            'f' : 'json',
-            'outFields' : '*'
-          };
-          queryBackend(featureService.property, queryParams)
-            .then(function(property){
-              property.features[0].attributes.zoning = dataCacheProperties.zoning;
-              property.features[0].attributes.zoningOverlays = dataCacheProperties.zoningOverlays;
-              if(codelinks[dataCacheProperties.zoning] === undefined){
-                property.features[0].attributes.codelink = 'disable';
-              }else{
-                property.features[0].attributes.codelink = codelinks[dataCacheProperties.zoning];
-              }
-              
-              var idField = property.fields[0].name;
-              var feature = L.esri.Util.arcgisToGeojson(property.features[0], idField);
-              var geojson = {
-                type: 'FeatureCollection',
-                features: [feature]
-              };
-              q.resolve(geojson);
-            });
-        });
-      }else if ($stateParams.searchby === 'pinnum'){
+      if($stateParams.searchby === 'address'){ 
+          
+        //build query params for the request with a where clause
+        var queryParams = {
+          'where' : 'civicaddress_id=' + Number($stateParams.id),
+          'f' : 'json',
+          'outFields' : 'pinnum'
+        };
+        queryBackend(featureService.xref, queryParams)
+          .then(function(xRef){
+            //build query params for the request with a where clause
+            var queryParams = {
+              'where' : "pinnum='" + xRef.features[0].attributes.pinnum + "'",
+              'f' : 'json',
+              'outFields' : '*'
+            };
+            queryBackend(featureService.property, queryParams)
+              .then(function(property){
+                q.resolve(formatPropertyData(property));
+              });
+          });
+      }else if ($stateParams.searchby === 'pinnum' || $stateParams.searchby === 'owner_name'){
+        console.log('or');
+        var pinArray = $stateParams.id.split(',');
+        var pinString = '';
+        for (var i = 0; i < pinArray.length; i++) {
+          if(i === 0){
+            pinString = pinString + "'" + pinArray[i] + "'";
+          }else{
+            pinString = pinString + ",'" + pinArray[i] + "'";
+          }         
+        }
         var pinParams = {
-          'where' : "pinnum='" + $stateParams.id + "'",
+          'where' : "pinnum in (" + pinString + ")",
           'f' : 'json',
           'outFields' : '*'
         };
         queryBackend(featureService.property, pinParams)
           .then(function(property){
-            property.features[0].attributes.zoning = dataCacheProperties.zoning;
-            property.features[0].attributes.zoningOverlays = dataCacheProperties.zoningOverlays;
-            if(codelinks[dataCacheProperties.zoning] === undefined){
-              property.features[0].attributes.codelink = 'disable';
-            }else{
-              property.features[0].attributes.codelink = codelinks[dataCacheProperties.zoning];
-            }
-            
-            var idField = property.fields[0].name;
-            var feature = L.esri.Util.arcgisToGeojson(property.features[0], idField);
-            var geojson = {
-              type: 'FeatureCollection',
-              features: [feature]
-            };
-            q.resolve(geojson);
+            q.resolve(formatPropertyData(property));
           });
       }
       return q.promise;
@@ -719,6 +767,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
         };
         queryBackend(featureService.crime, neighborhoodQueryParams)
           .then(function(crimes){
+            console.log(crimes);
             q.resolve(formatCrimeData(crimes));
           });
       }
@@ -953,34 +1002,54 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
     // +-+-+-+-+-+-+
 
     Topic.zoning = function(){
-      // var q = $q.defer();
-      // if(featureService.zoningOverlays){
-      //   var zoningOverlaysSplit = featureService.zoningOverlays.split('-');
-      //   var queryParams = {
-      //     'where' : "name='" + zoningOverlaysSplit[0] + "'",
-      //     'f' : 'json',
-      //     'outFields' : '*'
-      //   };
-      //   queryBackend(zoningOverlay, queryParams)
-      //         .then(function(zoningOverlayLayer){
-      //           var zoningProperties = {
-      //             'zoning' : featureService.zoning,
-      //             'codelink' : codelinks[featureService.zoning],
-      //             'zoningOverlays' : zoningOverlayLayer.features[0]
-      //           };
-      //           q.resolve(zoningProperties);
-      //         });
-      // }else{
-
-      //   var zoningProperties = {
-      //     'zoning' : featureService.zoning,
-      //     'codelink' : codelinks[featureService.zoning],
-      //     'zoningOverlays' : 'disable'
-      //   };
-      //   q.resolve(zoningProperties);
-      // }
-      
-      // return q.promise;
+      var q = $q.defer();
+      if(codelinks[dataCacheProperties.zoning] === undefined){
+        var codelink = 'disable';
+      }else{
+        var codelink = codelinks[dataCacheProperties.zoning];
+      }
+      var geojson = {
+        'type' : 'FeatureCollection',
+        'summary' : {},
+        'searchGeojson' : dataCacheProperties.searchGeojson,
+        'features' : [{
+            'type' : 'Feature',
+            'properties' : {
+              'zoning' : dataCacheProperties.zoning,
+              'zoningOverlays' : dataCacheProperties.zoningOverlays,
+              'codelink' : codelink
+            },
+            'geometry' : {
+              'type' : 'Point',
+              'coordinates' : [dataCacheProperties.searchGeojson.features[0].geometry.coordinates[0], dataCacheProperties.searchGeojson.features[0].geometry.coordinates[1]]
+            }
+        }]
+      };
+      if(dataCacheProperties.zoningOverlays){
+        var zoningOverlaysSplit = dataCacheProperties.zoningOverlays.split('-');
+        var zoningOverlayParams = {
+          'where' : "name='" + zoningOverlaysSplit[0] + "'",
+          'f' : 'json',
+          'outFields' : '*'
+        };
+         queryBackend(featureService.zoningOverlay, zoningOverlayParams)
+            .then(function(zoningOverlayLayer){
+              var features = [];
+              for (var i = 0; i < zoningOverlayLayer.features.length; i++) {
+                features.push(L.esri.Util.arcgisToGeojson(zoningOverlayLayer.features[i], 'id'));
+              }
+              var overlayGeojson = {
+                type: 'FeatureCollection',
+                features: features
+              };
+              geojson.overlays = overlayGeojson;
+              q.resolve(geojson);
+            });
+      }else{
+        q.resolve(geojson);
+      }
+            
+      return q.promise;
     };
 
 
@@ -1027,9 +1096,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
     //id can be a single civicaddress id or an array of civicaddress ids
     Backend.dataCache = function(){
       var q = $q.defer();
-      var queryParams = {};
-      var id = $stateParams.id;
-      var splitId = id.split(',');
+      dataCacheProperties = {};
       if($stateParams.searchby === 'address'){
         addGeoJsonForSearchToDataCache([$stateParams.id])
           .then(function(){
@@ -1057,33 +1124,34 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
                 q.resolve(queryDataCacheWithAnArrayOfIds(civicaddressIdArray));
               });
           });
-          
-        
-      }else if($stateParams.searchby === 'neighborhood'){
-        addGeoJsonForSearchToDataCache([$stateParams.id])
-          .then(function(){
-            q.resolve();
-          });
-      }else if($stateParams.searchby === 'pinnum'){
+     }else if($stateParams.searchby === 'owner_name' || $stateParams.searchby === 'pinnum'){
+        var pinArray = $stateParams.id.split(',');
+        var pinString = '';
+        for (var i = 0; i < pinArray.length; i++) {
+          if(i === 0){
+            pinString = pinString + "'" + pinArray[i] + "'";
+          }else{
+            pinString = pinString + ",'" + pinArray[i] + "'";
+          }         
+        }
         var pinQueryParams = {
-          'where' : "pinnum = '" + $stateParams.id + "'", 
+          'where' : "pinnum in (" + pinString + ")", 
           'f' : 'json',
-          'outFields' : 'civicaddress_id'
+          'outFields' : '*'
         };
         queryBackend(featureService.xref, pinQueryParams)
           .then(function(pinXrefResults){
             var civicaddressIdArray = [];
+            pinnum2civicaddressid = {};
             for (var i = 0; i < pinXrefResults.features.length; i++) {
               civicaddressIdArray.push(pinXrefResults.features[i].attributes.civicaddress_id);
+              pinnum2civicaddressid[pinXrefResults.features[i].attributes.pinnum] = pinXrefResults.features[i].attributes.civicaddress_id
             }
-            addGeoJsonForSearchToDataCache(idArray)
+            addGeoJsonForSearchToDataCache(civicaddressIdArray)
               .then(function(){
-                q.resolve(queryDataCacheWithASingleId(civicaddressIdArray[0]));
+                q.resolve(queryDataCacheWithAnArrayOfIds(civicaddressIdArray));
               });
-
-            
           });
-        //q.resolve();
         }
         
       
