@@ -152,61 +152,58 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
     var returnToFullscreen = false;
 
     var addGeoJsonToMap = function(data, style){
-      var leafletGeoJsonLayer = L.geoJson(data, {
-        pointToLayer: function(feature, latlng){
-          if(feature.geometry.type === "Point"){
-            return L.circleMarker(latlng, {
-              radius: 10,
-              fillColor: "#"+feature.properties.color,
-              color: "#"+feature.properties.color,
-              weight: 1,
-              opacity: 1,
-              fillOpacity: 0.8
-            }); 
-          }else{
-            return false;
+      if(data.length > 0){
+        var leafletGeoJsonLayer = L.geoJson(data, {
+          pointToLayer: function(feature, latlng){
+            if(feature.geometry.type === "Point"){
+              return L.circleMarker(latlng, {
+                radius: 10,
+                fillColor: "#"+feature.properties.color,
+                color: "#"+feature.properties.color,
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+              }); 
+            }else{
+              return false;
+            }
+          },
+          style: function (feature) {
+            if(style){
+              return style;
+            }
+          },
+          onEachFeature: function (feature, layer) {
+            layer.on('click', function(){
+                  $scope.filterText = feature.properties.objectid;
+                  $scope.$apply();
+                  $('#detailsModal').modal({'backdrop' : 'static'});
+                  if (
+                      document.fullscreenElement ||
+                      document.webkitFullscreenElement ||
+                      document.mozFullScreenElement ||
+                      document.msFullscreenElement
+                  ) {
+                    returnToFullscreen = true;
+                  }
+                  if (document.exitFullscreen) {
+                      document.exitFullscreen();
+                  } else if (document.webkitExitFullscreen) {
+                      document.webkitExitFullscreen();
+                  } else if (document.mozCancelFullScreen) {
+                      document.mozCancelFullScreen();
+                  } else if (document.msExitFullscreen) {
+                      document.msExitFullscreen();
+                  }   
+            });
           }
-        },
-        style: function (feature) {
-          if(style){
-            return style;
+        });
+        leafletGeoJsonLayer.addTo(map);
+        map.fitBounds(leafletGeoJsonLayer);
+          if(map.getZoom() > 18){
+            map.setZoom(18);
           }
-        },
-        onEachFeature: function (feature, layer) {
-          layer.on('click', function(){
-              if(feature.geometry.type === "Point"){
-                $scope.filterText = feature.properties.objectid;
-                $scope.$apply();
-                $('#detailsModal').modal({'backdrop' : 'static'});
-                if (
-                    document.fullscreenElement ||
-                    document.webkitFullscreenElement ||
-                    document.mozFullScreenElement ||
-                    document.msFullscreenElement
-                ) {
-                  returnToFullscreen = true;
-                }
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-                
-
-                
-              }     
-          });
-        }
-      });
-      leafletGeoJsonLayer.addTo(map);
-      map.fitBounds(leafletGeoJsonLayer);
-        if(map.getZoom() > 18){
-          map.setZoom(18);
-        }
+      }
     };
 
     var addSearchGeoJsonToMap = function(data, style){

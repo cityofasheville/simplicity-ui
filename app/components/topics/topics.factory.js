@@ -27,6 +27,15 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                     },
                     'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
                 },
+                'street_name' : {
+                    'params' : {
+                        'type' : null,
+                        'timeframe' : null,
+                        'extent' : null,
+                        'view' : 'list'
+                    },
+                    'headerTemplate' : 'topic/topic-headers/topic.header.along.html',
+                },
                 'pinnum' : {
                     'params' : {
                         'type' : null,
@@ -49,7 +58,7 @@ app.factory('Topics', ['$stateParams', function($stateParams){
             'simpleViewTemplate' : null,
             'detailsViewTemplate' : 'topic/topic-views/property.view.html',
             'tableViewTemplate' : null,
-            'listViewTemplate' : null,
+            'listViewTemplate' : 'topic/topic-views/property.view.html',
             'defaultView' : 'details',
             'iconClass' : 'flaticon-real10',
             'linkTopics' : ['crime', 'trash', 'recycling']
@@ -241,7 +250,7 @@ app.factory('Topics', ['$stateParams', function($stateParams){
             'defaultView' : 'details',
             'iconClass' : 'flaticon-map104',
             'linkTopics' : ['property', 'crime', 'development']
-        }
+        },
         //      _                 _                     _       _                                 
         //  ___| |_ _ __ ___  ___| |_   _ __ ___   __ _(_)_ __ | |_ ___ _ __   ___ _ __   ___ ___ 
         // / __| __| '__/ _ \/ _ \ __| | '_ ` _ \ / _` | | '_ \| __/ _ \ '_ \ / _ \ '_ \ / __/ _ \
@@ -268,37 +277,51 @@ app.factory('Topics', ['$stateParams', function($stateParams){
         //     'iconClass' : 'flaticon-location38'
         // },
         //            _     _                     _ _     _       
-        //   __ _  __| | __| |_ __ ___  ___ ___  | (_)___| |_ ___ 
-        //  / _` |/ _` |/ _` | '__/ _ \/ __/ __| | | / __| __/ __|
-        // | (_| | (_| | (_| | | |  __/\__ \__ \ | | \__ \ |_\__ \
-        //  \__,_|\__,_|\__,_|_|  \___||___/___/ |_|_|___/\__|___/                                                   
-        // {
-        //     'name' : 'address-lists',
-        //     'title' : 'Address Lists',
-        //     'position' : 8,
-        //     'searchby' : {
-        //         'street_name' : {
-        //             'params' : {},
-        //             'requiredParams' : [],
-        //             'headerTemplate' : 'topic/topic-headers/topic.header.during.along.html',
-        //         },
-        //         'neighborhood' : {
-        //             'params' : {},
-        //             'requiredParams' : [],
-        //             'headerTemplate' : 'topic/topic-headers/topic.header.during.in.html',
-        //         }
-        //     },
-        //     'viewTemplate' : 'topic/cards/address-lists.card.html',
-        //     'views' : ['details', 'map'],
-        //     'defaultView' : 'card',
-        //     'iconClass' : 'flaticon-address7'
-        // }
+        //   __ _  __| | __| |_ __ ___  ___ ___  | (_)___| |_ 
+        //  / _` |/ _` |/ _` | '__/ _ \/ __/ __| | | / __| __/ 
+        // | (_| | (_| | (_| | | |  __/\__ \__ \ | | \__ \ |_
+        //  \__,_|\__,_|\__,_|_|  \___||___/___/ |_|_|___/\__|                                                 
+        {
+            'name' : 'addresslist',
+            'title' : 'Address List',
+            'position' : 8,
+            'searchby' : {
+                'street_name' : {
+                    'params' : {
+                        'type' : null,
+                        'timeframe' : null,
+                        'extent' : 82.5,
+                        'view' : 'table'
+                    },
+                    'requiredParams' : [],
+                    'headerTemplate' : 'topic/topic-headers/topic.header.along.html',
+                },
+                'neighborhood' : {
+                    'params' : {
+                        'type' : null,
+                        'timeframe' : null,
+                        'extent' : null,
+                        'view' : 'simple'
+                    },
+                    'requiredParams' : [],
+                    'headerTemplate' : 'topic/topic-headers/topic.header.during.in.html',
+                }
+            },
+            'simpleViewTemplate' : null,
+            'detailsViewTemplate' : null,
+            'tableViewTemplate' : 'topic/topic-views/address-list.table.view.html',
+            'listViewTemplate' : 'topic/topic-views/address-list.view.html',
+            'defaultView' : 'simple',
+            'iconClass' : 'flaticon-address7',
+            'linkTopics' : ['property']
+        }
     ];
 
     var questions = {
         'property' : {
             'topic' : 'Do you want to know about a property?',
             'address' : 'Do you want to know about the property at this address?',
+            'street_name' : 'Do you want to know about the properties along this street?',
             'pinnum' : 'Do you want to know about the property for this PIN?',
             'owner_name' : 'Do you want to know about the properties owned by this owner?'
         },
@@ -325,17 +348,17 @@ app.factory('Topics', ['$stateParams', function($stateParams){
         'zoning' : {
             'topic' :  'Do you want to know about a zoning?', 
             'address' :  'Do you want to know about the zoning at this address?'
-        }
+        },
         // 'street-maintenance' : {
         //     'topic' :  'Do you want to know who is responsible for maintaining a street?',
         //     'address' :  'Do you want to know who is responsible for maintaining a street this address?',
         //     'street_name' : 'Do you want to know who is responsible for maintaining this street?'
         // },
-        // 'address-lists' : {
-        //     'topic' :  'Do you want a list of addresses?',
-        //     'street_name' : 'Do you want a list of addresses along this street?',
-        //     'neighborhood' :  'Do you want a list of addresses in this neighborhood?'
-        // }
+        'addresslist' : {
+            'topic' :  'Do you want a list of addresses?',
+            'street_name' : 'Do you want a list of addresses along this street?',
+            'neighborhood' :  'Do you want a list of addresses in this neighborhood?'
+        }
     };
 
 
@@ -347,7 +370,6 @@ app.factory('Topics', ['$stateParams', function($stateParams){
             var topicsToShowBeforeAnIdHasBeenSet = [];
             for (var i = 0; i < topicsArray.length; i++) {
                 topicsToShowBeforeAnIdHasBeenSet.push(topicsArray[i]);
-                console.log(topicsArray[i].name);
                 topicsToShowBeforeAnIdHasBeenSet[i].question = questions[topicsArray[i].name].topic;
                 topicsToShowBeforeAnIdHasBeenSet[i].linkTo = '#/search/' + topicsArray[i].name;
             }

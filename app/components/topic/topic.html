@@ -83,7 +83,7 @@
             <div class="modal-content">
               <div class="modal-header">
                 <button ng-click = "closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Point Details</h4>
+                <h4 class="modal-title">Location Details</h4>
               </div>
               <div class="modal-body" >
                 <div ng-include = "topicProperties.listViewTemplate"></div>
@@ -95,7 +95,7 @@
     </div>
 
     <!-- RELATED LINKS -->
-    <div class="col-xs-12 list-item-panel" style = "margin-top : 30px">
+    <div ng-if = "linkTopics.length > 0" class="col-xs-12 list-item-panel" style = "margin-top : 30px">
       <h2>Related Links</h2>
       <div class="list-group" style = "margin-top : 20px">
         <a class="row list-group-item list-item-panel" href = '{{linkTopic.linkTo}}' style = "margin-bottom : 5px" ng-repeat = "linkTopic in linkTopics">

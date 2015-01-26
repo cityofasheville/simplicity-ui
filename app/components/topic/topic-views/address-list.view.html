@@ -1,0 +1,10 @@
+<div ng-repeat = "feature in topic.features | filter:filterText" class="col-xs-12 list-item-panel">
+  <h4 class = "text-muted text-center" style = "margin-top : 20px; margin-botton : 20px">
+    <strong>
+      <span>{{feature.properties.street_number}} {{feature.properties.street_name}} {{feature.properties.street_type}}</span>
+      <span ng-if = "feature.properties.unit_number === null">,</span>
+      <span ng-if = "feature.properties.unit_number !== null">UNIT {{feature.properties.unit_number}},</span>
+      <span>{{feature.properties.zip_code}}</span>
+    </strong>
+  </h4>
+</div>

@@ -64,7 +64,6 @@ app.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'B
     //groupOrderArray.splice(groupOrderPosition, 0, data.candidates[i].attributes.Loc_name);
 
     $scope.goToTopics = function(candidate, event){
-        console.log(candidate);
         var label = ""
         for (var i = 0; i < candidate.label.length; i++) {
             if(candidate.label.charAt(i) !== '&'){
