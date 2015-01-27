@@ -256,26 +256,40 @@ app.factory('Topics', ['$stateParams', function($stateParams){
         // / __| __| '__/ _ \/ _ \ __| | '_ ` _ \ / _` | | '_ \| __/ _ \ '_ \ / _ \ '_ \ / __/ _ \
         // \__ \ |_| | |  __/  __/ |_  | | | | | | (_| | | | | | ||  __/ | | |  __/ | | | (_|  __/
         // |___/\__|_|  \___|\___|\__| |_| |_| |_|\__,_|_|_| |_|\__\___|_| |_|\___|_| |_|\___\___|                                                                           
-        // {
-        //     'name' : 'street-maintenance',
-        //     'title' : 'Street Mainenance',
-        //     'position' : 7,
-        //     'searchby' : {
-        //         'address' : {
-        //             'params' : {},
-        //             'requiredParams' : [],
-        //             'headerTemplate' : 'topic/topic-headers/topic.header.during.within.of.html',
-        //         },
-        //         'street_name' : {
-        //             'params' : {},
-        //             'requiredParams' : [],
-        //             'headerTemplate' : 'topic/topic-headers/topic.header.during.along.html',
-        //         }
-        //     },
-        //     'viewTemplate' : 'topic/cards/street-maintenance.card.html',
-        //     'views' : ['details', 'map'],
-        //     'iconClass' : 'flaticon-location38'
-        // },
+        {
+            'name' : 'streetmaintenance',
+            'title' : 'Street Maintenance',
+            'position' : 7,
+            'searchby' : {
+                'address' : {
+                    'params' : {
+                        'type' : null,
+                        'timeframe' : null,
+                        'extent' : null,
+                        'view' : 'map'
+                    },
+                    'requiredParams' : [],
+                    'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
+                },
+                'street_name' : {
+                    'params' : {
+                        'type' : null,
+                        'timeframe' : null,
+                        'extent' : 82.5,
+                        'view' : 'map'
+                    },
+                    'requiredParams' : [],
+                    'headerTemplate' : 'topic/topic-headers/topic.header.along.html',
+                }
+            },
+            'simpleViewTemplate' : null,
+            'detailsViewTemplate' : 'topic/topic-views/street-maintenance.view.html',
+            'tableViewTemplate' : null,
+            'listViewTemplate' : 'topic/topic-views/street-maintenance.view.html',
+            'defaultView' : 'map',
+            'linkTopics' : ['property'],
+            'iconClass' : 'flaticon-location38'
+        },
         //            _     _                     _ _     _       
         //   __ _  __| | __| |_ __ ___  ___ ___  | (_)___| |_ 
         //  / _` |/ _` |/ _` | '__/ _ \/ __/ __| | | / __| __/ 
@@ -349,11 +363,11 @@ app.factory('Topics', ['$stateParams', function($stateParams){
             'topic' :  'Do you want to know about a zoning?', 
             'address' :  'Do you want to know about the zoning at this address?'
         },
-        // 'street-maintenance' : {
-        //     'topic' :  'Do you want to know who is responsible for maintaining a street?',
-        //     'address' :  'Do you want to know who is responsible for maintaining a street this address?',
-        //     'street_name' : 'Do you want to know who is responsible for maintaining this street?'
-        // },
+        'streetmaintenance' : {
+            'topic' :  'Do you want to know who is responsible for maintaining a street?',
+            'address' :  'Do you want to know who is responsible for maintaining the street at this address?',
+            'street_name' : 'Do you want to know who is responsible for maintaining this street?'
+        },
         'addresslist' : {
             'topic' :  'Do you want a list of addresses?',
             'street_name' : 'Do you want a list of addresses along this street?',
