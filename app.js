@@ -187,6 +187,13 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
           'Planning Level II':'7FFFD4',
           'Planning Level III':'00FFFF',
           'Planning Signage Plan':'000080'
+      },
+      'streetmaintenance' : {
+        'CITY OF ASHEVILLE' : {'color' : 'FF0000'},
+        'PRIVATE' : {'color' : 'FFF000'},
+        'UNKNOWN' : {'color' : 'FFA500'},
+        'NCDOT' : {'color' : '00FF00'},
+        'NATIONAL PARK SERVICE' : {'color' : '000080'},
       }
     };
 
@@ -922,13 +929,10 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
           }else{
             filteredFeaturesSummary.table[development.features[i].attributes.record_type].count = filteredFeaturesSummary.table[development.features[i].attributes.record_type].count + 1;
           }
-          //add filtered features to array
-          if($stateParams.type === 'null' || $stateParams.type === null || $stateParams.type === development.features[i].attributes.record_type.toLowerCase().replace(/ /g, '-')){
-            if(development.features[i].attributes.record_comments){
-                development.features[i].attributes.commentsArray = development.features[i].attributes.record_comments.split('[NEXTCOMMENT]');
-              }
-            filterdFeaturesArray.push(L.esri.Util.arcgisToGeojson(development.features[i], 'id'));
+          if(development.features[i].attributes.record_comments){
+            development.features[i].attributes.commentsArray = development.features[i].attributes.record_comments.split('[NEXTCOMMENT]');
           }
+          filterdFeaturesArray.push(L.esri.Util.arcgisToGeojson(development.features[i], 'id'));
           
         }
       }
@@ -1184,9 +1188,65 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
     // +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+
     // |s|t|r|e|e|t| |m|a|i|n|t|e|n|a|n|c|e|
     // +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+
+    var formatStreetMaintenanceData = function(centerlineIdsString){
+      var q = $q.defer();
+      var streetQueryParams = {
+          'where' : "centerline_id in (" + centerlineIdsString + ")", 
+          'f' : 'json',
+          'outFields' : '*'
+        };
+        queryBackend(featureService.street, streetQueryParams)
+          .then(function(streetResults){
+              var streetFeaturesArray = [];
+              var streetMaintenanceColors = {};
+              for (var i = 0; i < streetResults.features.length; i++) {
+                if(streetResults.features[i].attributes.street_responsibility === 'UNKOWN'){
+                  streetResults.features[i].attributes.street_responsibility = 'UNKNOWN'
+                };
+                if(!streetMaintenanceColors[streetResults.features[i].attributes.street_responsibility]){
+                  streetMaintenanceColors[streetResults.features[i].attributes.street_responsibility] = colors.streetmaintenance[streetResults.features[i].attributes.street_responsibility]
+                }
+                streetResults.features[i].attributes.color = colors.streetmaintenance[streetResults.features[i].attributes.street_responsibility].color;
+                streetFeaturesArray.push(L.esri.Util.arcgisToGeojson(streetResults.features[i]));
+              };
+              var summary = {
+                'table' : streetMaintenanceColors
+              }
+              var geojson = {
+                'type' : 'FeatureCollection',
+                'summary' : summary,
+                'searchGeojson' : dataCacheProperties.searchGeojson,
+                'features' : streetFeaturesArray
+              };
+              q.resolve(geojson);
+          });
+        return q.promise
+    }
 
-    Topic.streetMaintenance = function(){
+    Topic.streetmaintenance = function(){
+      var q = $q.defer();
+      if($stateParams.searchby === "street_name"){
+        q.resolve(formatStreetMaintenanceData($stateParams.id));
 
+      }else if ($stateParams.searchby === "address"){
+        var addressQueryParams = {
+          'where' : "civicaddress_id = " + $stateParams.id, 
+          'f' : 'json',
+          'outFields' : '*'
+        };
+        queryBackend(featureService.xref, addressQueryParams)
+          .then(function(xrefResults){
+            var centerlineIdArray = [];
+            for (var i = 0; i < xrefResults.features.length; i++) {
+              centerlineIdArray.push(xrefResults.features[i].attributes.centerline_id);
+            }
+            q.resolve(formatStreetMaintenanceData(centerlineIdArray.join(',')));
+
+          })
+      }
+      
+
+      return q.promise;
     };
 
 
@@ -1307,6 +1367,8 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
                 q.resolve(queryDataCacheWithAnArrayOfIds(civicaddressIdArray));
               });
           });
+        }else if($stateParams.searchby === 'neighborhood'){
+          q.resolve();
         }
         
       
@@ -1644,6 +1706,12 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
           style: function (feature) {
             if(style){
               return style;
+            }else if(feature.geometry.type === "LineString"){
+              return {
+                color: "#"+feature.properties.color,
+                weight: 8,
+                opacity: .8,
+              }; 
             }
           },
           onEachFeature: function (feature, layer) {
@@ -1751,6 +1819,7 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
     };
 
     $scope.filterBy = function(type){
+
       if($stateParams.view === 'table'){
         updateStateParamsAndReloadState('type', type);
         updateStateParamsAndReloadState('view', 'list');
@@ -2185,26 +2254,40 @@ app.factory('Topics', ['$stateParams', function($stateParams){
         // / __| __| '__/ _ \/ _ \ __| | '_ ` _ \ / _` | | '_ \| __/ _ \ '_ \ / _ \ '_ \ / __/ _ \
         // \__ \ |_| | |  __/  __/ |_  | | | | | | (_| | | | | | ||  __/ | | |  __/ | | | (_|  __/
         // |___/\__|_|  \___|\___|\__| |_| |_| |_|\__,_|_|_| |_|\__\___|_| |_|\___|_| |_|\___\___|                                                                           
-        // {
-        //     'name' : 'street-maintenance',
-        //     'title' : 'Street Mainenance',
-        //     'position' : 7,
-        //     'searchby' : {
-        //         'address' : {
-        //             'params' : {},
-        //             'requiredParams' : [],
-        //             'headerTemplate' : 'topic/topic-headers/topic.header.during.within.of.html',
-        //         },
-        //         'street_name' : {
-        //             'params' : {},
-        //             'requiredParams' : [],
-        //             'headerTemplate' : 'topic/topic-headers/topic.header.during.along.html',
-        //         }
-        //     },
-        //     'viewTemplate' : 'topic/cards/street-maintenance.card.html',
-        //     'views' : ['details', 'map'],
-        //     'iconClass' : 'flaticon-location38'
-        // },
+        {
+            'name' : 'streetmaintenance',
+            'title' : 'Street Maintenance',
+            'position' : 7,
+            'searchby' : {
+                'address' : {
+                    'params' : {
+                        'type' : null,
+                        'timeframe' : null,
+                        'extent' : null,
+                        'view' : 'map'
+                    },
+                    'requiredParams' : [],
+                    'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
+                },
+                'street_name' : {
+                    'params' : {
+                        'type' : null,
+                        'timeframe' : null,
+                        'extent' : 82.5,
+                        'view' : 'map'
+                    },
+                    'requiredParams' : [],
+                    'headerTemplate' : 'topic/topic-headers/topic.header.along.html',
+                }
+            },
+            'simpleViewTemplate' : null,
+            'detailsViewTemplate' : 'topic/topic-views/street-maintenance.view.html',
+            'tableViewTemplate' : null,
+            'listViewTemplate' : 'topic/topic-views/street-maintenance.view.html',
+            'defaultView' : 'map',
+            'linkTopics' : ['property'],
+            'iconClass' : 'flaticon-location38'
+        },
         //            _     _                     _ _     _       
         //   __ _  __| | __| |_ __ ___  ___ ___  | (_)___| |_ 
         //  / _` |/ _` |/ _` | '__/ _ \/ __/ __| | | / __| __/ 
@@ -2278,11 +2361,11 @@ app.factory('Topics', ['$stateParams', function($stateParams){
             'topic' :  'Do you want to know about a zoning?', 
             'address' :  'Do you want to know about the zoning at this address?'
         },
-        // 'street-maintenance' : {
-        //     'topic' :  'Do you want to know who is responsible for maintaining a street?',
-        //     'address' :  'Do you want to know who is responsible for maintaining a street this address?',
-        //     'street_name' : 'Do you want to know who is responsible for maintaining this street?'
-        // },
+        'streetmaintenance' : {
+            'topic' :  'Do you want to know who is responsible for maintaining a street?',
+            'address' :  'Do you want to know who is responsible for maintaining the street at this address?',
+            'street_name' : 'Do you want to know who is responsible for maintaining this street?'
+        },
         'addresslist' : {
             'topic' :  'Do you want a list of addresses?',
             'street_name' : 'Do you want a list of addresses along this street?',
@@ -2401,7 +2484,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topic/topic.html',
-    '<div><div class="col-xs-12 btn-group btn-group-justified" style="margin-top : 15px"><a href="#/search/composite" class="btn btn-primary"><i class="fa fa-search fa-fw"></i> <strong>Search</strong></a> <a ng-click="goToTopics()" class="btn btn-primary"><i class="fa fa-bars fa-fw"></i> <strong>View Topics</strong></a></div><div class="col-xs-12"><hr></div><div ng-include="headerTemplate"></div><div class="col-xs-12" style="height : 200px; text-align : center; margin-top : 30px" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div class="col-xs-12 list-item-panel" ng-show="!loading"><div ng-if="stateParams.view !== \'simple\'" ng-include="\'topic/topic.view.header.html\'"></div><div ng-if="topicPropteries.simpleViewTemplate !== null" ng-show="stateParams.view === \'simple\'" ng-include="topicProperties.simpleViewTemplate"></div><div ng-if="topicPropteries.detailsViewTemplate !== null" ng-show="stateParams.view === \'details\'" ng-include="topicProperties.detailsViewTemplate"></div><div ng-if="topicPropteries.listViewTemplate !== null" ng-show="stateParams.view === \'list\'" ng-include="topicProperties.listViewTemplate"></div><div ng-if="topicPropteries.tableViewTemplate !== null" ng-show="stateParams.view === \'table\'" ng-include="topicProperties.tableViewTemplate"></div><div><div ng-show="stateParams.view === \'map\'" class="col-xs-12" style="height : 400px; margin-bottom : 20px" id="map"><div ng-if="topic.summary.table !== undefined"><div style="position : absolute; top : 50px; right : 10px; height : 36px; width : 36px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7"><i ng-init="showLegend = false" ng-click="showLegend = !showLegend" ng-mouseenter="showLegend = !showLegend" ng-mouseleave="showLegend = !showLegend" class="fa fa-2x fa-question text-primary" style="margin-top: 6px;margin-left: 10px"></i></div><div ng-show="showLegend" style="position : absolute; top : 50px; right : 50px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7"><table ng-if="topic.features.length !== 0" class="table table-hover"><thead><tr><th>Type <i class="pull-right text-muted fa fa-lg fa-times" ng-click="showLegend = !showLegend"></i></th></tr></thead><tbody><tr ng-repeat="(key, value) in topic.summary.table"><td ng-click="getDetails(key)" style="cursor : pointer"><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}</td></tr></tbody></table></div></div></div><div id="detailsModal" class="modal fade"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button ng-click="closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">Location Details</h4></div><div class="modal-body"><div ng-include="topicProperties.listViewTemplate"></div></div></div></div></div></div></div><div ng-if="linkTopics.length > 0" class="col-xs-12 list-item-panel" style="margin-top : 30px"><h2>Related Links</h2><div class="list-group" style="margin-top : 20px"><a class="row list-group-item list-item-panel" href="{{linkTopic.linkTo}}" style="margin-bottom : 5px" ng-repeat="linkTopic in linkTopics"><span class="visible-xs col-xs-8"><p class="text-primary text-center">{{linkTopic.question}}</p></span> <i ng-class="linkTopic.iconClass" class="visible-xs pull-left col-xs-3 text-primary"></i><div ng-class="linkTopic.iconClass" class="hidden-xs col-sm-2 text-primary"></div><h4 class="hidden-xs col-sm-9 text-primary" style="margin-top : 20px">{{linkTopic.question}}</h4><h4 class="col-sm-1 hidden-xs"><i class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="col-xs-12 text-center">List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a> under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.</div></div><div id="downloadModal" class="modal fade" style="z-index : 3000"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">Download</h4></div><div class="modal-body"><div ng-if="stateParams.topic === \'property\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)">Property Details <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'crime\' || stateParams.topic === \'development\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'summary\', topic)">Summary Table <i class="fa fa-cloud-download"></i></button> <button class="btn btn-primary col-xs-12" style="margin-top : 3px" ng-click="download(\'complete\', topic)">Complete records <i class="fa fa-cloud-download"></i></button><p class="text-muted text-center">based on selected filters</p></div></div></div></div></div></div>');
+    '<div><div class="col-xs-12 btn-group btn-group-justified" style="margin-top : 15px"><a href="#/search/composite" class="btn btn-primary"><i class="fa fa-search fa-fw"></i> <strong>Search</strong></a> <a ng-click="goToTopics()" class="btn btn-primary"><i class="fa fa-bars fa-fw"></i> <strong>View Topics</strong></a></div><div class="col-xs-12"><hr></div><div ng-include="headerTemplate"></div><div class="col-xs-12" style="height : 200px; text-align : center; margin-top : 30px" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div class="col-xs-12 list-item-panel" ng-show="!loading"><div ng-if="stateParams.view !== \'simple\'" ng-include="\'topic/topic.view.header.html\'"></div><div ng-if="topicPropteries.simpleViewTemplate !== null" ng-show="stateParams.view === \'simple\'" ng-include="topicProperties.simpleViewTemplate"></div><div ng-if="topicPropteries.detailsViewTemplate !== null" ng-show="stateParams.view === \'details\'" ng-include="topicProperties.detailsViewTemplate"></div><div ng-if="topicPropteries.listViewTemplate !== null" ng-show="stateParams.view === \'list\'" ng-include="topicProperties.listViewTemplate"></div><div ng-if="topicPropteries.tableViewTemplate !== null" ng-show="stateParams.view === \'table\'" ng-include="topicProperties.tableViewTemplate"></div><div><div ng-show="stateParams.view === \'map\'" class="col-xs-12" style="height : 400px; margin-bottom : 20px" id="map"><div ng-if="topic.summary.table !== undefined"><button ng-init="showLegend = true" ng-show="!showLegend" ng-click="showLegend = !showLegend" class="btn btn-primary btn-sm" style="position : absolute; top : 50px; right : 10px;z-index : 7">Legend <i class="fa fa-expand"></i></button><div ng-show="showLegend" style="position : absolute; top : 50px; right : 10px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7"><div class="col-xs-12"><h4 class="pull-left">Legend</h4><button ng-click="showLegend = !showLegend" class="btn btn-primary btn-sm pull-right" style="margin-top : 5px"><i class="fa fa-times"></i></button></div><table ng-if="topic.features.length !== 0" class="table table-hover"><tbody><tr ng-repeat="(key, value) in topic.summary.table"><td ng-click="getDetails(key)" style="cursor : pointer"><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}</td></tr></tbody></table></div></div></div><div id="detailsModal" class="modal fade"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button ng-click="closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">Location Details</h4></div><div class="modal-body"><div ng-include="topicProperties.listViewTemplate"></div></div></div></div></div></div></div><div ng-if="linkTopics.length > 0" class="col-xs-12 list-item-panel" style="margin-top : 30px"><h2>Related Links</h2><div class="list-group" style="margin-top : 20px"><a class="row list-group-item list-item-panel" href="{{linkTopic.linkTo}}" style="margin-bottom : 5px" ng-repeat="linkTopic in linkTopics"><span class="visible-xs col-xs-8"><p class="text-primary text-center">{{linkTopic.question}}</p></span> <i ng-class="linkTopic.iconClass" class="visible-xs pull-left col-xs-3 text-primary"></i><div ng-class="linkTopic.iconClass" class="hidden-xs col-sm-2 text-primary"></div><h4 class="hidden-xs col-sm-9 text-primary" style="margin-top : 20px">{{linkTopic.question}}</h4><h4 class="col-sm-1 hidden-xs"><i class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="col-xs-12 text-center">List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a> under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.</div></div><div id="downloadModal" class="modal fade" style="z-index : 3000"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">Download</h4></div><div class="modal-body"><div ng-if="stateParams.topic === \'property\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)">Property Details <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'crime\' || stateParams.topic === \'development\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'summary\', topic)">Summary Table <i class="fa fa-cloud-download"></i></button> <button class="btn btn-primary col-xs-12" style="margin-top : 3px" ng-click="download(\'complete\', topic)">Complete records <i class="fa fa-cloud-download"></i></button><p class="text-muted text-center">based on selected filters</p></div></div></div></div></div></div>');
 }]);
 })();
 
@@ -2606,6 +2689,18 @@ try {
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topic/topic-views/sanitation.card.html',
     '<div class="col-xs-12 list-item-panel"><div class="col-xs-12" style="padding : 10px"><h4>Trash</h4><p>Your trash is collected every <strong>{{card.trash}}</strong>.</p><br><h4>Recycling</h4><p class="text-muted">Recycling is collected every other week.</p><p>Your recycling will be collected <strong>{{card.recyclingSchedule.when}} on {{card.recycling}}</strong>.</p><br><h4>Brush and Leaf Collection</h4><p class="text-muted">Brush and leaves are collected every other week, and should be placed at the curb by 7 a.m. on Monday of your pickup week.</p><p>Your brush will be collected <strong>{{card.brushSchedule.when}}</strong>.</p><br><h4>Bulky Item Collection</h4><p>Call to schedule pickup <a href="tel:8282511122" target="_blank">(828) 251-1122</a>. <a href="http://www.ashevillenc.gov/Departments/Sanitation/BulkyItemCollection.aspx" target="_blank">More Info.</a></p></div></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('topic/topic-views/street-maintenance.view.html',
+    '<div ng-repeat="feature in topic.features | filter:filterText" class="col-xs-12 list-item-panel"><div class="col-sm-6 col-xs-12"><h5 class="text-center">Name</h5><h4 class="text-muted text-center" style="margin-top : 20px; margin-botton : 20px"><strong>{{feature.properties.full_street_name}}</strong></h4></div><div class="col-sm-6 col-xs-12"><h5 class="text-center">Centerline ID</h5><h4 class="text-muted text-center" style="margin-top : 20px; margin-botton : 20px"><strong>{{feature.properties.centerline_id}}</strong></h4></div><h5 class="text-center">Responsibility</h5><h2 class="text-muted text-center" style="margin-top : 20px; margin-botton : 20px"><strong>{{feature.properties.street_responsibility}}</strong></h2></div>');
 }]);
 })();
 
