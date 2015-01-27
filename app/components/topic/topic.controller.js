@@ -171,6 +171,12 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
           style: function (feature) {
             if(style){
               return style;
+            }else if(feature.geometry.type === "LineString"){
+              return {
+                color: "#"+feature.properties.color,
+                weight: 8,
+                opacity: .8,
+              }; 
             }
           },
           onEachFeature: function (feature, layer) {
@@ -278,6 +284,7 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
     };
 
     $scope.filterBy = function(type){
+
       if($stateParams.view === 'table'){
         updateStateParamsAndReloadState('type', type);
         updateStateParamsAndReloadState('view', 'list');

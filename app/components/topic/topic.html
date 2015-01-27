@@ -55,16 +55,18 @@
           style = "height : 400px; margin-bottom : 20px" 
           id="map">
           <div ng-if = "topic.summary.table !== undefined">
-            <div  style = "position : absolute; top : 50px; right : 10px; height : 36px; width : 36px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7">
-              <i ng-init = "showLegend = false" ng-click = "showLegend = !showLegend" ng-mouseenter = "showLegend = !showLegend" ng-mouseleave = "showLegend = !showLegend" class="fa fa-2x fa-question text-primary" style = "margin-top: 6px;margin-left: 10px"></i>
-            </div>
-            <div ng-show = "showLegend" style = "position : absolute; top : 50px; right : 50px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7">
+           <!--  <div  ng-init = "showLegend = true" ng-show = "!showLegend" ng-click = "showLegend = !showLegend" style = "position : absolute; top : 50px; right : 10px; height : 36px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7">
+              
+              
+            </div> -->
+            <button ng-init = "showLegend = true" ng-show = "!showLegend" ng-click = "showLegend = !showLegend" class="btn btn-primary btn-sm" style = "position : absolute; top : 50px; right : 10px;z-index : 7">Legend <i  class="fa fa-expand " ></i></button>
+            <div ng-show = "showLegend" style = "position : absolute; top : 50px; right : 10px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7">
+              <div class="col-xs-12" >
+                <h4 class="pull-left">Legend</h4>
+                <button ng-click = "showLegend = !showLegend" class="btn btn-primary btn-sm pull-right" style = "margin-top : 5px"><i class = "fa fa-times" ></i></button>
+              </div>
+              
               <table ng-if = "topic.features.length !== 0" class="table table-hover" >
-                <thead>
-                  <tr>
-                    <th>Type <i class = "pull-right text-muted fa fa-lg fa-times" ng-click = "showLegend = !showLegend"></i></th>
-                  </tr>
-                </thead>
                 <tbody>
                   <tr ng-repeat = "(key, value) in topic.summary.table">
                     <td ng-click = "getDetails(key)" style = "cursor : pointer">

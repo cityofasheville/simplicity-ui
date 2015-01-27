@@ -121,6 +121,13 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
           'Planning Level II':'7FFFD4',
           'Planning Level III':'00FFFF',
           'Planning Signage Plan':'000080'
+      },
+      'streetmaintenance' : {
+        'CITY OF ASHEVILLE' : {'color' : 'FF0000'},
+        'PRIVATE' : {'color' : 'FFF000'},
+        'UNKNOWN' : {'color' : 'FFA500'},
+        'NCDOT' : {'color' : '00FF00'},
+        'NATIONAL PARK SERVICE' : {'color' : '000080'},
       }
     };
 
@@ -856,13 +863,10 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
           }else{
             filteredFeaturesSummary.table[development.features[i].attributes.record_type].count = filteredFeaturesSummary.table[development.features[i].attributes.record_type].count + 1;
           }
-          //add filtered features to array
-          if($stateParams.type === 'null' || $stateParams.type === null || $stateParams.type === development.features[i].attributes.record_type.toLowerCase().replace(/ /g, '-')){
-            if(development.features[i].attributes.record_comments){
-                development.features[i].attributes.commentsArray = development.features[i].attributes.record_comments.split('[NEXTCOMMENT]');
-              }
-            filterdFeaturesArray.push(L.esri.Util.arcgisToGeojson(development.features[i], 'id'));
+          if(development.features[i].attributes.record_comments){
+            development.features[i].attributes.commentsArray = development.features[i].attributes.record_comments.split('[NEXTCOMMENT]');
           }
+          filterdFeaturesArray.push(L.esri.Util.arcgisToGeojson(development.features[i], 'id'));
           
         }
       }
@@ -1118,9 +1122,65 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
     // +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+
     // |s|t|r|e|e|t| |m|a|i|n|t|e|n|a|n|c|e|
     // +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+
+    var formatStreetMaintenanceData = function(centerlineIdsString){
+      var q = $q.defer();
+      var streetQueryParams = {
+          'where' : "centerline_id in (" + centerlineIdsString + ")", 
+          'f' : 'json',
+          'outFields' : '*'
+        };
+        queryBackend(featureService.street, streetQueryParams)
+          .then(function(streetResults){
+              var streetFeaturesArray = [];
+              var streetMaintenanceColors = {};
+              for (var i = 0; i < streetResults.features.length; i++) {
+                if(streetResults.features[i].attributes.street_responsibility === 'UNKOWN'){
+                  streetResults.features[i].attributes.street_responsibility = 'UNKNOWN'
+                };
+                if(!streetMaintenanceColors[streetResults.features[i].attributes.street_responsibility]){
+                  streetMaintenanceColors[streetResults.features[i].attributes.street_responsibility] = colors.streetmaintenance[streetResults.features[i].attributes.street_responsibility]
+                }
+                streetResults.features[i].attributes.color = colors.streetmaintenance[streetResults.features[i].attributes.street_responsibility].color;
+                streetFeaturesArray.push(L.esri.Util.arcgisToGeojson(streetResults.features[i]));
+              };
+              var summary = {
+                'table' : streetMaintenanceColors
+              }
+              var geojson = {
+                'type' : 'FeatureCollection',
+                'summary' : summary,
+                'searchGeojson' : dataCacheProperties.searchGeojson,
+                'features' : streetFeaturesArray
+              };
+              q.resolve(geojson);
+          });
+        return q.promise
+    }
 
-    Topic.streetMaintenance = function(){
+    Topic.streetmaintenance = function(){
+      var q = $q.defer();
+      if($stateParams.searchby === "street_name"){
+        q.resolve(formatStreetMaintenanceData($stateParams.id));
 
+      }else if ($stateParams.searchby === "address"){
+        var addressQueryParams = {
+          'where' : "civicaddress_id = " + $stateParams.id, 
+          'f' : 'json',
+          'outFields' : '*'
+        };
+        queryBackend(featureService.xref, addressQueryParams)
+          .then(function(xrefResults){
+            var centerlineIdArray = [];
+            for (var i = 0; i < xrefResults.features.length; i++) {
+              centerlineIdArray.push(xrefResults.features[i].attributes.centerline_id);
+            }
+            q.resolve(formatStreetMaintenanceData(centerlineIdArray.join(',')));
+
+          })
+      }
+      
+
+      return q.promise;
     };
 
 
@@ -1241,6 +1301,8 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
                 q.resolve(queryDataCacheWithAnArrayOfIds(civicaddressIdArray));
               });
           });
+        }else if($stateParams.searchby === 'neighborhood'){
+          q.resolve();
         }
         
       

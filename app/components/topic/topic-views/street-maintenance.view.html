@@ -1,0 +1,20 @@
+<div ng-repeat = "feature in topic.features | filter:filterText" class="col-xs-12 list-item-panel">
+  <div class="col-sm-6 col-xs-12">
+    <h5 class="text-center">Name</h5>
+    <h4 class = "text-muted text-center" style = "margin-top : 20px; margin-botton : 20px">
+      <strong>{{feature.properties.full_street_name}}</strong>
+    </h4>
+  </div>
+ 
+  <div class="col-sm-6 col-xs-12">
+    <h5 class="text-center">Centerline ID </h5>
+    <h4 class = "text-muted text-center" style = "margin-top : 20px; margin-botton : 20px">
+      <strong>{{feature.properties.centerline_id}}</strong>
+    </h4>
+  </div>
+  
+  <h5 class="text-center">Responsibility</h5>
+   <h2 class = "text-muted text-center" style = "margin-top : 20px; margin-botton : 20px">
+    <strong>{{feature.properties.street_responsibility}}</strong>
+  </h2>
+</div>
