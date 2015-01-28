@@ -175,7 +175,7 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
               return {
                 color: "#"+feature.properties.color,
                 weight: 8,
-                opacity: .8,
+                opacity: 0.8,
               }; 
             }
           },
@@ -266,7 +266,7 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
               addSearchGeoJsonToMap(topic.searchGeojson, {'fillOpacity' : 0,'opacity' : 0.3}).addTo(map);
             }
             if(topic.overlays){
-              var overlayLayer = addOverlayGeoJsonToMap(topic.overlays, {'fillOpacity' : 0.1,'opacity' : 0.3})
+              var overlayLayer = addOverlayGeoJsonToMap(topic.overlays, {'fillOpacity' : 0.1,'opacity' : 0.3});
             }
             if(topic.features){
               if($stateParams.type !== null || $stateParams.type !== 'null'){

@@ -7,13 +7,13 @@
   <table ng-if = "topic.features.length !== 0" class="table table-hover col-xs-12" >
     <thead>
       <tr>
-        <th class = "text-center text-muted">In The City?</th>
+        <th ng-if = "topic.features[0].properties.isincity !== undefined" class = "text-center text-muted">In The City?</th>
         <th class = "text-center text-muted">Address</th>
       </tr>
     </thead>
     <tbody>
       <tr ng-repeat = "feature in topic.features">
-        <td class = "text-muted text-center">
+        <td ng-if = "feature.properties.isincity !== undefined" class = "text-muted text-center">
           <h4 ng-if = "feature.properties.isincity " >
             <i class="fa fa-lg fa-check-circle text-success"></i> 
           </h4>

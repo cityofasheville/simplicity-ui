@@ -62,6 +62,10 @@
 			<span>{{feature.properties.zoningOverlays}}</span>
 		</h5>
 	</div>
+	<div ng-if = "feature.properties.neighborhood !== null" class = "col-xs-12 list-item-panel">
+		<h4>Neighborhood</h4>
+		<h5 class="text-muted"><strong>{{feature.properties.neighborhood}}</strong></h5>
+	</div>
 	
 	
 	<div class="col-xs-12 list-item-panel">
@@ -116,7 +120,7 @@
 		<br>
 		<a class="col-xs-12 col-sm-4 text-center btn btn-primary" style = "margin-bottom : 10px" target = "_blank" href = "{{feature.properties.deed_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Deed</a>
 		<a class="col-xs-12 col-sm-4 text-center btn btn-primary" style = "margin-bottom : 10px" target = "_blank" href = "{{feature.properties.plat_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Plat</a>
-		<a class="col-xs-12 col-sm-4 text-center btn btn-primary" style = "margin-bottom : 10px" target = "_blank" href = "{{feature.properties.proptopic_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Property Card</a>
+		<a class="col-xs-12 col-sm-4 text-center btn btn-primary" style = "margin-bottom : 10px" target = "_blank" href = "{{feature.properties.propcard_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Property Card</a>
 		<br>
 	</div>
 </div>

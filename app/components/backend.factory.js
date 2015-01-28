@@ -629,9 +629,10 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
         }else{
           q.resolve(geojson);
         }
-      };
+      }
       return  q.promise;
-    }
+    };
+
 
     //We need to use the pinnum to lookup property information 
     //We can access the pinnum by cross-referencing the cividaddress id in the xref table
@@ -642,20 +643,20 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
       if($stateParams.searchby === 'address'){ 
           
         //build query params for the request with a where clause
-        var queryParams = {
+        var xrefAddressQueryParams = {
           'where' : 'civicaddress_id=' + Number($stateParams.id),
           'f' : 'json',
           'outFields' : 'pinnum'
         };
-        queryBackend(featureService.xref, queryParams)
+        queryBackend(featureService.xref, xrefAddressQueryParams)
           .then(function(xRef){
             //build query params for the request with a where clause
-            var queryParams = {
+            var xrefAddressPropertyQueryParams = {
               'where' : "pinnum='" + xRef.features[0].attributes.pinnum + "'",
               'f' : 'json',
               'outFields' : '*'
             };
-            queryBackend(featureService.property, queryParams)
+            queryBackend(featureService.property, xrefAddressPropertyQueryParams)
               .then(function(property){
                 q.resolve(formatPropertyData(property));
               });
@@ -663,12 +664,12 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
       }else if($stateParams.searchby === 'street_name'){ 
           
         //build query params for the request with a where clause
-        var queryParams = {
+        var xrefStreetQueryParams = {
           'where' : 'civicaddress_id in(' + civicaddressIdArray.join(',') + ')',
           'f' : 'json',
           'outFields' : 'pinnum'
         };
-        queryBackend(featureService.xref, queryParams)
+        queryBackend(featureService.xref, xrefStreetQueryParams)
           .then(function(xRefPin){
             //build query params for the request with a where clause
             var xrefPinString = '';
@@ -679,12 +680,12 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
                 xrefPinString = xrefPinString + ",'" + xRefPin.features[i].attributes.pinnum + "'";
               }         
             }
-            var pinParams = {
+            var streetPinParams = {
               'where' : "pinnum in (" + xrefPinString + ")",
               'f' : 'json',
               'outFields' : '*'
             };
-            queryBackend(featureService.property, pinParams)
+            queryBackend(featureService.property, streetPinParams)
               .then(function(property){
                 q.resolve(formatPropertyData(property));
               });
@@ -807,12 +808,10 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
                 q.resolve(formatCrimeData(crimes));
               });
           }else{
-            var noCrime = {'features' : []};
-            q.resolve(formatCrimeData(noCrime));
+            q.resolve(formatCrimeData({'features' : []}));
           }
         }else{
-          var noCrime = {'features' : []};
-          q.resolve(formatCrimeData(noCrime));
+          q.resolve(formatCrimeData({'features' : []}));
         }
         
 
@@ -946,12 +945,10 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
                 q.resolve(formatDevelopmentData(development));
               });
           }else{
-            var noDevelopment = {'features' : []};
-            q.resolve(formatDevelopmentData(noDevelopment));
+            q.resolve(formatDevelopmentData({'features' : []}));
           }
         }else{
-          var noDevelopment = {'features' : []};
-          q.resolve(formatDevelopmentData(noDevelopment));
+          q.resolve(formatDevelopmentData({'features' : []}));
         }
 
       //For neighborhoods, lookup the development directly from the development table using the neighborhood name
@@ -1067,10 +1064,11 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
 
     Topic.zoning = function(){
       var q = $q.defer();
+      var codelink;
       if(codelinks[dataCacheProperties.zoning] === undefined){
-        var codelink = 'disable';
+        codelink = 'disable';
       }else{
-        var codelink = codelinks[dataCacheProperties.zoning];
+        codelink = codelinks[dataCacheProperties.zoning];
       }
       var geojson = {
         'type' : 'FeatureCollection',
@@ -1135,17 +1133,17 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
               var streetMaintenanceColors = {};
               for (var i = 0; i < streetResults.features.length; i++) {
                 if(streetResults.features[i].attributes.street_responsibility === 'UNKOWN'){
-                  streetResults.features[i].attributes.street_responsibility = 'UNKNOWN'
-                };
+                  streetResults.features[i].attributes.street_responsibility = 'UNKNOWN';
+                }
                 if(!streetMaintenanceColors[streetResults.features[i].attributes.street_responsibility]){
-                  streetMaintenanceColors[streetResults.features[i].attributes.street_responsibility] = colors.streetmaintenance[streetResults.features[i].attributes.street_responsibility]
+                  streetMaintenanceColors[streetResults.features[i].attributes.street_responsibility] = colors.streetmaintenance[streetResults.features[i].attributes.street_responsibility];
                 }
                 streetResults.features[i].attributes.color = colors.streetmaintenance[streetResults.features[i].attributes.street_responsibility].color;
                 streetFeaturesArray.push(L.esri.Util.arcgisToGeojson(streetResults.features[i]));
-              };
+              }
               var summary = {
                 'table' : streetMaintenanceColors
-              }
+              };
               var geojson = {
                 'type' : 'FeatureCollection',
                 'summary' : summary,
@@ -1154,8 +1152,8 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
               };
               q.resolve(geojson);
           });
-        return q.promise
-    }
+        return q.promise;
+    };
 
     Topic.streetmaintenance = function(){
       var q = $q.defer();
@@ -1176,7 +1174,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
             }
             q.resolve(formatStreetMaintenanceData(centerlineIdArray.join(',')));
 
-          })
+          });
       }
       
 
@@ -1193,31 +1191,56 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
 
     Topic.addresslist = function(){
       var q = $q.defer();
-      var addressQueryParams = {
-        'where' : "civicaddress_id in (" + civicaddressIdArray.join(',') + ")", 
-        'f' : 'json',
-        'outFields' : '*'
-      };
-      queryBackend(featureService.address, addressQueryParams)
-        .then(function(addressResults){
-            var addressFeaturesArray = [];
-            for (var i = 0; i < addressResults.features.length; i++) {
-              addressResults.features[i].attributes.isincity = dataCacheProperties.inTheCity[addressResults.features[i].attributes.civicaddress_id]
-              addressResults.features[i].attributes.color = '035096';
+      if($stateParams.searchby === "street_name"){
+        var addressQueryParams = {
+          'where' : "civicaddress_id in (" + civicaddressIdArray.join(',') + ")", 
+          'f' : 'json',
+          'outFields' : '*'
+        };
+        queryBackend(featureService.address, addressQueryParams)
+          .then(function(addressResults){
+              var addressFeaturesArray = [];
+              for (var i = 0; i < addressResults.features.length; i++) {
+                addressResults.features[i].attributes.isincity = dataCacheProperties.inTheCity[addressResults.features[i].attributes.civicaddress_id];
+                addressResults.features[i].attributes.color = '035096';
 
-              addressFeaturesArray.push(L.esri.Util.arcgisToGeojson(addressResults.features[i]));
-            };
-            var geojson = {
-              'type' : 'FeatureCollection',
-              'summary' : {},
-              'searchGeojson' : dataCacheProperties.searchGeojson,
-              'features' : addressFeaturesArray
-            };
-            q.resolve(geojson);
-        });
+                addressFeaturesArray.push(L.esri.Util.arcgisToGeojson(addressResults.features[i]));
+              }
+              var geojson = {
+                'type' : 'FeatureCollection',
+                'summary' : {},
+                'searchGeojson' : dataCacheProperties.searchGeojson,
+                'features' : addressFeaturesArray
+              };
+              q.resolve(geojson);
+          });
+      }else if($stateParams.searchby === "neighborhood"){
+        var neighborhoodQueryParams = {
+          'where' : "neighborhood = '" + $stateParams.id + "'", 
+          'f' : 'json',
+          'outFields' : '*'
+        };
+        queryBackend(featureService.address, neighborhoodQueryParams)
+          .then(function(addressResults){
+              var addressFeaturesArray = [];
+              for (var i = 0; i < addressResults.features.length; i++) {
+                //addressResults.features[i].attributes.isincity = dataCacheProperties.inTheCity[addressResults.features[i].attributes.civicaddress_id]
+                addressResults.features[i].attributes.color = '035096';
 
-        return q.promise;
-      };
+                addressFeaturesArray.push(L.esri.Util.arcgisToGeojson(addressResults.features[i]));
+              }
+              var geojson = {
+                'type' : 'FeatureCollection',
+                'summary' : {},
+                'searchGeojson' : dataCacheProperties.searchGeojson,
+                'features' : addressFeaturesArray
+              };
+              q.resolve(geojson);
+          });
+      }
+
+      return q.promise;
+    };
 
      
       
@@ -1265,7 +1288,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
             civicaddressIdArray = [];
             for (var i = 0; i < xrefResults.features.length; i++) {
               civicaddressIdArray.push(xrefResults.features[i].attributes.civicaddress_id);
-              pinnum2civicaddressid[xrefResults.features[i].attributes.pinnum] = xrefResults.features[i].attributes.civicaddress_id
+              pinnum2civicaddressid[xrefResults.features[i].attributes.pinnum] = xrefResults.features[i].attributes.civicaddress_id;
             }
 
             addGeoJsonForSearchToDataCache(idArray)
@@ -1276,11 +1299,11 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
      }else if($stateParams.searchby === 'owner_name' || $stateParams.searchby === 'pinnum'){
         var pinArray = $stateParams.id.split(',');
         var pinString = '';
-        for (var i = 0; i < pinArray.length; i++) {
-          if(i === 0){
-            pinString = pinString + "'" + pinArray[i] + "'";
+        for (var p = 0; p < pinArray.length; p++) {
+          if(p === 0){
+            pinString = pinString + "'" + pinArray[p] + "'";
           }else{
-            pinString = pinString + ",'" + pinArray[i] + "'";
+            pinString = pinString + ",'" + pinArray[p] + "'";
           }         
         }
         var pinQueryParams = {
@@ -1294,7 +1317,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
             pinnum2civicaddressid = {};
             for (var i = 0; i < pinXrefResults.features.length; i++) {
               civicaddressIdArray.push(pinXrefResults.features[i].attributes.civicaddress_id);
-              pinnum2civicaddressid[pinXrefResults.features[i].attributes.pinnum] = pinXrefResults.features[i].attributes.civicaddress_id
+              pinnum2civicaddressid[pinXrefResults.features[i].attributes.pinnum] = pinXrefResults.features[i].attributes.civicaddress_id;
             }
             addGeoJsonForSearchToDataCache(civicaddressIdArray)
               .then(function(){
@@ -1302,7 +1325,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
               });
           });
         }else if($stateParams.searchby === 'neighborhood'){
-          q.resolve();
+          q.resolve(addGeoJsonForSearchToDataCache([$stateParams.id]));
         }
         
       
