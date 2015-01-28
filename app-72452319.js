@@ -695,9 +695,10 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
         }else{
           q.resolve(geojson);
         }
-      };
+      }
       return  q.promise;
-    }
+    };
+
 
     //We need to use the pinnum to lookup property information 
     //We can access the pinnum by cross-referencing the cividaddress id in the xref table
@@ -708,20 +709,20 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
       if($stateParams.searchby === 'address'){ 
           
         //build query params for the request with a where clause
-        var queryParams = {
+        var xrefAddressQueryParams = {
           'where' : 'civicaddress_id=' + Number($stateParams.id),
           'f' : 'json',
           'outFields' : 'pinnum'
         };
-        queryBackend(featureService.xref, queryParams)
+        queryBackend(featureService.xref, xrefAddressQueryParams)
           .then(function(xRef){
             //build query params for the request with a where clause
-            var queryParams = {
+            var xrefAddressPropertyQueryParams = {
               'where' : "pinnum='" + xRef.features[0].attributes.pinnum + "'",
               'f' : 'json',
               'outFields' : '*'
             };
-            queryBackend(featureService.property, queryParams)
+            queryBackend(featureService.property, xrefAddressPropertyQueryParams)
               .then(function(property){
                 q.resolve(formatPropertyData(property));
               });
@@ -729,12 +730,12 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
       }else if($stateParams.searchby === 'street_name'){ 
           
         //build query params for the request with a where clause
-        var queryParams = {
+        var xrefStreetQueryParams = {
           'where' : 'civicaddress_id in(' + civicaddressIdArray.join(',') + ')',
           'f' : 'json',
           'outFields' : 'pinnum'
         };
-        queryBackend(featureService.xref, queryParams)
+        queryBackend(featureService.xref, xrefStreetQueryParams)
           .then(function(xRefPin){
             //build query params for the request with a where clause
             var xrefPinString = '';
@@ -745,12 +746,12 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
                 xrefPinString = xrefPinString + ",'" + xRefPin.features[i].attributes.pinnum + "'";
               }         
             }
-            var pinParams = {
+            var streetPinParams = {
               'where' : "pinnum in (" + xrefPinString + ")",
               'f' : 'json',
               'outFields' : '*'
             };
-            queryBackend(featureService.property, pinParams)
+            queryBackend(featureService.property, streetPinParams)
               .then(function(property){
                 q.resolve(formatPropertyData(property));
               });
@@ -873,12 +874,10 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
                 q.resolve(formatCrimeData(crimes));
               });
           }else{
-            var noCrime = {'features' : []};
-            q.resolve(formatCrimeData(noCrime));
+            q.resolve(formatCrimeData({'features' : []}));
           }
         }else{
-          var noCrime = {'features' : []};
-          q.resolve(formatCrimeData(noCrime));
+          q.resolve(formatCrimeData({'features' : []}));
         }
         
 
@@ -1012,12 +1011,10 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
                 q.resolve(formatDevelopmentData(development));
               });
           }else{
-            var noDevelopment = {'features' : []};
-            q.resolve(formatDevelopmentData(noDevelopment));
+            q.resolve(formatDevelopmentData({'features' : []}));
           }
         }else{
-          var noDevelopment = {'features' : []};
-          q.resolve(formatDevelopmentData(noDevelopment));
+          q.resolve(formatDevelopmentData({'features' : []}));
         }
 
       //For neighborhoods, lookup the development directly from the development table using the neighborhood name
@@ -1133,10 +1130,11 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
 
     Topic.zoning = function(){
       var q = $q.defer();
+      var codelink;
       if(codelinks[dataCacheProperties.zoning] === undefined){
-        var codelink = 'disable';
+        codelink = 'disable';
       }else{
-        var codelink = codelinks[dataCacheProperties.zoning];
+        codelink = codelinks[dataCacheProperties.zoning];
       }
       var geojson = {
         'type' : 'FeatureCollection',
@@ -1201,17 +1199,17 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
               var streetMaintenanceColors = {};
               for (var i = 0; i < streetResults.features.length; i++) {
                 if(streetResults.features[i].attributes.street_responsibility === 'UNKOWN'){
-                  streetResults.features[i].attributes.street_responsibility = 'UNKNOWN'
-                };
+                  streetResults.features[i].attributes.street_responsibility = 'UNKNOWN';
+                }
                 if(!streetMaintenanceColors[streetResults.features[i].attributes.street_responsibility]){
-                  streetMaintenanceColors[streetResults.features[i].attributes.street_responsibility] = colors.streetmaintenance[streetResults.features[i].attributes.street_responsibility]
+                  streetMaintenanceColors[streetResults.features[i].attributes.street_responsibility] = colors.streetmaintenance[streetResults.features[i].attributes.street_responsibility];
                 }
                 streetResults.features[i].attributes.color = colors.streetmaintenance[streetResults.features[i].attributes.street_responsibility].color;
                 streetFeaturesArray.push(L.esri.Util.arcgisToGeojson(streetResults.features[i]));
-              };
+              }
               var summary = {
                 'table' : streetMaintenanceColors
-              }
+              };
               var geojson = {
                 'type' : 'FeatureCollection',
                 'summary' : summary,
@@ -1220,8 +1218,8 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
               };
               q.resolve(geojson);
           });
-        return q.promise
-    }
+        return q.promise;
+    };
 
     Topic.streetmaintenance = function(){
       var q = $q.defer();
@@ -1242,7 +1240,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
             }
             q.resolve(formatStreetMaintenanceData(centerlineIdArray.join(',')));
 
-          })
+          });
       }
       
 
@@ -1259,31 +1257,56 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
 
     Topic.addresslist = function(){
       var q = $q.defer();
-      var addressQueryParams = {
-        'where' : "civicaddress_id in (" + civicaddressIdArray.join(',') + ")", 
-        'f' : 'json',
-        'outFields' : '*'
-      };
-      queryBackend(featureService.address, addressQueryParams)
-        .then(function(addressResults){
-            var addressFeaturesArray = [];
-            for (var i = 0; i < addressResults.features.length; i++) {
-              addressResults.features[i].attributes.isincity = dataCacheProperties.inTheCity[addressResults.features[i].attributes.civicaddress_id]
-              addressResults.features[i].attributes.color = '035096';
+      if($stateParams.searchby === "street_name"){
+        var addressQueryParams = {
+          'where' : "civicaddress_id in (" + civicaddressIdArray.join(',') + ")", 
+          'f' : 'json',
+          'outFields' : '*'
+        };
+        queryBackend(featureService.address, addressQueryParams)
+          .then(function(addressResults){
+              var addressFeaturesArray = [];
+              for (var i = 0; i < addressResults.features.length; i++) {
+                addressResults.features[i].attributes.isincity = dataCacheProperties.inTheCity[addressResults.features[i].attributes.civicaddress_id];
+                addressResults.features[i].attributes.color = '035096';
 
-              addressFeaturesArray.push(L.esri.Util.arcgisToGeojson(addressResults.features[i]));
-            };
-            var geojson = {
-              'type' : 'FeatureCollection',
-              'summary' : {},
-              'searchGeojson' : dataCacheProperties.searchGeojson,
-              'features' : addressFeaturesArray
-            };
-            q.resolve(geojson);
-        });
+                addressFeaturesArray.push(L.esri.Util.arcgisToGeojson(addressResults.features[i]));
+              }
+              var geojson = {
+                'type' : 'FeatureCollection',
+                'summary' : {},
+                'searchGeojson' : dataCacheProperties.searchGeojson,
+                'features' : addressFeaturesArray
+              };
+              q.resolve(geojson);
+          });
+      }else if($stateParams.searchby === "neighborhood"){
+        var neighborhoodQueryParams = {
+          'where' : "neighborhood = '" + $stateParams.id + "'", 
+          'f' : 'json',
+          'outFields' : '*'
+        };
+        queryBackend(featureService.address, neighborhoodQueryParams)
+          .then(function(addressResults){
+              var addressFeaturesArray = [];
+              for (var i = 0; i < addressResults.features.length; i++) {
+                //addressResults.features[i].attributes.isincity = dataCacheProperties.inTheCity[addressResults.features[i].attributes.civicaddress_id]
+                addressResults.features[i].attributes.color = '035096';
 
-        return q.promise;
-      };
+                addressFeaturesArray.push(L.esri.Util.arcgisToGeojson(addressResults.features[i]));
+              }
+              var geojson = {
+                'type' : 'FeatureCollection',
+                'summary' : {},
+                'searchGeojson' : dataCacheProperties.searchGeojson,
+                'features' : addressFeaturesArray
+              };
+              q.resolve(geojson);
+          });
+      }
+
+      return q.promise;
+    };
 
      
       
@@ -1331,7 +1354,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
             civicaddressIdArray = [];
             for (var i = 0; i < xrefResults.features.length; i++) {
               civicaddressIdArray.push(xrefResults.features[i].attributes.civicaddress_id);
-              pinnum2civicaddressid[xrefResults.features[i].attributes.pinnum] = xrefResults.features[i].attributes.civicaddress_id
+              pinnum2civicaddressid[xrefResults.features[i].attributes.pinnum] = xrefResults.features[i].attributes.civicaddress_id;
             }
 
             addGeoJsonForSearchToDataCache(idArray)
@@ -1342,11 +1365,11 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
      }else if($stateParams.searchby === 'owner_name' || $stateParams.searchby === 'pinnum'){
         var pinArray = $stateParams.id.split(',');
         var pinString = '';
-        for (var i = 0; i < pinArray.length; i++) {
-          if(i === 0){
-            pinString = pinString + "'" + pinArray[i] + "'";
+        for (var p = 0; p < pinArray.length; p++) {
+          if(p === 0){
+            pinString = pinString + "'" + pinArray[p] + "'";
           }else{
-            pinString = pinString + ",'" + pinArray[i] + "'";
+            pinString = pinString + ",'" + pinArray[p] + "'";
           }         
         }
         var pinQueryParams = {
@@ -1360,7 +1383,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
             pinnum2civicaddressid = {};
             for (var i = 0; i < pinXrefResults.features.length; i++) {
               civicaddressIdArray.push(pinXrefResults.features[i].attributes.civicaddress_id);
-              pinnum2civicaddressid[pinXrefResults.features[i].attributes.pinnum] = pinXrefResults.features[i].attributes.civicaddress_id
+              pinnum2civicaddressid[pinXrefResults.features[i].attributes.pinnum] = pinXrefResults.features[i].attributes.civicaddress_id;
             }
             addGeoJsonForSearchToDataCache(civicaddressIdArray)
               .then(function(){
@@ -1368,7 +1391,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
               });
           });
         }else if($stateParams.searchby === 'neighborhood'){
-          q.resolve();
+          q.resolve(addGeoJsonForSearchToDataCache([$stateParams.id]));
         }
         
       
@@ -1516,7 +1539,7 @@ app.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'B
     //groupOrderArray.splice(groupOrderPosition, 0, data.candidates[i].attributes.Loc_name);
 
     $scope.goToTopics = function(candidate, event){
-        var label = ""
+        var label = "";
         for (var i = 0; i < candidate.label.length; i++) {
             if(candidate.label.charAt(i) !== '&'){
                 label = label + candidate.label.charAt(i);
@@ -1710,7 +1733,7 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
               return {
                 color: "#"+feature.properties.color,
                 weight: 8,
-                opacity: .8,
+                opacity: 0.8,
               }; 
             }
           },
@@ -1801,7 +1824,7 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
               addSearchGeoJsonToMap(topic.searchGeojson, {'fillOpacity' : 0,'opacity' : 0.3}).addTo(map);
             }
             if(topic.overlays){
-              var overlayLayer = addOverlayGeoJsonToMap(topic.overlays, {'fillOpacity' : 0.1,'opacity' : 0.3})
+              var overlayLayer = addOverlayGeoJsonToMap(topic.overlays, {'fillOpacity' : 0.1,'opacity' : 0.3});
             }
             if(topic.features){
               if($stateParams.type !== null || $stateParams.type !== 'null'){
@@ -2313,7 +2336,7 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'type' : null,
                         'timeframe' : null,
                         'extent' : null,
-                        'view' : 'simple'
+                        'view' : 'table'
                     },
                     'requiredParams' : [],
                     'headerTemplate' : 'topic/topic-headers/topic.header.during.in.html',
@@ -2604,7 +2627,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topic/topic-views/address-list.table.view.html',
-    '<div><div class="col-xs-12" ng-if="topic.features.length === 0"><div class="col-xs-12"><hr></div><h3 class="text-muted text-center"><strong>We couldn\'t find any results.</strong></h3><h4 class="text-muted text-center"><strong>Try expanding the time frame or extent of your search.</strong></h4></div><table ng-if="topic.features.length !== 0" class="table table-hover col-xs-12"><thead><tr><th class="text-center text-muted">In The City?</th><th class="text-center text-muted">Address</th></tr></thead><tbody><tr ng-repeat="feature in topic.features"><td class="text-muted text-center"><h4 ng-if="feature.properties.isincity"><i class="fa fa-lg fa-check-circle text-success"></i></h4><h4 ng-if="!feature.properties.isincity" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger"></i></h4></td><td class="text-center" ng-click="filterBy(feature)"><h4 class="text-muted"><strong><span>{{feature.properties.street_number}} {{feature.properties.street_name}} {{feature.properties.street_type}}</span> <span ng-if="feature.properties.unit_number === null">,</span> <span ng-if="feature.properties.unit_number !== null">UNIT {{feature.properties.unit_number}},</span> <span>{{feature.properties.zip_code}}</span></strong></h4></td></tr></tbody></table></div>');
+    '<div><div class="col-xs-12" ng-if="topic.features.length === 0"><div class="col-xs-12"><hr></div><h3 class="text-muted text-center"><strong>We couldn\'t find any results.</strong></h3><h4 class="text-muted text-center"><strong>Try expanding the time frame or extent of your search.</strong></h4></div><table ng-if="topic.features.length !== 0" class="table table-hover col-xs-12"><thead><tr><th ng-if="topic.features[0].properties.isincity !== undefined" class="text-center text-muted">In The City?</th><th class="text-center text-muted">Address</th></tr></thead><tbody><tr ng-repeat="feature in topic.features"><td ng-if="feature.properties.isincity !== undefined" class="text-muted text-center"><h4 ng-if="feature.properties.isincity"><i class="fa fa-lg fa-check-circle text-success"></i></h4><h4 ng-if="!feature.properties.isincity" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger"></i></h4></td><td class="text-center" ng-click="filterBy(feature)"><h4 class="text-muted"><strong><span>{{feature.properties.street_number}} {{feature.properties.street_name}} {{feature.properties.street_type}}</span> <span ng-if="feature.properties.unit_number === null">,</span> <span ng-if="feature.properties.unit_number !== null">UNIT {{feature.properties.unit_number}},</span> <span>{{feature.properties.zip_code}}</span></strong></h4></td></tr></tbody></table></div>');
 }]);
 })();
 
@@ -2664,7 +2687,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topic/topic-views/property.view.html',
-    '<div ng-repeat="feature in topic.features | filter:filterText"><div><div class="col-xs-12"><div class="col-xs-12 col-sm-6"><h4><strong class="text-muted">Civic Address Id</strong> : <span>{{feature.properties.civicaddress_id}}</span></h4><h4><strong class="text-muted">PIN</strong> : <span>{{feature.properties.pinnum}}</span></h4></div><div class="col-xs-12 col-sm-6"><h4 ng-if="feature.properties.isincity === \'Yes\'" class="text-muted"><i class="fa fa-lg fa-check-circle text-success pull-left"></i> <strong>It\'s in the city!</strong></h4><h4 ng-if="feature.properties.isincity === \'No\'" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger pull-left"></i> <strong>It\'s not in the city!</strong></h4><h4 ng-if="feature.properties.iscityowned === \'Yes\'" class="text-muted"><i class="fa fa-lg fa-check-circle text-success pull-left"></i> <strong>It\'s city owned!</strong></h4><h4 ng-if="feature.properties.iscityowned === \'No\'" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger pull-left"></i> <strong>It\'s not city owned!</strong></h4></div></div></div><div class="col-xs-12 list-item-panel"><h4>Address</h4><address class="text-muted"><strong>{{feature.properties.street_number}} {{feature.properties.street_name}} {{feature.properties.street_type}} <span ng-if="feature.properties.unit_number !== null">Unit {{feature.properties.unit_number}}</span></strong></address></div><div class="col-xs-12 list-item-panel"><h4>Owner</h4><strong class="text-muted">{{feature.properties.owner}}</strong><address>{{feature.properties.owner_address}}<br>{{feature.properties.owner_citystatezip}}</address></div><div class="col-xs-12 list-item-panel"><h4>Zoning</h4><h5 class="text-muted" ng-if="card.codelink === \'disable\'"><strong>District</strong> : <span>{{feature.properties.zoning}}</span></h5><h5 class="text-muted" ng-if="card.codelink !== \'disable\'"><strong>District</strong> : <a ng-if="feature.properties.zoning.length > 0" ng-repeat="zoning in feature.properties.zoning" class="" target="_blank" href="{{feature.properties.codelink}}"><strong>{{zoning}}<span ng-if="$index !== feature.properties.zoning.length - 1 && feature.properties.zoning.length !== 1">,</span></strong></a> <span ng-if="feature.properties.zoning.length === 0 || feature.properties.zoning === undefined">No City of Asheville Zoning</span></h5><h5 ng-if="feature.properties.zoningOverlays !== undefined"><strong>Zoning Overlay</strong> : <span>{{feature.properties.zoningOverlays}}</span></h5></div><div class="col-xs-12 list-item-panel"><h4>Property and Tax Value</h4><table class="table"><thead><tr><th>Value Type</th><th>Amount</th></tr></thead><tbody><tr><td>Building Value</td><td>${{feature.properties.buildingvalue|number}}</td></tr><tr><td>Land Value</td><td>${{feature.properties.landvalue|number}}</td></tr><tr><td>Appraised Value</td><td>${{feature.properties.appraisedvalue|number}}</td></tr><tr><td>Tax Value</td><td>${{feature.properties.taxvalue|number}}</td></tr><tr><td>Total Market Value</td><td>${{feature.properties.totalmarketvalue|number}}</td></tr></tbody></table></div><div class="col-xs-12 list-item-panel"><h4>Other Details</h4><p class="col-sm-6" ng-if="feature.properties.exempt === null">Tax exempt : <span>NO</span></p><p class="col-sm-6" ng-if="feature.properties.exempt !== null">Tax exempt : <span>YES</span></p><p class="col-sm-6" ng-if="feature.properties.improved === \'Y\'">Improved : <span>YES (${{feature.properties.improvementvalue|number}})</span></p><p class="col-sm-6">Appraisal Area : {{feature.properties.appraisalarea}}</p><p class="col-sm-6">Acreage : {{feature.properties.acreage}} acres</p></div><div class="col-xs-12 list-item-panel" style="margin-bottom : 20px"><br><a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.deed_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Deed</a> <a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.plat_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Plat</a> <a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.proptopic_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Property Card</a><br></div></div>');
+    '<div ng-repeat="feature in topic.features | filter:filterText"><div><div class="col-xs-12"><div class="col-xs-12 col-sm-6"><h4><strong class="text-muted">Civic Address Id</strong> : <span>{{feature.properties.civicaddress_id}}</span></h4><h4><strong class="text-muted">PIN</strong> : <span>{{feature.properties.pinnum}}</span></h4></div><div class="col-xs-12 col-sm-6"><h4 ng-if="feature.properties.isincity === \'Yes\'" class="text-muted"><i class="fa fa-lg fa-check-circle text-success pull-left"></i> <strong>It\'s in the city!</strong></h4><h4 ng-if="feature.properties.isincity === \'No\'" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger pull-left"></i> <strong>It\'s not in the city!</strong></h4><h4 ng-if="feature.properties.iscityowned === \'Yes\'" class="text-muted"><i class="fa fa-lg fa-check-circle text-success pull-left"></i> <strong>It\'s city owned!</strong></h4><h4 ng-if="feature.properties.iscityowned === \'No\'" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger pull-left"></i> <strong>It\'s not city owned!</strong></h4></div></div></div><div class="col-xs-12 list-item-panel"><h4>Address</h4><address class="text-muted"><strong>{{feature.properties.street_number}} {{feature.properties.street_name}} {{feature.properties.street_type}} <span ng-if="feature.properties.unit_number !== null">Unit {{feature.properties.unit_number}}</span></strong></address></div><div class="col-xs-12 list-item-panel"><h4>Owner</h4><strong class="text-muted">{{feature.properties.owner}}</strong><address>{{feature.properties.owner_address}}<br>{{feature.properties.owner_citystatezip}}</address></div><div class="col-xs-12 list-item-panel"><h4>Zoning</h4><h5 class="text-muted" ng-if="card.codelink === \'disable\'"><strong>District</strong> : <span>{{feature.properties.zoning}}</span></h5><h5 class="text-muted" ng-if="card.codelink !== \'disable\'"><strong>District</strong> : <a ng-if="feature.properties.zoning.length > 0" ng-repeat="zoning in feature.properties.zoning" class="" target="_blank" href="{{feature.properties.codelink}}"><strong>{{zoning}}<span ng-if="$index !== feature.properties.zoning.length - 1 && feature.properties.zoning.length !== 1">,</span></strong></a> <span ng-if="feature.properties.zoning.length === 0 || feature.properties.zoning === undefined">No City of Asheville Zoning</span></h5><h5 ng-if="feature.properties.zoningOverlays !== undefined"><strong>Zoning Overlay</strong> : <span>{{feature.properties.zoningOverlays}}</span></h5></div><div ng-if="feature.properties.neighborhood !== null" class="col-xs-12 list-item-panel"><h4>Neighborhood</h4><h5 class="text-muted"><strong>{{feature.properties.neighborhood}}</strong></h5></div><div class="col-xs-12 list-item-panel"><h4>Property and Tax Value</h4><table class="table"><thead><tr><th>Value Type</th><th>Amount</th></tr></thead><tbody><tr><td>Building Value</td><td>${{feature.properties.buildingvalue|number}}</td></tr><tr><td>Land Value</td><td>${{feature.properties.landvalue|number}}</td></tr><tr><td>Appraised Value</td><td>${{feature.properties.appraisedvalue|number}}</td></tr><tr><td>Tax Value</td><td>${{feature.properties.taxvalue|number}}</td></tr><tr><td>Total Market Value</td><td>${{feature.properties.totalmarketvalue|number}}</td></tr></tbody></table></div><div class="col-xs-12 list-item-panel"><h4>Other Details</h4><p class="col-sm-6" ng-if="feature.properties.exempt === null">Tax exempt : <span>NO</span></p><p class="col-sm-6" ng-if="feature.properties.exempt !== null">Tax exempt : <span>YES</span></p><p class="col-sm-6" ng-if="feature.properties.improved === \'Y\'">Improved : <span>YES (${{feature.properties.improvementvalue|number}})</span></p><p class="col-sm-6">Appraisal Area : {{feature.properties.appraisalarea}}</p><p class="col-sm-6">Acreage : {{feature.properties.acreage}} acres</p></div><div class="col-xs-12 list-item-panel" style="margin-bottom : 20px"><br><a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.deed_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Deed</a> <a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.plat_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Plat</a> <a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.propcard_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Property Card</a><br></div></div>');
 }]);
 })();
 
