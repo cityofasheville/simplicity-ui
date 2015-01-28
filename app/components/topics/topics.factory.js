@@ -315,7 +315,7 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'type' : null,
                         'timeframe' : null,
                         'extent' : null,
-                        'view' : 'simple'
+                        'view' : 'table'
                     },
                     'requiredParams' : [],
                     'headerTemplate' : 'topic/topic-headers/topic.header.during.in.html',
