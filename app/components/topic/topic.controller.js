@@ -343,6 +343,11 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
           var rowArray = [];
           for (var x = 0; x < headerArray.length; x++) {
             if(topic.features[i].properties[headerArray[x]]){
+              // if(topic.features[i].properties[headerArray[x]].constructor === Array){
+              //   rowArray.push(JSON.stringify(topic.features[i].properties[headerArray[x]]));
+              // }else{
+              //   rowArray.push(topic.features[i].properties[headerArray[x]]);
+              // }
               rowArray.push(topic.features[i].properties[headerArray[x]]);
             }else if(topic.features[i].geometry[headerArray[x]]){
               rowArray.push(topic.features[i].geometry[headerArray[x]]);
