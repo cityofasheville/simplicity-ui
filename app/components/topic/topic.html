@@ -136,6 +136,12 @@
               <button class="btn btn-primary col-xs-12" style = "margin-top : 3px" ng-click = "download('complete', topic)">Complete records <i class="fa fa-cloud-download"></i></button>
               <p class = "text-muted text-center">based on selected filters</p>
             </div>
+            <div ng-if= "stateParams.topic === 'addresslist'">
+              <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)">Address List <i class="fa fa-cloud-download"></i></button>
+            </div>
+            <div ng-if= "stateParams.topic === 'streetmaintenance'">
+              <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)">Street Details <i class="fa fa-cloud-download"></i></button>
+            </div>
           </div>
         </div><!-- /download modal-content -->
       </div><!-- /download modal-dialog -->

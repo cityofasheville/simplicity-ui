@@ -318,7 +318,7 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'view' : 'table'
                     },
                     'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.during.in.html',
+                    'headerTemplate' : 'topic/topic-headers/topic.header.in.html',
                 }
             },
             'simpleViewTemplate' : null,
