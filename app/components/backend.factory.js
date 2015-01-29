@@ -569,6 +569,37 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
     // |p|r|o|p|e|r|t|y|
     // +-+-+-+-+-+-+-+-+
 
+    var formatZoningPropertyForAnAddress = function(){
+      var formattedZoningArray = [];
+      for (var z = 0; z < dataCacheProperties.zoning.length; z++) {
+        var zoningDistrict = dataCacheProperties.zoning[z];
+        if(codelinks[zoningDistrict] === undefined){
+          formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : 'disable'});
+        }else{
+          formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : codelinks[zoningDistrict]});
+        }
+      };
+      return formattedZoningArray;
+    }
+
+    var formatZoningPropertyForMultipleAddressess = function(civicaddressId){
+      var formattedZoningArray = [];
+      if(dataCacheProperties.zoning[civicaddressId]){
+        for (var z = 0; z < dataCacheProperties.zoning[civicaddressId].length; z++) {
+          var zoningDistrict = dataCacheProperties.zoning[civicaddressId][z];
+          if(codelinks[zoningDistrict] === undefined){
+            formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : 'disable'});
+          }else{
+            formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : codelinks[zoningDistrict]});
+          }
+        };
+        return formattedZoningArray;
+      }else{
+        return undefined;
+      }
+      
+    }
+
 
     var formatPropertyData = function(property){
       var q = $q.defer();
@@ -580,21 +611,21 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
 
         if($stateParams.searchby === "address"){
           property.features[p].attributes.civicaddress_id = $stateParams.id;
-          property.features[p].attributes.zoning = dataCacheProperties.zoning;
-          if(codelinks[dataCacheProperties.zoning] === undefined){
-            property.features[p].attributes.codelink = 'disable';
-          }else{
-            property.features[p].attributes.codelink = codelinks[dataCacheProperties.zoning];
+          
+          if(dataCacheProperties.zoning){
+            property.features[p].attributes.zoning = formatZoningPropertyForAnAddress();
           }
+          
         }else if($stateParams.searchby === 'pinnum' || $stateParams.searchby === 'owner_name' || $stateParams.searchby === 'street_name'){
           property.features[p].attributes.civicaddress_id = pinnum2civicaddressid[property.features[p].attributes.pinnum];
           if(dataCacheProperties.zoning){
-            property.features[p].attributes.zoning = dataCacheProperties.zoning[property.features[p].attributes.civicaddress_id];
-            if(codelinks[dataCacheProperties.zoning[property.features[p].attributes.civicaddress_id]] === undefined){
-              property.features[p].attributes.codelink = 'disable';
-            }else{
-              property.features[p].attributes.codelink = codelinks[dataCacheProperties.zoning[property.features[p].attributes.civicaddress_id]];
-            }
+            // property.features[p].attributes.zoning = dataCacheProperties.zoning[property.features[p].attributes.civicaddress_id];
+            // if(codelinks[dataCacheProperties.zoning[property.features[p].attributes.civicaddress_id]] === undefined){
+            //   property.features[p].attributes.codelink = 'disable';
+            // }else{
+            //   property.features[p].attributes.codelink = codelinks[dataCacheProperties.zoning[property.features[p].attributes.civicaddress_id]];
+            // }
+            property.features[p].attributes.zoning = formatZoningPropertyForMultipleAddressess(property.features[p].attributes.civicaddress_id)
           }
 
           
@@ -1077,9 +1108,8 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
         'features' : [{
             'type' : 'Feature',
             'properties' : {
-              'zoning' : dataCacheProperties.zoning,
+              'zoning' : formatZoningPropertyForAnAddress(),
               'zoningOverlays' : dataCacheProperties.zoningOverlays,
-              'codelink' : codelink
             },
             'geometry' : {
               'type' : 'Point',
@@ -1201,7 +1231,12 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
           .then(function(addressResults){
               var addressFeaturesArray = [];
               for (var i = 0; i < addressResults.features.length; i++) {
-                addressResults.features[i].attributes.isincity = dataCacheProperties.inTheCity[addressResults.features[i].attributes.civicaddress_id];
+                if(dataCacheProperties.inTheCity[addressResults.features[i].attributes.civicaddress_id]){
+                  addressResults.features[i].attributes.isincity = dataCacheProperties.inTheCity[addressResults.features[i].attributes.civicaddress_id];
+                }else{
+                  addressResults.features[i].attributes.isincity = false;
+                }
+                
                 addressResults.features[i].attributes.color = '035096';
 
                 addressFeaturesArray.push(L.esri.Util.arcgisToGeojson(addressResults.features[i]));
