@@ -6,6 +6,70 @@
     <h2 ng-if = "stateParams.view === 'map'" class = "pull-left" style = "margin-right : 10px">Map View </h2>
 
     <div class="btn-group pull-right" role="group" aria-label="..." style= "margin-top : 15px">
+      <button 
+        ng-if = "topicProperties.detailsViewTemplate" 
+        ng-class = "{'active' : stateParams.view === 'details'}" 
+        ng-click = "onClickChangeView('details')"
+        class = "btn btn-primary">
+          <i class="fa fa-lg fa-th fa-fw"></i> Details
+      </button>
+      <button 
+        ng-if = "topicProperties.listViewTemplate" 
+        ng-class = "{'active' : stateParams.view === 'list'}" 
+        ng-click = "onClickChangeView('list')"
+        class = "btn btn-primary">
+          <i class="fa fa-lg fa-list-alt fa-fw"></i> List
+      </button>
+      <button 
+        ng-if = "topicProperties.tableViewTemplate" 
+        ng-class = "{'active' : stateParams.view === 'table'}"
+        ng-click = "onClickChangeView('table')"
+        class = "btn btn-primary"> 
+          <i class="fa fa-lg fa-table fa-fw"></i> Table
+      </button>
+      <button 
+        ng-class = "{'active' : stateParams.view === 'map'}"
+        ng-click = "onClickChangeView('map')"
+        class = "btn btn-primary" > 
+          <i class="fa fa-lg fa-map-marker fa-fw"></i> Map
+      </button>
+      <div ng-if = "topicParams.view === 'list' || (topicParams.view === 'map' || topic.summary !== undefined)" class="btn-group" role="group" >
+        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+            Filter
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+            <li 
+              class = "text-primary" 
+              role="presentation">
+              <a role="menuitem" tabindex="-1" ng-click = "filterBy(null)">
+                Show All
+              </a>
+            </li>
+            <li 
+              ng-repeat = "(key, value) in topic.summary.table"
+              class = "text-primary" 
+              role="presentation">
+              <a role="menuitem" tabindex="-1" ng-click = "filterBy(key)">
+                {{key}}
+              </a>
+            </li>
+        </ul>
+      </div>
+      <!-- <button type="button" class="btn btn-primary" data-toggle = "tooltip" title = "Share"><i class="fa fa-lg fa-share"></i></button> -->
+      <button ng-click = "openDownloadModal()" type="button" class="btn btn-primary" data-toggle = "tooltip" title = "Download"><i class="fa fa-lg fa-cloud-download"></i></button>
+    </div>
+    <div ng-if = "stateParams.type !== null" class="col-xs-12">
+      <h5 class = "text-muted">Filtered by <strong >{{stateParams.type}}</strong></h5>
+    </div>
+    
+  </div>
+  <div class="visible-xs" style = "text-align : center; width : 100%">
+    <h2 ng-if = "stateParams.view === 'details'">Details View </h2>
+    <h2 ng-if = "stateParams.view === 'list'">List View </h2>
+    <h2 ng-if = "stateParams.view === 'table'">Table View </h2>
+    <h2 ng-if = "stateParams.view === 'map'">Map View </h2>
+    <div class="btn-group" role="group" aria-label="..." style= "margin-top : 15px">
       <div class="btn-group" role="group" >
         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
             Change View
@@ -76,69 +140,6 @@
             </li>
         </ul>
       </div>
-      <!-- <button type="button" class="btn btn-primary" data-toggle = "tooltip" title = "Share"><i class="fa fa-lg fa-share"></i></button> -->
-      <button ng-click = "openDownloadModal()" type="button" class="btn btn-primary" data-toggle = "tooltip" title = "Download"><i class="fa fa-lg fa-cloud-download"></i></button>
-    </div>
-    <div ng-if = "stateParams.type !== null" class="col-xs-12">
-      <h5 class = "text-muted">Filtered by <strong >{{stateParams.type}}</strong></h5>
-    </div>
-    
-  </div>
-  <div class="visible-xs" style = "text-align : center; width : 100%">
-    <h2 ng-if = "stateParams.view === 'details'">Details View </h2>
-    <h2 ng-if = "stateParams.view === 'list'">List View </h2>
-    <h2 ng-if = "stateParams.view === 'table'">Table View </h2>
-    <h2 ng-if = "stateParams.view === 'map'">Map View </h2>
-    <div class="btn-group" style = "text-align: center" role="group" aria-label="..." style= "margin-top : 15px">
-      <div class="btn-group" role="group" >
-        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-            Change View
-            <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-            <li 
-              ng-if = "topicProperties.detailsViewTemplate" 
-              ng-class = "{'active' : stateParams.view === 'details'}" 
-              ng-click = "onClickChangeView('details')"
-              class = "text-primary" 
-              role="presentation">
-              <a role="menuitem" tabindex="-1">
-                <i class="fa fa-lg fa-th fa-fw"></i> Details
-              </a>
-            </li>
-            <li 
-              ng-if = "topicProperties.listViewTemplate" 
-              ng-class = "{'active' : stateParams.view === 'list'}" 
-              ng-click = "onClickChangeView('list')"
-              class = "text-primary" 
-              role="presentation">
-              <a role="menuitem" tabindex="-1">
-                <i class="fa fa-lg fa-list-alt fa-fw"></i> List
-              </a>
-            </li>
-            <li 
-              ng-if = "topicProperties.tableViewTemplate" 
-              ng-class = "{'active' : stateParams.view === 'table'}"
-              ng-click = "onClickChangeView('table')"
-              class = "text-primary" 
-              role="presentation">
-              <a role="menuitem" tabindex="-1">
-                <i class="fa fa-lg fa-table fa-fw"></i> Table
-              </a>
-            </li>
-            <li 
-              ng-class = "{'active' : stateParams.view === 'map'}"
-              ng-click = "onClickChangeView('map')"
-              class = "text-primary"  
-              role="presentation">
-              <a role="menuitem" tabindex="-1">
-                <i class="fa fa-lg fa-map-marker fa-fw"></i> Map
-              </a>
-            </li>
-        </ul>
-      </div>
-      <!-- <button type="button" class="btn btn-primary" data-toggle = "tooltip" title = "Share"><i class="fa fa-lg fa-share"></i></button> -->
-      <button type="button" class="btn btn-primary" data-toggle = "tooltip" title = "Download"><i class="fa fa-lg fa-cloud-download"></i></button>
     </div>
     <div class="col-xs-12" style = "height : 10px"></div>
   </div>
