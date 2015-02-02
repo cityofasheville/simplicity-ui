@@ -1943,9 +1943,9 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
         for(var attributeKey in topic.features[0].properties){
           headerArray.push(attributeKey);
         }
-        for(var geometryKey in topic.features[0].geometry){
-          headerArray.push(geometryKey);
-        }
+        // for(var geometryKey in topic.features[0].geometry){
+        //   headerArray.push(geometryKey);
+        // }
         csvString += headerArray.join(',') + '\n';
         for (var i = 0; i < topic.features.length; i++) {
           var rowArray = [];
@@ -1958,7 +1958,7 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
               // }
               rowArray.push(topic.features[i].properties[headerArray[x]]);
             }else if(topic.features[i].geometry[headerArray[x]]){
-              rowArray.push(topic.features[i].geometry[headerArray[x]]);
+              //rowArray.push(topic.features[i].geometry[headerArray[x]]);
             }else{
               rowArray.push('NULL');
             }
@@ -1967,8 +1967,7 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
         }
       }
       var encodedUri = encodeURI(csvString);
-      setTimeout(function() {}, 1000);
-      
+      setTimeout(function() {window.open(encodedUri);}, 1000);
     };
 
 
