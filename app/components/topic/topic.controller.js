@@ -6,7 +6,8 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
     $(function () {
       $('[data-toggle="tooltip"]').tooltip();
     });
-
+    $("html, body").animate({'scrollTop' : "0px"});
+    
     //!!! This is breaking the back button :-(
     var updateStateParamsAndReloadState = function(propertyName, value){
       var stateParams = $stateParams;

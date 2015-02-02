@@ -802,64 +802,66 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
     Topic.crime = function(){
       var q = $q.defer();
 
-      if(!dataCacheProperties.crimes){
-        //!!!throw an error
-      }
+      if(dataCacheProperties.crime){
 
-      //Crime 'pids' should be accessible through the dataCacheProperties object for addresses
-      if($stateParams.searchby === 'address'){
-        //we only want the crimes for extent specified as a $stateParams
-        //use $stateParams.extent
-        //!!! We should probably filter by date in the where clause; Need to format the date for ESRI, can't use a timestamp
-        var addressQueryParams = {
-          'where' : 'pid in (' + dataCacheProperties.crime[Number($stateParams.extent)] + ')',
-          'f' : 'json',
-          'outFields' : '*'
-        };
-        queryBackend(featureService.crime, addressQueryParams)
-          .then(function(crimes){
-            q.resolve(formatCrimeData(crimes));
-          });
-
-
-      //Crime 'pids' should be accessible through the dataCacheProperties object streets but we want to hardcode the extent
-      //to limit searches to smallest extent
-      }else if($stateParams.searchby === 'street_name'){
-        if(dataCacheProperties.crime){
-          //we only want the smallest extent for each address next to the street
-          //!!!We should probably filter by date in the where clause; Need to format the date for ESRI, can't use a timestamp
-          if(dataCacheProperties.crime['82.5']){
-            var streetQueryParams = {
-              'where' : 'pid in (' + dataCacheProperties.crime['82.5'] + ')',
+        //Crime 'pids' should be accessible through the dataCacheProperties object for addresses
+        if($stateParams.searchby === 'address'){
+          //we only want the crimes for extent specified as a $stateParams
+          //use $stateParams.extent
+          //!!! We should probably filter by date in the where clause; Need to format the date for ESRI, can't use a timestamp
+          if(dataCacheProperties.crime[Number($stateParams.extent)]){
+            var addressQueryParams = {
+              'where' : 'pid in (' + dataCacheProperties.crime[Number($stateParams.extent)] + ')',
               'f' : 'json',
               'outFields' : '*'
             };
-            queryBackend(featureService.crime, streetQueryParams)
+            queryBackend(featureService.crime, addressQueryParams)
               .then(function(crimes){
                 q.resolve(formatCrimeData(crimes));
-              });
+              }); 
           }else{
             q.resolve(formatCrimeData({'features' : []}));
           }
-        }else{
-          q.resolve(formatCrimeData({'features' : []}));
+        //Crime 'pids' should be accessible through the dataCacheProperties object streets but we want to hardcode the extent
+        //to limit searches to smallest extent
+        }else if($stateParams.searchby === 'street_name'){
+          if(dataCacheProperties.crime){
+            //we only want the smallest extent for each address next to the street
+            //!!!We should probably filter by date in the where clause; Need to format the date for ESRI, can't use a timestamp
+            if(dataCacheProperties.crime['82.5']){
+              var streetQueryParams = {
+                'where' : 'pid in (' + dataCacheProperties.crime['82.5'] + ')',
+                'f' : 'json',
+                'outFields' : '*'
+              };
+              queryBackend(featureService.crime, streetQueryParams)
+                .then(function(crimes){
+                  q.resolve(formatCrimeData(crimes));
+                });
+            }else{
+              q.resolve(formatCrimeData({'features' : []}));
+            }
+          }else{
+            q.resolve(formatCrimeData({'features' : []}));
+          }
+          
+
+
+        //For neighborhoods, lookup the crimes directly from the crimes table using the neighborhood name
+        }else if($stateParams.searchby === 'neighborhood'){
+          var neighborhoodQueryParams = {
+            'where' : "neighborhood='" + $stateParams.id + "'",
+            'f' : 'json',
+            'outFields' : '*'
+          };
+          queryBackend(featureService.crime, neighborhoodQueryParams)
+            .then(function(crimes){
+              q.resolve(formatCrimeData(crimes));
+            });
         }
-        
-
-
-      //For neighborhoods, lookup the crimes directly from the crimes table using the neighborhood name
-      }else if($stateParams.searchby === 'neighborhood'){
-        var neighborhoodQueryParams = {
-          'where' : "neighborhood='" + $stateParams.id + "'",
-          'f' : 'json',
-          'outFields' : '*'
-        };
-        queryBackend(featureService.crime, neighborhoodQueryParams)
-          .then(function(crimes){
-            q.resolve(formatCrimeData(crimes));
-          });
+      }else{
+        q.resolve(formatCrimeData({'features' : []}));
       }
-
       return q.promise;
     };
 
