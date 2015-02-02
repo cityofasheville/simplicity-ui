@@ -88,7 +88,11 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
     }
 
      $scope.onChangeTimeframeValue = function(timeframeValue){
-      updateStateParamsAndReloadState('timeframe', timeframeValue.value);
+      $scope.loading = true;
+      setTimeout(function() {
+        updateStateParamsAndReloadState('timeframe', timeframeValue.value);
+      }, 250);
+      
     };
 
     // +-+-+-+-+-+-+

@@ -12,7 +12,7 @@ app.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'B
         return nameKey[unformattedType];
     };
 
-
+    $("#addressSearch").focus();
     $scope.searchText = '';
 
     $scope.errorMessage = {
@@ -32,6 +32,7 @@ app.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'B
         $("html, body").animate({'scrollTop' : offset + "px"});
         //we don't want to start search until the user has input 3 characters
         if(searchText.length < 3){
+            $scope.searchGroups = [];
             return;
         }
 
@@ -47,7 +48,13 @@ app.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'B
         //Search usign searchText
         Backend.compositeSearch(searchText)
             .then(function(searchResults){
-                $scope.searchGroups = searchResults; 
+                if(searchText === ""){
+                    $scope.searchGroups = [];
+                }else{
+                    if(searchResults.length !== 0){
+                        $scope.searchGroups = searchResults;   
+                    }
+                } 
             });
     };
 

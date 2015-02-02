@@ -27,12 +27,15 @@
     <h2 class="text-muted">
       For a single address? 
     </h2>
-    <div class="input-group col-xs-12">
-      <input id = "addressSearch" tabindex = '1' type="text" autocomplete = "on" class="form-control" placeholder = "Enter an address..." style = "z-index: 0" ng-init = "typedAddress = ''" ng-model = "typedAddress" ng-focus = "getAddressCandidates(typedAddress, $event)" ng-keyup = "getAddressCandidates(typedAddress, $event)">
+    <form>
+      <div class="input-group col-xs-12">
+      <input autofocus id = "addressSearch" type="text" autocomplete = "on" class="form-control" placeholder = "Enter an address..." style = "z-index: 0" ng-init = "typedAddress = ''" ng-model = "typedAddress" ng-keyup = "getAddressCandidates(typedAddress, $event)" >
       <span class="input-group-btn">
         <button class="btn btn-primary" type="button" style = "box-shadow : none"><i class="fa fa-search"></i></button>
       </span>
     </div>
+    </form>
+    
     <h2 class="text-muted">
       For a PIN? 
     </h2>
