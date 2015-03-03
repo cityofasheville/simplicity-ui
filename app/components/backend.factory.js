@@ -329,6 +329,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
           q.resolve();
         });
       }else if($stateParams.searchby === "neighborhood"){
+
         //build query params for the request with a where clause
        var neighborhoodQueryParams = {
           'where' : "name in ('" + idArray.join() + "')", 
@@ -844,11 +845,11 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
           }else{
             q.resolve(formatCrimeData({'features' : []}));
           }
-          
-
-
-        //For neighborhoods, lookup the crimes directly from the crimes table using the neighborhood name
-        }else if($stateParams.searchby === 'neighborhood'){
+        }
+      }else{
+        //For neighborhoods, we don't crime cached crime data
+        //so lookup the crimes directly from the crimes table using the neighborhood name
+        if($stateParams.searchby === 'neighborhood'){
           var neighborhoodQueryParams = {
             'where' : "neighborhood='" + $stateParams.id + "'",
             'f' : 'json',
@@ -858,9 +859,9 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
             .then(function(crimes){
               q.resolve(formatCrimeData(crimes));
             });
+        }else{
+          q.resolve(formatCrimeData({'features' : []}));
         }
-      }else{
-        q.resolve(formatCrimeData({'features' : []}));
       }
       return q.promise;
     };
