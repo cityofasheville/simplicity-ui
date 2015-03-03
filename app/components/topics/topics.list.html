@@ -11,6 +11,18 @@
   <h1 class="text-muted text-center">
     {{searchText}}
   </h1>
+  <h3 ng-if = "anAddress && loading" class = "text-muted text-center">
+    <i class="fa fa-lg fa-spinner fa-spin text-muted"></i> 
+  </h3>
+  <h3 ng-if = "anAddress && inTheCity && !loading" class = "text-muted text-center">
+    <i class="fa fa-lg fa-check-circle text-success"></i> 
+    <strong>It's in the city!</strong>
+  </h3>
+  <h3 ng-if = "anAddress && !inTheCity && !loading" class = "text-muted text-center">
+    <i class="fa fa-lg fa-times-circle text-danger"></i> 
+    <strong>It's not in the city!</strong>
+  </h3>
+
   <div class="list-group" style = "margin-top : 20px">
     <a class="row list-group-item list-item-panel" href = '{{topic.linkTo}}' style = "margin-bottom : 5px" ng-repeat = "topic in topics">
       <!-- mobile -->
