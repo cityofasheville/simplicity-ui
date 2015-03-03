@@ -395,6 +395,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
           q.resolve();
         });
       }else if($stateParams.searchby === "neighborhood"){
+
         //build query params for the request with a where clause
        var neighborhoodQueryParams = {
           'where' : "name in ('" + idArray.join() + "')", 
@@ -910,11 +911,11 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
           }else{
             q.resolve(formatCrimeData({'features' : []}));
           }
-          
-
-
-        //For neighborhoods, lookup the crimes directly from the crimes table using the neighborhood name
-        }else if($stateParams.searchby === 'neighborhood'){
+        }
+      }else{
+        //For neighborhoods, we don't crime cached crime data
+        //so lookup the crimes directly from the crimes table using the neighborhood name
+        if($stateParams.searchby === 'neighborhood'){
           var neighborhoodQueryParams = {
             'where' : "neighborhood='" + $stateParams.id + "'",
             'f' : 'json',
@@ -924,9 +925,9 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
             .then(function(crimes){
               q.resolve(formatCrimeData(crimes));
             });
+        }else{
+          q.resolve(formatCrimeData({'features' : []}));
         }
-      }else{
-        q.resolve(formatCrimeData({'features' : []}));
       }
       return q.promise;
     };
@@ -1600,449 +1601,8 @@ app.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'B
 
 
 }]);
-app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Topics', 'Backend',
- function ($scope, $stateParams, $state, $filter, Topics, Backend) {
-
-    //****Private variables and methods*****//
-
-    $(function () {
-      $('[data-toggle="tooltip"]').tooltip();
-    });
-    $("html, body").animate({'scrollTop' : "0px"});
-    
-    //!!! This is breaking the back button :-(
-    var updateStateParamsAndReloadState = function(propertyName, value){
-      var stateParams = $stateParams;
-      stateParams[propertyName] = value;
-      $state.transitionTo('main.topics.topic', stateParams, {'reload' : true});
-    };
-
-    //****$scope variables and methods*****//
-
-    //Get properties for a topic
-    $scope.topicProperties = Topics.topicProperties($stateParams.topic);
-
-    var topics = Topics.getTopics();
-    $scope.linkTopics =[];
-    for (var lt = 0; lt < $scope.topicProperties.linkTopics.length; lt++) {
-      for (var t = 0; t < topics.length; t++) {
-        if(topics[t].name === $scope.topicProperties.linkTopics[lt]){
-          $scope.linkTopics.push(topics[t]);
-        }
-      }
-    }
-
-    //Assign stateParams to scope
-    $scope.stateParams = $stateParams;
-
-    //if searchby or id is not defined go back to search with topic defined (after search come back topic)
-    if($stateParams.searchby === null || $stateParams.id === null){
-      $state.go('main.search.composite', {'composite' : $stateParams.topic});
-    //if searchby is defined check topicProperties to determine if valid, if not go to home
-    }else{
-      if($scope.topicProperties.searchby[$stateParams.searchby] === undefined){
-        $state.go('main.search.composite', {'composite' : 'composite'});
-      }
-    }
-
-    // +-+-+-+-+
-    // |v|i|e|w|
-    // +-+-+-+-+
-
-    $scope.headerTemplate = $scope.topicProperties.searchby[$stateParams.searchby].headerTemplate;
-
-    //if view is not defined or if view is not allowed, use default
-    if($stateParams.view === null){
-      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
-    }else if($stateParams.view === 'details' && $scope.topicProperties.detailsViewTemplate === null){
-      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
-    }else if($stateParams.view === 'list' && $scope.topicProperties.listViewTemplate === null){
-      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
-    }else if($stateParams.view === 'table' && $scope.topicProperties.tableViewTemplate === null){
-      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
-    }else if($stateParams.view === 'table' && $stateParams.type !== null){
-      updateStateParamsAndReloadState('type', null);
-    }else{
-      //The view is defined and allowed
-    }
-
-    $scope.onClickChangeView = function(view){
-      updateStateParamsAndReloadState('view', view);
-    };
-
-    // +-+-+-+-+-+-+-+-+-+
-    // |t|i|m|e|f|r|a|m|e|
-    // +-+-+-+-+-+-+-+-+-+
-
-    //if timeframe is not defined is supposed to be, use default
-    if($stateParams.timeframe === null && $scope.topicProperties.searchby[$stateParams.searchby].params.timeframe !== null){
-      updateStateParamsAndReloadState('timeframe', $scope.topicProperties.searchby[$stateParams.searchby].params.timeframe);
-    }
-
-    //get the select options for changing the timeframe
-    $scope.timeframeOptions = Backend.options('timeframe');
-    //define a default select option
-    $scope.timeframeOptionIndex = 0;
-    //find the option that matches the current timeframe defiend in the $stateParams
-    for (var tf = 0; tf < $scope.timeframeOptions.length; tf++) {
-      if($scope.timeframeOptions[tf].value === $stateParams.timeframe){
-        $scope.timeframeOptionIndex = tf;
-      } 
-    }
-
-     $scope.onChangeTimeframeValue = function(timeframeValue){
-      $scope.loading = true;
-      setTimeout(function() {
-        updateStateParamsAndReloadState('timeframe', timeframeValue.value);
-      }, 250);
-      
-    };
-
-    // +-+-+-+-+-+-+
-    // |e|x|t|e|n|t|
-    // +-+-+-+-+-+-+
-
-    //if extent is not defined is supposed to be, use default
-    if($stateParams.extent === null && $scope.topicProperties.searchby[$stateParams.searchby].params.extent !== null){
-      updateStateParamsAndReloadState('extent', $scope.topicProperties.searchby[$stateParams.searchby].params.extent);
-    }
-
-    //get the select options for changing the timeframe
-    $scope.extentOptions = Backend.options('extent');
-    //define a default select option
-    $scope.extentOptionIndex = 0;
-    
-    //find the option that matches the current timeframe defiend in the $stateParams
-    for (var e = 0; e < $scope.extentOptions.length; e++) {
-      if($scope.extentOptions[e].value === Number($stateParams.extent)){
-        $scope.extentOptionIndex = e;
-      } 
-    }
-
-    $scope.onChangeExtentValue = function(extentValue){
-      updateStateParamsAndReloadState('extent', extentValue.value);
-    };
-
-     var openstreetmap = L.tileLayer("http://a.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-        attribution:'&copy; <a href="http://osm.org/copyright" title="OpenStreetMap" target="_blank">OpenStreetMap</a> contributors',
-        maxZoom : 22
-    });
-
-    var esriImagery = L.esri.basemapLayer("Imagery");
-
-
-    var baseMaps = {
-      "Open Street Map" : openstreetmap,
-      "ESRI Imagery" : esriImagery
-    };
-
-
-
-    $(".leaflet-control-attribution").css("maxWidth", "90%");
-
-    var map = L.map('map', {
-        center: [35.5951125,-82.5511088], 
-        zoom : 13,
-        maxZoom : 22,
-        fullscreenControl: true,
-        layers : [openstreetmap]
-    });
-
-    var layerControl = L.control.layers(baseMaps).addTo(map);
-    
-    if($stateParams.type === null || $stateParams.type === 'null'){
-      $scope.filterText = "";
-    }else{
-      $scope.filterText = $stateParams.type;
-    }
-    
-    var returnToFullscreen = false;
-
-    var addGeoJsonToMap = function(data, style){
-      if(data.length > 0){
-        var leafletGeoJsonLayer = L.geoJson(data, {
-          pointToLayer: function(feature, latlng){
-            if(feature.geometry.type === "Point"){
-              return L.circleMarker(latlng, {
-                radius: 10,
-                fillColor: "#"+feature.properties.color,
-                color: "#"+feature.properties.color,
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
-              }); 
-            }else{
-              return false;
-            }
-          },
-          style: function (feature) {
-            if(style){
-              return style;
-            }else if(feature.geometry.type === "LineString"){
-              return {
-                color: "#"+feature.properties.color,
-                weight: 8,
-                opacity: 0.8,
-              }; 
-            }
-          },
-          onEachFeature: function (feature, layer) {
-            layer.on('click', function(){
-                  $scope.filterText = feature.properties.objectid;
-                  $scope.$apply();
-                  $('#detailsModal').modal({'backdrop' : 'static'});
-                  if (
-                      document.fullscreenElement ||
-                      document.webkitFullscreenElement ||
-                      document.mozFullScreenElement ||
-                      document.msFullscreenElement
-                  ) {
-                    returnToFullscreen = true;
-                  }
-                  if (document.exitFullscreen) {
-                      document.exitFullscreen();
-                  } else if (document.webkitExitFullscreen) {
-                      document.webkitExitFullscreen();
-                  } else if (document.mozCancelFullScreen) {
-                      document.mozCancelFullScreen();
-                  } else if (document.msExitFullscreen) {
-                      document.msExitFullscreen();
-                  }   
-            });
-          }
-        });
-        leafletGeoJsonLayer.addTo(map);
-        map.fitBounds(leafletGeoJsonLayer);
-          if(map.getZoom() > 18){
-            map.setZoom(18);
-          }
-      }
-    };
-
-    var addSearchGeoJsonToMap = function(data, style){
-      return L.geoJson(data, {
-        style: function (feature) {
-          if(style){
-            return style;
-          }
-        },
-        onEachFeature: function (feature, layer) {
-          if(feature.geometry.type === 'Point' && $stateParams.extent !== null && $stateParams.extent !== 'null'){
-            var radiusInMeters = $stateParams.extent*0.3048;
-            var circle = L.circle([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], radiusInMeters, {
-              'fillOpacity' : 0,
-              'opacity' : 0.3
-            });
-            circle.addTo(map);
-              layer.on('click', function(){
-                  
-              });
-          }
-          
-        }
-      });
-    };
-
-    var addOverlayGeoJsonToMap = function(data, style){
-      var overlayLayer =  L.geoJson(data, {
-        style: function (feature) {
-          if(style){
-            return style;
-          }
-        },
-        onEachFeature: function (feature, layer) {
-          layerControl.addOverlay(layer, feature.properties.name);
-          
-        }
-      });
-      overlayLayer.addTo(map);
-    };
-
-
-
-    $scope.loading = true;
-    //!!! Check if dataCache is already defined
-
-    Backend.dataCache()
-      .then(function(data){
-        Backend.topic()
-          .then(function(topic){
-            console.log(topic);
-            $scope.topic = topic;
-            $scope.loading = false;
-            if(topic.searchGeojson){
-              addSearchGeoJsonToMap(topic.searchGeojson, {'fillOpacity' : 0,'opacity' : 0.3}).addTo(map);
-            }
-            if(topic.overlays){
-              var overlayLayer = addOverlayGeoJsonToMap(topic.overlays, {'fillOpacity' : 0.1,'opacity' : 0.3});
-            }
-            if(topic.features){
-              if($stateParams.type !== null || $stateParams.type !== 'null'){
-                var filteredTopic = $filter('filter')(topic.features, $stateParams.type, true);
-                addGeoJsonToMap(filteredTopic);
-              }else{
-                addGeoJsonToMap(topic);
-              }             
-            }         
-          });
-      });
-
-    $scope.goToTopics = function(){
-      $state.go('main.topics.list', {'searchtext' : $stateParams.searchtext, 'searchby' : $stateParams.searchby, 'id' : $stateParams.id});
-    };
-
-    $scope.filterBy = function(type){
-
-      if($stateParams.view === 'table'){
-        updateStateParamsAndReloadState('type', type);
-        updateStateParamsAndReloadState('view', 'list');
-      }else if($stateParams.view === 'map' || $stateParams.view === 'list'){
-        updateStateParamsAndReloadState('type', type);
-      }else{
-        //do nothing
-      }
-      $scope.filterText = type;
-    };
-
-
-    $scope.closeModal = function(){
-      if(returnToFullscreen === true){
-        var m = document.getElementById("map");
- 
-        // go full-screen
-        if (m.requestFullscreen) {
-            m.requestFullscreen();
-        } else if (m.webkitRequestFullscreen) {
-            m.webkitRequestFullscreen();
-        } else if (m.mozRequestFullScreen) {
-            m.mozRequestFullScreen();
-        } else if (m.msRequestFullscreen) {
-            m.msRequestFullscreen();
-        }
-        returnToFullscreen = false;
-      }
-    };
-
-
-    $scope.openDownloadModal = function(){
-      $('#downloadModal').modal({'backdrop' : false});
-    };
-
-
-    $scope.download = function(downloadType, topic){
-      var csvString =  'data:text/csv;charset=utf-8,';
-      if(downloadType === 'summary'){
-        csvString += 'Type, Count' + '\n';
-        for(var key in topic.summary.table){
-          var summaryItemString = key + ',' + topic.summary.table[key].count;
-          csvString += summaryItemString + '\n';
-        }
-      }else if (downloadType === 'complete'){
-        var headerArray = [];
-        
-        for(var attributeKey in topic.features[0].properties){
-          headerArray.push(attributeKey);
-        }
-        // for(var geometryKey in topic.features[0].geometry){
-        //   headerArray.push(geometryKey);
-        // }
-        csvString += headerArray.join(',') + '\n';
-        for (var i = 0; i < topic.features.length; i++) {
-          var rowArray = [];
-          for (var x = 0; x < headerArray.length; x++) {
-            if(topic.features[i].properties[headerArray[x]]){
-              // if(topic.features[i].properties[headerArray[x]].constructor === Array){
-              //   rowArray.push(JSON.stringify(topic.features[i].properties[headerArray[x]]));
-              // }else{
-              //   rowArray.push(topic.features[i].properties[headerArray[x]]);
-              // }
-              rowArray.push(topic.features[i].properties[headerArray[x]]);
-            }else if(topic.features[i].geometry[headerArray[x]]){
-              //rowArray.push(topic.features[i].geometry[headerArray[x]]);
-            }else{
-              rowArray.push('NULL');
-            }
-          }
-          csvString += rowArray.join(',') + '\n';
-        }
-      }
-      var encodedUri = encodeURI(csvString);
-      setTimeout(function() {window.open(encodedUri);}, 1000);
-    };
-
-
-}]);
-// app.factory('Topic', ['$stateParams', function($stateParams){
-
-//     //****Create the factory object****//
-//     var Topic = {};
-
-//     //****Private variables*****//
-
-
-
-
-//     //Options for the topic's select elements
-//     //The labels are displayed as the select element options
-//     //The values are the values of the select element options
-//     //The values should match any url params
-//     var options = {
-//       'extent' : [
-//         {'value' : 330, 'label' : 'a city block (110 yards)'},
-//         {'value' : 660, 'label' : 'a couple city blocks (1/8 mile)'},
-//         {'value' : 1320, 'label' : 'a quarter mile'}   
-//       ],
-//       'timeframe' : [
-//         {'value' : 'last-30-days', 'label' : 'the last 30 days'},
-//         {'value' : 'last-6-months', 'label' : 'the last 6 months'},
-//         {'value' : 'last-year', 'label' : 'the last year'},
-//         {'value' : 'last-5-years', 'label' : 'the last 5 years'},
-//         {'value' : 'last-10-years', 'label' : 'the last 10 years'},
-//         {'value' : 'all-time', 'label' : 'all time'}
-//       ]
-//     };
-
-//     //We need a date to filter the timeframe, so get today's date
-//     var d = new Date();
-
-//     //filterValues are the actual values used to filter the topic
-//     //filterValues are numberic form of the text values from options
-//     var filterValues = {
-//       'extent' : {
-//         'within-about-a-block' : 330,
-//         'within-an-eighth-of-a-mile' : 660,
-//         'within-a-quarter-mile' : 1320,
-//       },
-//       'timeframe' : {
-//         'last-30-days' : d.setMonth(d.getMonth() - 1),
-//         'last-6-months' : d.setMonth(d.getMonth() - 6),
-//         'last-year' : d.setFullYear(d.getFullYear()-1),
-//         'last-5-years': d.setFullYear(d.getFullYear()-5),
-//         'last-10-years': d.setFullYear(d.getFullYear()-10),
-//         'all-time' : d.setFullYear(d.getFullYear()-100)
-//       }
-//     };
-
-//     //****API*****//
-
-    
-
-//     Topic.options = function(param){
-//       return options[param];
-//     };
-
-//     Topic.getFilterValueFromOption = function(param, option){
-//       return filterValues[param][option];
-//     };
-
-
-//     //****Return the factory object****//
-//     return Topic; 
-
-    
-// }]); //END Topic factory function
-app.controller('TopicsCtrl', ['$scope', '$stateParams', '$state', 'Topics',
- function ($scope, $stateParams, $state, Topics) {
+app.controller('TopicsCtrl', ['$scope', '$stateParams', '$state', 'Topics', 'Backend',
+ function ($scope, $stateParams, $state, Topics, Backend) {
     $("html, body").animate({'scrollTop' : "0px"});
     $scope.$on('$stateChangeSuccess', function (event, toState) {
         if (toState.name === 'main.topics') {           
@@ -2053,24 +1613,29 @@ app.controller('TopicsCtrl', ['$scope', '$stateParams', '$state', 'Topics',
     });
 
     //you can't have more tha
-    $scope.heading = 'What are you looking for...';
-    if($stateParams.searchby === 'address'){
-      $scope.heading =  'What are you looking for at ';
-    }else if($stateParams.searchby === 'street_name'){
-      $scope.heading = 'What are you looking for on ';
-    }else if($stateParams.searchby === 'neighborhood'){
-      $scope.heading = 'What are you looking for in ';
-    }else if($stateParams.searchby === 'pinnum'){
-      $scope.heading = 'What are you looking for with the PIN ';
-    }else if($stateParams.searchby === 'owner_name'){
-      $scope.heading = 'What are you looking for by the owner ';
-    }
+    $scope.heading = 'Topics for ';
+    
 
     $scope.searchText = $stateParams.searchtext + '?';
 
     $scope.topics = Topics.getTopics($stateParams);
     
-
+    $scope.inTheCity = false;
+    $scope.loading = false;
+    $scope.anAddress = false;
+    if($stateParams.searchby === 'address'){
+      $scope.anAddress = true;
+      $scope.loading = true;
+      Backend.dataCache()
+      .then(function(data){
+        $scope.loading = false;
+        if(data.inTheCity === true){
+          $scope.inTheCity = true;
+        }else{
+          $scope.inTheCity = false;
+        }
+      });
+    }
 
 
 }]);
@@ -2506,6 +2071,446 @@ app.factory('Topics', ['$stateParams', function($stateParams){
 
     
 }]); //END Topics factory function
+app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Topics', 'Backend',
+ function ($scope, $stateParams, $state, $filter, Topics, Backend) {
+
+    //****Private variables and methods*****//
+
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+    $("html, body").animate({'scrollTop' : "0px"});
+    
+    //!!! This is breaking the back button :-(
+    var updateStateParamsAndReloadState = function(propertyName, value){
+      var stateParams = $stateParams;
+      stateParams[propertyName] = value;
+      $state.transitionTo('main.topics.topic', stateParams, {'reload' : true});
+    };
+
+    //****$scope variables and methods*****//
+
+    //Get properties for a topic
+    $scope.topicProperties = Topics.topicProperties($stateParams.topic);
+
+    var topics = Topics.getTopics();
+    $scope.linkTopics =[];
+    for (var lt = 0; lt < $scope.topicProperties.linkTopics.length; lt++) {
+      for (var t = 0; t < topics.length; t++) {
+        if(topics[t].name === $scope.topicProperties.linkTopics[lt]){
+          $scope.linkTopics.push(topics[t]);
+        }
+      }
+    }
+
+    //Assign stateParams to scope
+    $scope.stateParams = $stateParams;
+
+    //if searchby or id is not defined go back to search with topic defined (after search come back topic)
+    if($stateParams.searchby === null || $stateParams.id === null){
+      $state.go('main.search.composite', {'composite' : $stateParams.topic});
+    //if searchby is defined check topicProperties to determine if valid, if not go to home
+    }else{
+      if($scope.topicProperties.searchby[$stateParams.searchby] === undefined){
+        $state.go('main.search.composite', {'composite' : 'composite'});
+      }
+    }
+
+    // +-+-+-+-+
+    // |v|i|e|w|
+    // +-+-+-+-+
+
+    $scope.headerTemplate = $scope.topicProperties.searchby[$stateParams.searchby].headerTemplate;
+
+    //if view is not defined or if view is not allowed, use default
+    if($stateParams.view === null){
+      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
+    }else if($stateParams.view === 'details' && $scope.topicProperties.detailsViewTemplate === null){
+      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
+    }else if($stateParams.view === 'list' && $scope.topicProperties.listViewTemplate === null){
+      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
+    }else if($stateParams.view === 'table' && $scope.topicProperties.tableViewTemplate === null){
+      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
+    }else if($stateParams.view === 'table' && $stateParams.type !== null){
+      updateStateParamsAndReloadState('type', null);
+    }else{
+      //The view is defined and allowed
+    }
+
+    $scope.onClickChangeView = function(view){
+      updateStateParamsAndReloadState('view', view);
+    };
+
+    // +-+-+-+-+-+-+-+-+-+
+    // |t|i|m|e|f|r|a|m|e|
+    // +-+-+-+-+-+-+-+-+-+
+
+    //if timeframe is not defined is supposed to be, use default
+    if($stateParams.timeframe === null && $scope.topicProperties.searchby[$stateParams.searchby].params.timeframe !== null){
+      updateStateParamsAndReloadState('timeframe', $scope.topicProperties.searchby[$stateParams.searchby].params.timeframe);
+    }
+
+    //get the select options for changing the timeframe
+    $scope.timeframeOptions = Backend.options('timeframe');
+    //define a default select option
+    $scope.timeframeOptionIndex = 0;
+    //find the option that matches the current timeframe defiend in the $stateParams
+    for (var tf = 0; tf < $scope.timeframeOptions.length; tf++) {
+      if($scope.timeframeOptions[tf].value === $stateParams.timeframe){
+        $scope.timeframeOptionIndex = tf;
+      } 
+    }
+
+     $scope.onChangeTimeframeValue = function(timeframeValue){
+      $scope.loading = true;
+      setTimeout(function() {
+        updateStateParamsAndReloadState('timeframe', timeframeValue.value);
+      }, 250);
+      
+    };
+
+    // +-+-+-+-+-+-+
+    // |e|x|t|e|n|t|
+    // +-+-+-+-+-+-+
+
+    //if extent is not defined is supposed to be, use default
+    if($stateParams.extent === null && $scope.topicProperties.searchby[$stateParams.searchby].params.extent !== null){
+      updateStateParamsAndReloadState('extent', $scope.topicProperties.searchby[$stateParams.searchby].params.extent);
+    }
+
+    //get the select options for changing the timeframe
+    $scope.extentOptions = Backend.options('extent');
+    //define a default select option
+    $scope.extentOptionIndex = 0;
+    
+    //find the option that matches the current timeframe defiend in the $stateParams
+    for (var e = 0; e < $scope.extentOptions.length; e++) {
+      if($scope.extentOptions[e].value === Number($stateParams.extent)){
+        $scope.extentOptionIndex = e;
+      } 
+    }
+
+    $scope.onChangeExtentValue = function(extentValue){
+      updateStateParamsAndReloadState('extent', extentValue.value);
+    };
+
+     var openstreetmap = L.tileLayer("http://a.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+        attribution:'&copy; <a href="http://osm.org/copyright" title="OpenStreetMap" target="_blank">OpenStreetMap</a> contributors',
+        maxZoom : 22
+    });
+
+    var esriImagery = L.esri.basemapLayer("Imagery");
+
+
+    var baseMaps = {
+      "Open Street Map" : openstreetmap,
+      "ESRI Imagery" : esriImagery
+    };
+
+
+
+    $(".leaflet-control-attribution").css("maxWidth", "90%");
+
+    var map = L.map('map', {
+        center: [35.5951125,-82.5511088], 
+        zoom : 13,
+        maxZoom : 22,
+        fullscreenControl: true,
+        layers : [openstreetmap]
+    });
+
+    var layerControl = L.control.layers(baseMaps).addTo(map);
+    
+    if($stateParams.type === null || $stateParams.type === 'null'){
+      $scope.filterText = "";
+    }else{
+      $scope.filterText = $stateParams.type;
+    }
+    
+    var returnToFullscreen = false;
+
+    var addGeoJsonToMap = function(data, style){
+      if(data.length > 0){
+        var leafletGeoJsonLayer = L.geoJson(data, {
+          pointToLayer: function(feature, latlng){
+            if(feature.geometry.type === "Point"){
+              return L.circleMarker(latlng, {
+                radius: 10,
+                fillColor: "#"+feature.properties.color,
+                color: "#"+feature.properties.color,
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+              }); 
+            }else{
+              return false;
+            }
+          },
+          style: function (feature) {
+            if(style){
+              return style;
+            }else if(feature.geometry.type === "LineString"){
+              return {
+                color: "#"+feature.properties.color,
+                weight: 8,
+                opacity: 0.8,
+              }; 
+            }
+          },
+          onEachFeature: function (feature, layer) {
+            layer.on('click', function(){
+                  $scope.filterText = feature.properties.objectid;
+                  $scope.$apply();
+                  $('#detailsModal').modal({'backdrop' : 'static'});
+                  if (
+                      document.fullscreenElement ||
+                      document.webkitFullscreenElement ||
+                      document.mozFullScreenElement ||
+                      document.msFullscreenElement
+                  ) {
+                    returnToFullscreen = true;
+                  }
+                  if (document.exitFullscreen) {
+                      document.exitFullscreen();
+                  } else if (document.webkitExitFullscreen) {
+                      document.webkitExitFullscreen();
+                  } else if (document.mozCancelFullScreen) {
+                      document.mozCancelFullScreen();
+                  } else if (document.msExitFullscreen) {
+                      document.msExitFullscreen();
+                  }   
+            });
+          }
+        });
+        leafletGeoJsonLayer.addTo(map);
+        map.fitBounds(leafletGeoJsonLayer);
+          if(map.getZoom() > 18){
+            map.setZoom(18);
+          }
+      }
+    };
+
+    var addSearchGeoJsonToMap = function(data, style){
+      return L.geoJson(data, {
+        style: function (feature) {
+          if(style){
+            return style;
+          }
+        },
+        onEachFeature: function (feature, layer) {
+          if(feature.geometry.type === 'Point' && $stateParams.extent !== null && $stateParams.extent !== 'null'){
+            var radiusInMeters = $stateParams.extent*0.3048;
+            var circle = L.circle([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], radiusInMeters, {
+              'fillOpacity' : 0,
+              'opacity' : 0.3
+            });
+            circle.addTo(map);
+              layer.on('click', function(){
+                  
+              });
+          }
+          
+        }
+      });
+    };
+
+    var addOverlayGeoJsonToMap = function(data, style){
+      var overlayLayer =  L.geoJson(data, {
+        style: function (feature) {
+          if(style){
+            return style;
+          }
+        },
+        onEachFeature: function (feature, layer) {
+          layerControl.addOverlay(layer, feature.properties.name);
+          
+        }
+      });
+      overlayLayer.addTo(map);
+    };
+
+
+
+    $scope.loading = true;
+    //!!! Check if dataCache is already defined
+
+    Backend.dataCache()
+      .then(function(data){
+        Backend.topic()
+          .then(function(topic){
+            $scope.topic = topic;
+            $scope.loading = false;
+            if(topic.searchGeojson){
+              addSearchGeoJsonToMap(topic.searchGeojson, {'fillOpacity' : 0,'opacity' : 0.3}).addTo(map);
+            }
+            if(topic.overlays){
+              var overlayLayer = addOverlayGeoJsonToMap(topic.overlays, {'fillOpacity' : 0.1,'opacity' : 0.3});
+            }
+            if(topic.features){
+              if($stateParams.type !== null || $stateParams.type !== 'null'){
+                var filteredTopic = $filter('filter')(topic.features, $stateParams.type, true);
+                addGeoJsonToMap(filteredTopic);
+              }else{
+                addGeoJsonToMap(topic);
+              }             
+            }         
+          });
+      });
+
+    $scope.goToTopics = function(){
+      $state.go('main.topics.list', {'searchtext' : $stateParams.searchtext, 'searchby' : $stateParams.searchby, 'id' : $stateParams.id});
+    };
+
+    $scope.filterBy = function(type){
+
+      if($stateParams.view === 'table'){
+        updateStateParamsAndReloadState('type', type);
+        updateStateParamsAndReloadState('view', 'list');
+      }else if($stateParams.view === 'map' || $stateParams.view === 'list'){
+        updateStateParamsAndReloadState('type', type);
+      }else{
+        //do nothing
+      }
+      $scope.filterText = type;
+    };
+
+
+    $scope.closeModal = function(){
+      if(returnToFullscreen === true){
+        var m = document.getElementById("map");
+ 
+        // go full-screen
+        if (m.requestFullscreen) {
+            m.requestFullscreen();
+        } else if (m.webkitRequestFullscreen) {
+            m.webkitRequestFullscreen();
+        } else if (m.mozRequestFullScreen) {
+            m.mozRequestFullScreen();
+        } else if (m.msRequestFullscreen) {
+            m.msRequestFullscreen();
+        }
+        returnToFullscreen = false;
+      }
+    };
+
+
+    $scope.openDownloadModal = function(){
+      $('#downloadModal').modal({'backdrop' : false});
+    };
+
+
+    $scope.download = function(downloadType, topic){
+      var csvString =  'data:text/csv;charset=utf-8,';
+      if(downloadType === 'summary'){
+        csvString += 'Type, Count' + '\n';
+        for(var key in topic.summary.table){
+          var summaryItemString = key + ',' + topic.summary.table[key].count;
+          csvString += summaryItemString + '\n';
+        }
+      }else if (downloadType === 'complete'){
+        var headerArray = [];
+        
+        for(var attributeKey in topic.features[0].properties){
+          headerArray.push(attributeKey);
+        }
+        for(var geometryKey in topic.features[0].geometry){
+          headerArray.push(geometryKey);
+        }
+        csvString += headerArray.join(',') + '\n';
+        for (var i = 0; i < topic.features.length; i++) {
+          var rowArray = [];
+          for (var x = 0; x < headerArray.length; x++) {
+            if(topic.features[i].properties[headerArray[x]]){
+              // if(topic.features[i].properties[headerArray[x]].constructor === Array){
+              //   rowArray.push(JSON.stringify(topic.features[i].properties[headerArray[x]]));
+              // }else{
+              //   rowArray.push(topic.features[i].properties[headerArray[x]]);
+              // }
+              rowArray.push(topic.features[i].properties[headerArray[x]]);
+            }else if(topic.features[i].geometry[headerArray[x]]){
+              rowArray.push(topic.features[i].geometry[headerArray[x]]);
+            }else{
+              rowArray.push('NULL');
+            }
+          }
+          csvString += rowArray.join(',') + '\n';
+        }
+      }
+      var encodedUri = encodeURI(csvString);
+      window.open(encodedUri);
+    };
+
+
+}]);
+// app.factory('Topic', ['$stateParams', function($stateParams){
+
+//     //****Create the factory object****//
+//     var Topic = {};
+
+//     //****Private variables*****//
+
+
+
+
+//     //Options for the topic's select elements
+//     //The labels are displayed as the select element options
+//     //The values are the values of the select element options
+//     //The values should match any url params
+//     var options = {
+//       'extent' : [
+//         {'value' : 330, 'label' : 'a city block (110 yards)'},
+//         {'value' : 660, 'label' : 'a couple city blocks (1/8 mile)'},
+//         {'value' : 1320, 'label' : 'a quarter mile'}   
+//       ],
+//       'timeframe' : [
+//         {'value' : 'last-30-days', 'label' : 'the last 30 days'},
+//         {'value' : 'last-6-months', 'label' : 'the last 6 months'},
+//         {'value' : 'last-year', 'label' : 'the last year'},
+//         {'value' : 'last-5-years', 'label' : 'the last 5 years'},
+//         {'value' : 'last-10-years', 'label' : 'the last 10 years'},
+//         {'value' : 'all-time', 'label' : 'all time'}
+//       ]
+//     };
+
+//     //We need a date to filter the timeframe, so get today's date
+//     var d = new Date();
+
+//     //filterValues are the actual values used to filter the topic
+//     //filterValues are numberic form of the text values from options
+//     var filterValues = {
+//       'extent' : {
+//         'within-about-a-block' : 330,
+//         'within-an-eighth-of-a-mile' : 660,
+//         'within-a-quarter-mile' : 1320,
+//       },
+//       'timeframe' : {
+//         'last-30-days' : d.setMonth(d.getMonth() - 1),
+//         'last-6-months' : d.setMonth(d.getMonth() - 6),
+//         'last-year' : d.setFullYear(d.getFullYear()-1),
+//         'last-5-years': d.setFullYear(d.getFullYear()-5),
+//         'last-10-years': d.setFullYear(d.getFullYear()-10),
+//         'all-time' : d.setFullYear(d.getFullYear()-100)
+//       }
+//     };
+
+//     //****API*****//
+
+    
+
+//     Topic.options = function(param){
+//       return options[param];
+//     };
+
+//     Topic.getFilterValueFromOption = function(param, option){
+//       return filterValues[param][option];
+//     };
+
+
+//     //****Return the factory object****//
+//     return Topic; 
+
+    
+// }]); //END Topic factory function
 (function(module) {
 try {
   module = angular.module('simplicity');
@@ -2526,7 +2531,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('search/composite.search.html',
-    '<div style="min-height : 1000px"><div class="col-xs-12"><p class=" text-muted text-center lead" style="margin-bottom : 0px; margin-top : 20px">Discover city data about places in your community.</p><p class=" text-muted text-center lead">Search for an address, street, neighborhood, or property to get started!</p></div><div class="col-xs-12"><div class="input-group"><input id="inputSearch" groupindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location..." style="z-index: 0" ng-model="searchText" ng-keyup="doSearch(searchText, $event)" autofocus=""> <span class="input-group-btn"><button class="btn btn-primary" type="button" style="box-shadow : none; font-size : 17px"><i class="fa fa-search"></i></button></span></div></div><div class="" ng-show="errorMessage.show || helperMessage.show || searchGroups.length > 0"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-success">{{helperMessage.message}}</p><div ng-repeat="group in searchGroups"><div class="col-xs-12" style="margin-top : 10px; margin-bottom : 10px"><h4 class="row text-muted"><span class="fa-stack fa-lg" ng-click="goBack()"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span> <strong>{{group.label}}</strong> <span class="badge" style="background : #999">{{group.results.length}}</span></h4><div class="list-group" ng-repeat="candidate in group.results | limitTo : group.offset"><a ng-click="goToTopics(candidate, $event)" ng-keypress="goToTopics(candidate, $event)" class="row list-group-item"><span class="col-xs-2 col-lg-1"><span class="fa-stack fa-lg text-primary"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span></span><p class="col-xs-8 col-lg-9 pull-left text-primary" style="margin-top : 8px">{{candidate.label}}</p><h4 class="col-xs-2 col-lg-2"><i class="fa fa-lg fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="list-group" ng-if="group.results.length > 3"><a ng-click="group.offset = group.offset + 3" class="row list-group-item"><h4 class="col-xs-10 text-primary"><strong>More</strong></h4><h4 class="col-xs-2"><i class="fa fa-lg fa-chevron-down text-primary pull-right"></i></h4></a></div></div></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div></div>');
+    '<div style="min-height : 1000px"><div class="col-xs-12"><p class="text-muted text-center lead" style="margin-bottom : 0px; margin-top : 20px">Discover <a ng-init="showCityDataDef = false" ng-click="showCityDataDef = !showCityDataDef">city data</a> about places in your community.</p><p class="text-muted text-center lead"><strong>Search for an address, street, neighborhood, or property to get started!</strong></p></div><div class="col-xs-12"><div class="input-group"><input id="inputSearch" groupindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location..." style="z-index: 0" ng-model="searchText" ng-keyup="doSearch(searchText, $event)" autofocus=""> <span class="input-group-btn"><button class="btn btn-primary" type="button" style="box-shadow : none; font-size : 17px"><i class="fa fa-search"></i></button></span></div></div><div class="" ng-show="errorMessage.show || helperMessage.show || searchGroups.length > 0"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-success">{{helperMessage.message}}</p><div ng-repeat="group in searchGroups"><div class="col-xs-12" style="margin-top : 10px; margin-bottom : 10px"><h4 class="row text-muted"><span class="fa-stack fa-lg" ng-click="goBack()"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span> <strong>{{group.label}}</strong> <span class="badge" style="background : #999">{{group.results.length}}</span></h4><div class="list-group" ng-repeat="candidate in group.results | limitTo : group.offset"><a ng-click="goToTopics(candidate, $event)" ng-keypress="goToTopics(candidate, $event)" class="row list-group-item"><span class="col-xs-2 col-lg-1"><span class="fa-stack fa-lg text-primary"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span></span><p class="col-xs-8 col-lg-9 pull-left text-primary" style="margin-top : 8px">{{candidate.label}}</p><h4 class="col-xs-2 col-lg-2"><i class="fa fa-lg fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="list-group" ng-if="group.results.length > 3"><a ng-click="group.offset = group.offset + 3" class="row list-group-item"><h4 class="col-xs-10 text-primary"><strong>More</strong></h4><h4 class="col-xs-2"><i class="fa fa-lg fa-chevron-down text-primary pull-right"></i></h4></a></div></div></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div><div class="col-xs-12"><h4 class="text-primary text-center">Brought to you by the <strong><a href="http://www.ashevillenc.gov/" target="_blank">City of Asheville</a></strong> <i class="fa fa-smile-o"></i></h4></div><div class="col-xs-12" style="margin-top : 100px"><div class="well col-xs-12 col-md-6 col-md-offset-3" ng-if="showCityDataDef"><p class="lead">city data</p><p><strong>\\ˈsi-tē ˈdā-tə\\</strong></p><p>City data is just information about your city. It includes information about properties, trash collection, recycling pickup, crimes, development, who\'s responsible for fixing the street in front of your house, and more. At the City of Asheville we are working to provide you with better access to data in your city through SimpliCity!</p></div></div></div>');
 }]);
 })();
 
@@ -2562,7 +2567,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topic/topic.html',
-    '<div><div class="col-xs-12 btn-group btn-group-justified" style="margin-top : 15px"><a href="#/search/composite" class="btn btn-primary"><i class="fa fa-search fa-fw"></i> <strong>Search</strong></a> <a ng-click="goToTopics()" class="btn btn-primary"><i class="fa fa-bars fa-fw"></i> <strong>View Topics</strong></a></div><div class="col-xs-12"><hr></div><div ng-include="headerTemplate"></div><div class="col-xs-12" style="height : 200px; text-align : center; margin-top : 30px" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div class="col-xs-12 list-item-panel" ng-show="!loading"><div ng-if="stateParams.view !== \'simple\'" ng-include="\'topic/topic.view.header.html\'"></div><div ng-if="topicPropteries.simpleViewTemplate !== null" ng-show="stateParams.view === \'simple\'" ng-include="topicProperties.simpleViewTemplate"></div><div ng-if="topicPropteries.detailsViewTemplate !== null" ng-show="stateParams.view === \'details\'" ng-include="topicProperties.detailsViewTemplate"></div><div ng-if="topicPropteries.listViewTemplate !== null" ng-show="stateParams.view === \'list\'" ng-include="topicProperties.listViewTemplate"></div><div ng-if="topicPropteries.tableViewTemplate !== null" ng-show="stateParams.view === \'table\'" ng-include="topicProperties.tableViewTemplate"></div><div><div ng-show="stateParams.view === \'map\'" class="col-xs-12" style="height : 400px; margin-bottom : 20px" id="map"><div ng-if="topic.summary.table !== undefined"><button ng-init="showLegend = true" ng-show="!showLegend" ng-click="showLegend = !showLegend" class="btn btn-primary btn-sm" style="position : absolute; top : 50px; right : 10px;z-index : 7">Legend <i class="fa fa-expand "></i></button><div ng-show="showLegend" style="position : absolute; top : 50px; right : 10px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7"><div class="col-xs-12"><h4 class="pull-left">Legend</h4><button ng-click="showLegend = !showLegend" class="btn btn-primary btn-sm pull-right" style="margin-top : 5px"><i class="fa fa-times"></i></button></div><table ng-if="topic.features.length !== 0" class="table table-hover"><tbody><tr ng-repeat="(key, value) in topic.summary.table"><td ng-click="getDetails(key)" style="cursor : pointer"><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}</td></tr></tbody></table></div></div></div><div id="detailsModal" class="modal fade"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button ng-click="closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">Location Details</h4></div><div class="modal-body"><div ng-include="topicProperties.listViewTemplate"></div></div></div></div></div></div></div><div ng-if="linkTopics.length > 0" class="col-xs-12 list-item-panel" style="margin-top : 30px"><h2>Related Links</h2><div class="list-group" style="margin-top : 20px"><a class="row list-group-item list-item-panel" href="{{linkTopic.linkTo}}" style="margin-bottom : 5px" ng-repeat="linkTopic in linkTopics"><span class="visible-xs col-xs-8"><p class="text-primary text-center">{{linkTopic.question}}</p></span> <i ng-class="linkTopic.iconClass" class="visible-xs pull-left col-xs-3 text-primary"></i><div ng-class="linkTopic.iconClass" class="hidden-xs col-sm-2 text-primary"></div><h4 class="hidden-xs col-sm-9 text-primary" style="margin-top : 20px">{{linkTopic.question}}</h4><h4 class="col-sm-1 hidden-xs"><i class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="col-xs-12 text-center">List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a> under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.</div></div><div id="downloadModal" class="modal fade" style="z-index : 3000"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">Download</h4></div><div class="modal-body"><div ng-if="stateParams.topic === \'property\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)">Property Details <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'crime\' || stateParams.topic === \'development\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'summary\', topic)">Summary Table <i class="fa fa-cloud-download"></i></button> <button class="btn btn-primary col-xs-12" style="margin-top : 3px" ng-click="download(\'complete\', topic)">Detailed records <i class="fa fa-cloud-download"></i></button><p class="text-muted text-center">based on selected filters</p></div><div ng-if="stateParams.topic === \'zoning\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)">Zoning Data <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'addresslist\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)">Address List <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'streetmaintenance\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)">Street Details <i class="fa fa-cloud-download"></i></button></div></div></div></div></div></div>');
+    '<div><div class="col-xs-12 btn-group btn-group-justified" style="margin-top : 15px"><a href="#/search/composite" class="btn btn-primary"><i class="fa fa-search fa-fw"></i> <strong>Search</strong></a> <a ng-click="goToTopics()" class="btn btn-primary"><i class="fa fa-bars fa-fw"></i> <strong>View Topics</strong></a></div><div class="col-xs-12"><hr></div><div ng-include="headerTemplate"></div><div class="col-xs-12" style="height : 200px; text-align : center; margin-top : 30px" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div class="col-xs-12 list-item-panel" ng-show="!loading"><div ng-if="stateParams.view !== \'simple\'" ng-include="\'topic/topic.view.header.html\'"></div><div ng-if="topicPropteries.simpleViewTemplate !== null" ng-show="stateParams.view === \'simple\'" ng-include="topicProperties.simpleViewTemplate"></div><div ng-if="topicPropteries.detailsViewTemplate !== null" ng-show="stateParams.view === \'details\'" ng-include="topicProperties.detailsViewTemplate"></div><div ng-if="topicPropteries.listViewTemplate !== null" ng-show="stateParams.view === \'list\'" ng-include="topicProperties.listViewTemplate"></div><div ng-if="topicPropteries.tableViewTemplate !== null" ng-show="stateParams.view === \'table\'" ng-include="topicProperties.tableViewTemplate"></div><div><div ng-show="stateParams.view === \'map\'" class="col-xs-12" style="height : 400px; margin-bottom : 20px" id="map"><div ng-if="topic.summary.table !== undefined"><button ng-init="showLegend = true" ng-show="!showLegend" ng-click="showLegend = !showLegend" class="btn btn-primary btn-sm" style="position : absolute; top : 50px; right : 10px;z-index : 7">Legend <i class="fa fa-expand"></i></button><div ng-show="showLegend" style="position : absolute; top : 50px; right : 10px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7"><div class="col-xs-12"><h4 class="pull-left">Legend</h4><button ng-click="showLegend = !showLegend" class="btn btn-primary btn-sm pull-right" style="margin-top : 5px"><i class="fa fa-times"></i></button></div><table ng-if="topic.features.length !== 0" class="table table-hover"><tbody><tr ng-repeat="(key, value) in topic.summary.table"><td ng-click="getDetails(key)" style="cursor : pointer"><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}</td></tr></tbody></table></div></div></div><div id="detailsModal" class="modal fade"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button ng-click="closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">Location Details</h4></div><div class="modal-body"><div ng-include="topicProperties.listViewTemplate"></div></div></div></div></div></div></div><div ng-if="linkTopics.length > 0" class="col-xs-12 list-item-panel" style="margin-top : 30px"><h2>Related Links</h2><div class="list-group" style="margin-top : 20px"><a class="row list-group-item list-item-panel" href="{{linkTopic.linkTo}}" style="margin-bottom : 5px" ng-repeat="linkTopic in linkTopics"><span class="visible-xs col-xs-8"><p class="text-primary text-center">{{linkTopic.question}}</p></span> <i ng-class="linkTopic.iconClass" class="visible-xs pull-left col-xs-3 text-primary"></i><div ng-class="linkTopic.iconClass" class="hidden-xs col-sm-2 text-primary"></div><h4 class="hidden-xs col-sm-9 text-primary" style="margin-top : 20px">{{linkTopic.question}}</h4><h4 class="col-sm-1 hidden-xs"><i class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="col-xs-12 text-center">List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a> under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.</div></div><div id="downloadModal" class="modal fade" style="z-index : 3000"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">Download</h4></div><div class="modal-body"><div ng-if="stateParams.topic === \'property\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)">Property Details <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'crime\' || stateParams.topic === \'development\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'summary\', topic)">Summary Table <i class="fa fa-cloud-download"></i></button> <button class="btn btn-primary col-xs-12" style="margin-top : 3px" ng-click="download(\'complete\', topic)">Detailed records <i class="fa fa-cloud-download"></i></button><p class="text-muted text-center">based on selected filters</p></div><div ng-if="stateParams.topic === \'zoning\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)">Zoning Data <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'addresslist\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)">Address List <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'streetmaintenance\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)">Street Details <i class="fa fa-cloud-download"></i></button></div></div></div></div></div></div>');
 }]);
 })();
 
@@ -2574,7 +2579,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topic/topic.view.header.html',
-    '<div><div class="hidden-xs col-xs-12"><h2 ng-if="stateParams.view === \'details\'" class="pull-left" style="margin-right : 10px">Details View</h2><h2 ng-if="stateParams.view === \'list\'" class="pull-left" style="margin-right : 10px">List View</h2><h2 ng-if="stateParams.view === \'table\'" class="pull-left" style="margin-right : 10px">Table View</h2><h2 ng-if="stateParams.view === \'map\'" class="pull-left" style="margin-right : 10px">Map View</h2><div class="btn-group pull-right" role="group" aria-label="..." style="margin-top : 15px"><button ng-if="topicProperties.detailsViewTemplate" ng-class="{\'active\' : stateParams.view === \'details\'}" ng-click="onClickChangeView(\'details\')" class="btn btn-primary"><i class="fa fa-lg fa-th fa-fw"></i> Details</button> <button ng-if="topicProperties.listViewTemplate" ng-class="{\'active\' : stateParams.view === \'list\'}" ng-click="onClickChangeView(\'list\')" class="btn btn-primary"><i class="fa fa-lg fa-list-alt fa-fw"></i> List</button> <button ng-if="topicProperties.tableViewTemplate" ng-class="{\'active\' : stateParams.view === \'table\'}" ng-click="onClickChangeView(\'table\')" class="btn btn-primary"><i class="fa fa-lg fa-table fa-fw"></i> Table</button> <button ng-class="{\'active\' : stateParams.view === \'map\'}" ng-click="onClickChangeView(\'map\')" class="btn btn-primary"><i class="fa fa-lg fa-map-marker fa-fw"></i> Map</button><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div><button ng-click="openDownloadModal()" type="button" class="btn btn-primary" data-toggle="tooltip" title="Download"><i class="fa fa-lg fa-cloud-download"></i> Download</button></div><div ng-if="stateParams.type !== null" class="col-xs-12"><h5 class="text-muted">Filtered by <strong>{{stateParams.type}}</strong></h5></div></div><div class="visible-xs" style="text-align : center; width : 100%"><h2 ng-if="stateParams.view === \'details\'">Details View</h2><h2 ng-if="stateParams.view === \'list\'">List View</h2><h2 ng-if="stateParams.view === \'table\'">Table View</h2><h2 ng-if="stateParams.view === \'map\'">Map View</h2><div class="btn-group" role="group" aria-label="..." style="margin-top : 15px"><div class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Change View <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li ng-if="topicProperties.detailsViewTemplate" ng-class="{\'active\' : stateParams.view === \'details\'}" ng-click="onClickChangeView(\'details\')" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1"><i class="fa fa-lg fa-th fa-fw"></i> Details</a></li><li ng-if="topicProperties.listViewTemplate" ng-class="{\'active\' : stateParams.view === \'list\'}" ng-click="onClickChangeView(\'list\')" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1"><i class="fa fa-lg fa-list-alt fa-fw"></i> List</a></li><li ng-if="topicProperties.tableViewTemplate" ng-class="{\'active\' : stateParams.view === \'table\'}" ng-click="onClickChangeView(\'table\')" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1"><i class="fa fa-lg fa-table fa-fw"></i> Table</a></li><li ng-class="{\'active\' : stateParams.view === \'map\'}" ng-click="onClickChangeView(\'map\')" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1"><i class="fa fa-lg fa-map-marker fa-fw"></i> Map</a></li></ul></div><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div></div><div class="col-xs-12" style="height : 10px"></div></div></div>');
+    '<div><div class="hidden-xs col-xs-12"><h2 ng-if="stateParams.view === \'details\'" class="pull-left" style="margin-right : 10px">Details View</h2><h2 ng-if="stateParams.view === \'list\'" class="pull-left" style="margin-right : 10px">List View</h2><h2 ng-if="stateParams.view === \'table\'" class="pull-left" style="margin-right : 10px">Table View</h2><h2 ng-if="stateParams.view === \'map\'" class="pull-left" style="margin-right : 10px">Map View</h2><div class="btn-group pull-right" role="group" aria-label="..." style="margin-top : 15px"><button ng-if="topicProperties.detailsViewTemplate" ng-class="{\'active\' : stateParams.view === \'details\'}" ng-click="onClickChangeView(\'details\')" class="btn btn-primary"><i class="fa fa-lg fa-th fa-fw"></i> Details</button> <button ng-if="topicProperties.listViewTemplate" ng-class="{\'active\' : stateParams.view === \'list\'}" ng-click="onClickChangeView(\'list\')" class="btn btn-primary"><i class="fa fa-lg fa-list-alt fa-fw"></i> List</button> <button ng-if="topicProperties.tableViewTemplate" ng-class="{\'active\' : stateParams.view === \'table\'}" ng-click="onClickChangeView(\'table\')" class="btn btn-primary"><i class="fa fa-lg fa-table fa-fw"></i> Table</button> <button ng-class="{\'active\' : stateParams.view === \'map\'}" ng-click="onClickChangeView(\'map\')" class="btn btn-primary"><i class="fa fa-lg fa-map-marker fa-fw"></i> Map</button><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div><button ng-click="openDownloadModal()" type="button" class="btn btn-primary" data-toggle="tooltip" title="Download"><i class="fa fa-lg fa-cloud-download"></i></button></div><div ng-if="stateParams.type !== null" class="col-xs-12"><h5 class="text-muted">Filtered by <strong>{{stateParams.type}}</strong></h5></div></div><div class="visible-xs" style="text-align : center; width : 100%"><h2 ng-if="stateParams.view === \'details\'">Details View</h2><h2 ng-if="stateParams.view === \'list\'">List View</h2><h2 ng-if="stateParams.view === \'table\'">Table View</h2><h2 ng-if="stateParams.view === \'map\'">Map View</h2><div class="btn-group" role="group" aria-label="..." style="margin-top : 15px"><div class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Change View <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li ng-if="topicProperties.detailsViewTemplate" ng-class="{\'active\' : stateParams.view === \'details\'}" ng-click="onClickChangeView(\'details\')" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1"><i class="fa fa-lg fa-th fa-fw"></i> Details</a></li><li ng-if="topicProperties.listViewTemplate" ng-class="{\'active\' : stateParams.view === \'list\'}" ng-click="onClickChangeView(\'list\')" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1"><i class="fa fa-lg fa-list-alt fa-fw"></i> List</a></li><li ng-if="topicProperties.tableViewTemplate" ng-class="{\'active\' : stateParams.view === \'table\'}" ng-click="onClickChangeView(\'table\')" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1"><i class="fa fa-lg fa-table fa-fw"></i> Table</a></li><li ng-class="{\'active\' : stateParams.view === \'map\'}" ng-click="onClickChangeView(\'map\')" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1"><i class="fa fa-lg fa-map-marker fa-fw"></i> Map</a></li></ul></div><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div></div><div class="col-xs-12" style="height : 10px"></div></div></div>');
 }]);
 })();
 
@@ -2598,7 +2603,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topics.list.html',
-    '<div><div class="col-xs-12 btn-group btn-group-justified" style="margin-top : 15px"><a href="#/search/composite" class="btn btn-primary"><i class="fa fa-search"></i> <strong>Search</strong></a></div><div class="col-xs-12"><hr></div><h2 class="text-muted text-center">{{heading}}</h2><h1 class="text-muted text-center">{{searchText}}</h1><div class="list-group" style="margin-top : 20px"><a class="row list-group-item list-item-panel" href="{{topic.linkTo}}" style="margin-bottom : 5px" ng-repeat="topic in topics"><span class="visible-xs col-xs-8"><p class="text-primary text-center">{{topic.question}}</p></span> <i ng-class="topic.iconClass" class="visible-xs pull-left col-xs-3 text-primary"></i><div ng-class="topic.iconClass" class="hidden-xs col-sm-2 text-primary"></div><h4 class="hidden-xs col-sm-9 text-primary" style="margin-top : 20px">{{topic.question}}</h4><h4 class="col-sm-1 hidden-xs"><i class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="col-xs-12 text-center">List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a> under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.</div></div>');
+    '<div><div class="col-xs-12 btn-group btn-group-justified" style="margin-top : 15px"><a href="#/search/composite" class="btn btn-primary"><i class="fa fa-search"></i> <strong>Search</strong></a></div><div class="col-xs-12"><hr></div><h2 class="text-muted text-center">{{heading}}</h2><h1 class="text-muted text-center">{{searchText}}</h1><h3 ng-if="anAddress && loading" class="text-muted text-center"><i class="fa fa-lg fa-spinner fa-spin text-muted"></i></h3><h3 ng-if="anAddress && inTheCity && !loading" class="text-muted text-center"><i class="fa fa-lg fa-check-circle text-success"></i> <strong>It\'s in the city!</strong></h3><h3 ng-if="anAddress && !inTheCity && !loading" class="text-muted text-center"><i class="fa fa-lg fa-times-circle text-danger"></i> <strong>It\'s not in the city!</strong></h3><div class="list-group" style="margin-top : 20px"><a class="row list-group-item list-item-panel" href="{{topic.linkTo}}" style="margin-bottom : 5px" ng-repeat="topic in topics"><span class="visible-xs col-xs-8"><p class="text-primary text-center">{{topic.question}}</p></span> <i ng-class="topic.iconClass" class="visible-xs pull-left col-xs-3 text-primary"></i><div ng-class="topic.iconClass" class="hidden-xs col-sm-2 text-primary"></div><h4 class="hidden-xs col-sm-9 text-primary" style="margin-top : 20px">{{topic.question}}</h4><h4 class="col-sm-1 hidden-xs"><i class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="col-xs-12 text-center">List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a> under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.</div></div>');
 }]);
 })();
 
@@ -2694,7 +2699,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topic/topic-views/address-list.table.view.html',
-    '<div><div class="col-xs-12" ng-if="topic.features.length === 0"><div class="col-xs-12"><hr></div><h3 class="text-muted text-center"><strong>We couldn\'t find any results.</strong></h3><h4 class="text-muted text-center"><strong>Try expanding the time frame or extent of your search.</strong></h4></div><table ng-if="topic.features.length !== 0" class="table table-hover col-xs-12"><thead><tr><th ng-if="topic.features[0].properties.isincity !== undefined" class="text-center text-muted">In The City?</th><th class="text-center text-muted">Address</th></tr></thead><tbody><tr ng-repeat="feature in topic.features"><td ng-if="feature.properties.isincity !== undefined" class="text-muted text-center"><h4 ng-if="feature.properties.isincity "><i class="fa fa-lg fa-check-circle text-success"></i></h4><h4 ng-if="!feature.properties.isincity" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger"></i></h4></td><td class="text-center" ng-click="filterBy(feature)"><h4 class="text-muted"><strong><span>{{feature.properties.street_number}} {{feature.properties.street_name}} {{feature.properties.street_type}}</span> <span ng-if="feature.properties.unit_number === null">,</span> <span ng-if="feature.properties.unit_number !== null">UNIT {{feature.properties.unit_number}},</span> <span>{{feature.properties.zip_code}}</span></strong></h4></td></tr></tbody></table></div>');
+    '<div><div class="col-xs-12" ng-if="topic.features.length === 0"><div class="col-xs-12"><hr></div><h3 class="text-muted text-center"><strong>We couldn\'t find any results.</strong></h3><h4 class="text-muted text-center"><strong>Try expanding the time frame or extent of your search.</strong></h4></div><table ng-if="topic.features.length !== 0" class="table table-hover col-xs-12"><thead><tr><th ng-if="topic.features[0].properties.isincity !== undefined" class="text-center text-muted">In The City?</th><th class="text-center text-muted">Address</th></tr></thead><tbody><tr ng-repeat="feature in topic.features"><td ng-if="feature.properties.isincity !== undefined" class="text-muted text-center"><h4 ng-if="feature.properties.isincity"><i class="fa fa-lg fa-check-circle text-success"></i></h4><h4 ng-if="!feature.properties.isincity" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger"></i></h4></td><td class="text-center" ng-click="filterBy(feature)"><h4 class="text-muted"><strong><span>{{feature.properties.street_number}} {{feature.properties.street_name}} {{feature.properties.street_type}}</span> <span ng-if="feature.properties.unit_number === null">,</span> <span ng-if="feature.properties.unit_number !== null">UNIT {{feature.properties.unit_number}},</span> <span>{{feature.properties.zip_code}}</span></strong></h4></td></tr></tbody></table></div>');
 }]);
 })();
 
@@ -2754,7 +2759,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topic/topic-views/property.view.html',
-    '<div><div class="col-xs-12" ng-if="topic.features.length === 0"><div class="col-xs-12"><hr></div><h3 class="text-muted text-center"><strong>We couldn\'t find any results.</strong></h3></div><div ng-repeat="feature in topic.features | filter:filterText"><div><div class="col-xs-12"><div class="col-xs-12 col-sm-6"><h4><strong class="text-muted">Civic Address Id</strong> : <span>{{feature.properties.civicaddress_id}}</span></h4><h4><strong class="text-muted">PIN</strong> : <span>{{feature.properties.pinnum}}</span></h4></div><div class="col-xs-12 col-sm-6"><h4 ng-if="feature.properties.isincity === \'Yes\'" class="text-muted"><i class="fa fa-lg fa-check-circle text-success pull-left"></i> <strong>It\'s in the city!</strong></h4><h4 ng-if="feature.properties.isincity === \'No\'" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger pull-left"></i> <strong>It\'s not in the city!</strong></h4><h4 ng-if="feature.properties.iscityowned === \'Yes\'" class="text-muted"><i class="fa fa-lg fa-check-circle text-success pull-left"></i> <strong>It\'s city owned!</strong></h4><h4 ng-if="feature.properties.iscityowned === \'No\'" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger pull-left"></i> <strong>It\'s not city owned!</strong></h4></div></div></div><div class="col-xs-12 list-item-panel"><h4>Address</h4><address class="text-muted"><strong>{{feature.properties.street_number}} {{feature.properties.street_name}} {{feature.properties.street_type}} <span ng-if="feature.properties.unit_number !== null">Unit {{feature.properties.unit_number}}</span></strong></address></div><div class="col-xs-12 list-item-panel"><h4>Owner</h4><strong class="text-muted">{{feature.properties.owner}}</strong><address>{{feature.properties.owner_address}}<br>{{feature.properties.owner_citystatezip}}</address></div><div class="col-xs-12 list-item-panel"><h4>Zoning</h4><h5 class="text-muted"><strong>District</strong> : <span ng-if="feature.properties.zoning.length > 0" ng-repeat="zoning in feature.properties.zoning"><span ng-if="zoning.codelink === \'disable\'">{{zoning.zoningDistrict}}</span> <a target="_blank" href="{{zoning.codelink}}"><strong>{{zoning.zoningDistrict}}<span ng-if="$index !==  feature.properties.zoning.length - 1 && feature.properties.zoning.length !== 1">,</span></strong></a></span> <span ng-if="feature.properties.zoning.length === 0 || feature.properties.zoning === undefined">No City of Asheville Zoning</span></h5><h5 ng-if="feature.properties.zoningOverlays !== undefined"><strong>Zoning Overlay</strong> : <span>{{feature.properties.zoningOverlays}}</span></h5></div><div ng-if="feature.properties.neighborhood !== null" class="col-xs-12 list-item-panel"><h4>Neighborhood</h4><h5 class="text-muted"><strong>{{feature.properties.neighborhood}}</strong></h5></div><div class="col-xs-12 list-item-panel"><h4>Property and Tax Value</h4><table class="table "><thead><tr><th>Value Type</th><th>Amount</th></tr></thead><tbody><tr><td>Building Value</td><td>${{feature.properties.buildingvalue|number}}</td></tr><tr><td>Land Value</td><td>${{feature.properties.landvalue|number}}</td></tr><tr><td>Appraised Value</td><td>${{feature.properties.appraisedvalue|number}}</td></tr><tr><td>Tax Value</td><td>${{feature.properties.taxvalue|number}}</td></tr><tr><td>Total Market Value</td><td>${{feature.properties.totalmarketvalue|number}}</td></tr></tbody></table></div><div class="col-xs-12 list-item-panel"><h4>Other Details</h4><p class="col-sm-6" ng-if="feature.properties.exempt === null">Tax exempt : <span>NO</span></p><p class="col-sm-6" ng-if="feature.properties.exempt !== null">Tax exempt : <span>YES</span></p><p class="col-sm-6" ng-if="feature.properties.improved === \'Y\'">Improved : <span>YES (${{feature.properties.improvementvalue|number}})</span></p><p class="col-sm-6">Appraisal Area : {{feature.properties.appraisalarea}}</p><p class="col-sm-6">Acreage : {{feature.properties.acreage}} acres</p></div><div class="col-xs-12 list-item-panel" style="margin-bottom : 20px"><br><a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.deed_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Deed</a> <a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.plat_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Plat</a> <a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.propcard_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Property Card</a><br></div></div></div>');
+    '<div><div class="col-xs-12" ng-if="topic.features.length === 0"><div class="col-xs-12"><hr></div><h3 class="text-muted text-center"><strong>We couldn\'t find any results.</strong></h3></div><div ng-repeat="feature in topic.features | filter:filterText"><div><div class="col-xs-12"><div class="col-xs-12 col-sm-6"><h4><strong class="text-muted">Civic Address Id</strong> : <span>{{feature.properties.civicaddress_id}}</span></h4><h4><strong class="text-muted">PIN</strong> : <span>{{feature.properties.pinnum}}</span></h4></div><div class="col-xs-12 col-sm-6"><h4 ng-if="feature.properties.isincity === \'Yes\'" class="text-muted"><i class="fa fa-lg fa-check-circle text-success pull-left"></i> <strong>It\'s in the city!</strong></h4><h4 ng-if="feature.properties.isincity === \'No\'" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger pull-left"></i> <strong>It\'s not in the city!</strong></h4><h4 ng-if="feature.properties.iscityowned === \'Yes\'" class="text-muted"><i class="fa fa-lg fa-check-circle text-success pull-left"></i> <strong>It\'s city owned!</strong></h4><h4 ng-if="feature.properties.iscityowned === \'No\'" class="text-muted"><i class="fa fa-lg fa-times-circle text-danger pull-left"></i> <strong>It\'s not city owned!</strong></h4></div></div></div><div class="col-xs-12 list-item-panel"><h4>Address</h4><address class="text-muted"><strong>{{feature.properties.street_number}} {{feature.properties.street_name}} {{feature.properties.street_type}} <span ng-if="feature.properties.unit_number !== null">Unit {{feature.properties.unit_number}}</span></strong></address></div><div class="col-xs-12 list-item-panel"><h4>Owner</h4><strong class="text-muted">{{feature.properties.owner}}</strong><address>{{feature.properties.owner_address}}<br>{{feature.properties.owner_citystatezip}}</address></div><div class="col-xs-12 list-item-panel"><h4>Zoning</h4><h5 class="text-muted"><strong>District</strong> : <span ng-if="feature.properties.zoning.length > 0" ng-repeat="zoning in feature.properties.zoning"><span ng-if="zoning.codelink === \'disable\'">{{zoning.zoningDistrict}}</span> <a target="_blank" href="{{zoning.codelink}}"><strong>{{zoning.zoningDistrict}}<span ng-if="$index !== feature.properties.zoning.length - 1 && feature.properties.zoning.length !== 1">,</span></strong></a></span> <span ng-if="feature.properties.zoning.length === 0 || feature.properties.zoning === undefined">No City of Asheville Zoning</span></h5><h5 ng-if="feature.properties.zoningOverlays !== undefined"><strong>Zoning Overlay</strong> : <span>{{feature.properties.zoningOverlays}}</span></h5></div><div ng-if="feature.properties.neighborhood !== null" class="col-xs-12 list-item-panel"><h4>Neighborhood</h4><h5 class="text-muted"><strong>{{feature.properties.neighborhood}}</strong></h5></div><div class="col-xs-12 list-item-panel"><h4>Property and Tax Value</h4><table class="table"><thead><tr><th>Value Type</th><th>Amount</th></tr></thead><tbody><tr><td>Building Value</td><td>${{feature.properties.buildingvalue|number}}</td></tr><tr><td>Land Value</td><td>${{feature.properties.landvalue|number}}</td></tr><tr><td>Appraised Value</td><td>${{feature.properties.appraisedvalue|number}}</td></tr><tr><td>Tax Value</td><td>${{feature.properties.taxvalue|number}}</td></tr><tr><td>Total Market Value</td><td>${{feature.properties.totalmarketvalue|number}}</td></tr></tbody></table></div><div class="col-xs-12 list-item-panel"><h4>Other Details</h4><p class="col-sm-6" ng-if="feature.properties.exempt === null">Tax exempt : <span>NO</span></p><p class="col-sm-6" ng-if="feature.properties.exempt !== null">Tax exempt : <span>YES</span></p><p class="col-sm-6" ng-if="feature.properties.improved === \'Y\'">Improved : <span>YES (${{feature.properties.improvementvalue|number}})</span></p><p class="col-sm-6">Appraisal Area : {{feature.properties.appraisalarea}}</p><p class="col-sm-6">Acreage : {{feature.properties.acreage}} acres</p></div><div class="col-xs-12 list-item-panel" style="margin-bottom : 20px"><br><a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.deed_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Deed</a> <a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.plat_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Plat</a> <a class="col-xs-12 col-sm-4 text-center btn btn-primary" style="margin-bottom : 10px" target="_blank" href="{{feature.properties.propcard_url}}"><i class="fa fa-2x fa-file-text-o"></i><br>Property Card</a><br></div></div></div>');
 }]);
 })();
 
@@ -2826,6 +2831,6 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topic/topic-views/zoning.view.html',
-    '<div ng-repeat="feature in topic.features"><div class="col-xs-12 list-item-panel" style="margin-bottom : 20px"><h4>Zoning</h4><h5 class="text-muted"><strong>District</strong> : <span ng-if="feature.properties.zoning.length > 0" ng-repeat="zoning in feature.properties.zoning"><span ng-if="zoning.codelink === \'disable\'">{{zoning.zoningDistrict}}</span> <a target="_blank" href="{{zoning.codelink}}"><strong>{{zoning.zoningDistrict}}<span ng-if="$index !==  feature.properties.zoning.length - 1 && feature.properties.zoning.length !== 1">,</span></strong></a></span> <span ng-if="feature.properties.zoning.length === 0 || feature.properties.zoning === undefined">No City of Asheville Zoning</span></h5><h5 ng-if="feature.properties.zoningOverlays !== undefined"><strong>Zoning Overlay</strong> : <span>{{feature.properties.zoningOverlays}}</span></h5></div></div>');
+    '<div ng-repeat="feature in topic.features"><div class="col-xs-12 list-item-panel" style="margin-bottom : 20px"><h4>Zoning</h4><h5 class="text-muted"><strong>District</strong> : <span ng-if="feature.properties.zoning.length > 0" ng-repeat="zoning in feature.properties.zoning"><span ng-if="zoning.codelink === \'disable\'">{{zoning.zoningDistrict}}</span> <a target="_blank" href="{{zoning.codelink}}"><strong>{{zoning.zoningDistrict}}<span ng-if="$index !== feature.properties.zoning.length - 1 && feature.properties.zoning.length !== 1">,</span></strong></a></span> <span ng-if="feature.properties.zoning.length === 0 || feature.properties.zoning === undefined">No City of Asheville Zoning</span></h5><h5 ng-if="feature.properties.zoningOverlays !== undefined"><strong>Zoning Overlay</strong> : <span>{{feature.properties.zoningOverlays}}</span></h5></div></div>');
 }]);
 })();
