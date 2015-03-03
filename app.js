@@ -1326,7 +1326,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
         };
         queryBackend(featureService.address, neighborhoodQueryParams)
           .then(function(addressResults){
-              var addressFeaturesArray = [];
+            var addressFeaturesArray = [];
               for (var i = 0; i < addressResults.features.length; i++) {
                 //addressResults.features[i].attributes.isincity = dataCacheProperties.inTheCity[addressResults.features[i].attributes.civicaddress_id]
                 addressResults.features[i].attributes.color = '035096';
@@ -1601,6 +1601,446 @@ app.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'B
 
 
 }]);
+app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Topics', 'Backend',
+ function ($scope, $stateParams, $state, $filter, Topics, Backend) {
+
+    //****Private variables and methods*****//
+
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+    //$("html, body").animate({'scrollTop' : "0px"});
+    
+    //!!! This is breaking the back button :-(
+    var updateStateParamsAndReloadState = function(propertyName, value){
+      var stateParams = $stateParams;
+      stateParams[propertyName] = value;
+      $state.transitionTo('main.topics.topic', stateParams, {'reload' : true});
+    };
+
+    //****$scope variables and methods*****//
+
+    //Get properties for a topic
+    $scope.topicProperties = Topics.topicProperties($stateParams.topic);
+
+    var topics = Topics.getTopics();
+    $scope.linkTopics =[];
+    for (var lt = 0; lt < $scope.topicProperties.linkTopics.length; lt++) {
+      for (var t = 0; t < topics.length; t++) {
+        if(topics[t].name === $scope.topicProperties.linkTopics[lt]){
+          $scope.linkTopics.push(topics[t]);
+        }
+      }
+    }
+
+    //Assign stateParams to scope
+    $scope.stateParams = $stateParams;
+
+    //if searchby or id is not defined go back to search with topic defined (after search come back topic)
+    if($stateParams.searchby === null || $stateParams.id === null){
+      $state.go('main.search.composite', {'composite' : $stateParams.topic});
+    //if searchby is defined check topicProperties to determine if valid, if not go to home
+    }else{
+      if($scope.topicProperties.searchby[$stateParams.searchby] === undefined){
+        $state.go('main.search.composite', {'composite' : 'composite'});
+      }
+    }
+
+    // +-+-+-+-+
+    // |v|i|e|w|
+    // +-+-+-+-+
+
+    $scope.headerTemplate = $scope.topicProperties.searchby[$stateParams.searchby].headerTemplate;
+
+    //if view is not defined or if view is not allowed, use default
+    if($stateParams.view === null){
+      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
+    }else if($stateParams.view === 'details' && $scope.topicProperties.detailsViewTemplate === null){
+      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
+    }else if($stateParams.view === 'list' && $scope.topicProperties.listViewTemplate === null){
+      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
+    }else if($stateParams.view === 'table' && $scope.topicProperties.tableViewTemplate === null){
+      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
+    }else if($stateParams.view === 'table' && $stateParams.type !== null){
+      updateStateParamsAndReloadState('type', null);
+    }else{
+      //The view is defined and allowed
+    }
+
+    $scope.onClickChangeView = function(view){
+      updateStateParamsAndReloadState('view', view);
+    };
+
+    // +-+-+-+-+-+-+-+-+-+
+    // |t|i|m|e|f|r|a|m|e|
+    // +-+-+-+-+-+-+-+-+-+
+
+    //if timeframe is not defined is supposed to be, use default
+    if($stateParams.timeframe === null && $scope.topicProperties.searchby[$stateParams.searchby].params.timeframe !== null){
+      updateStateParamsAndReloadState('timeframe', $scope.topicProperties.searchby[$stateParams.searchby].params.timeframe);
+    }
+
+    //get the select options for changing the timeframe
+    $scope.timeframeOptions = Backend.options('timeframe');
+    //define a default select option
+    $scope.timeframeOptionIndex = 0;
+    //find the option that matches the current timeframe defiend in the $stateParams
+    for (var tf = 0; tf < $scope.timeframeOptions.length; tf++) {
+      if($scope.timeframeOptions[tf].value === $stateParams.timeframe){
+        $scope.timeframeOptionIndex = tf;
+      } 
+    }
+
+     $scope.onChangeTimeframeValue = function(timeframeValue){
+      $scope.loading = true;
+      setTimeout(function() {
+        updateStateParamsAndReloadState('timeframe', timeframeValue.value);
+      }, 250);
+      
+    };
+
+    // +-+-+-+-+-+-+
+    // |e|x|t|e|n|t|
+    // +-+-+-+-+-+-+
+
+    //if extent is not defined is supposed to be, use default
+    if($stateParams.extent === null && $scope.topicProperties.searchby[$stateParams.searchby].params.extent !== null){
+      updateStateParamsAndReloadState('extent', $scope.topicProperties.searchby[$stateParams.searchby].params.extent);
+    }
+
+    //get the select options for changing the timeframe
+    $scope.extentOptions = Backend.options('extent');
+    //define a default select option
+    $scope.extentOptionIndex = 0;
+    
+    //find the option that matches the current timeframe defiend in the $stateParams
+    for (var e = 0; e < $scope.extentOptions.length; e++) {
+      if($scope.extentOptions[e].value === Number($stateParams.extent)){
+        $scope.extentOptionIndex = e;
+      } 
+    }
+
+    $scope.onChangeExtentValue = function(extentValue){
+      updateStateParamsAndReloadState('extent', extentValue.value);
+    };
+
+     var openstreetmap = L.tileLayer("http://a.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+        attribution:'&copy; <a href="http://osm.org/copyright" title="OpenStreetMap" target="_blank">OpenStreetMap</a> contributors',
+        maxZoom : 22
+    });
+
+    var esriImagery = L.esri.basemapLayer("Imagery");
+
+
+    var baseMaps = {
+      "Open Street Map" : openstreetmap,
+      "ESRI Imagery" : esriImagery
+    };
+
+
+
+    $(".leaflet-control-attribution").css("maxWidth", "90%");
+
+    var map = L.map('map', {
+        center: [35.5951125,-82.5511088], 
+        zoom : 13,
+        maxZoom : 22,
+        fullscreenControl: true,
+        layers : [openstreetmap]
+    });
+
+    var layerControl = L.control.layers(baseMaps).addTo(map);
+    
+    if($stateParams.type === null || $stateParams.type === 'null'){
+      $scope.filterText = "";
+    }else{
+      $scope.filterText = $stateParams.type;
+    }
+    
+    var returnToFullscreen = false;
+
+    var addGeoJsonToMap = function(data, style){
+      if(data.length > 0){
+        var leafletGeoJsonLayer = L.geoJson(data, {
+          pointToLayer: function(feature, latlng){
+            if(feature.geometry.type === "Point"){
+              return L.circleMarker(latlng, {
+                radius: 10,
+                fillColor: "#"+feature.properties.color,
+                color: "#"+feature.properties.color,
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+              }); 
+            }else{
+              return false;
+            }
+          },
+          style: function (feature) {
+            if(style){
+              return style;
+            }else if(feature.geometry.type === "LineString"){
+              return {
+                color: "#"+feature.properties.color,
+                weight: 8,
+                opacity: 0.8,
+              }; 
+            }
+          },
+          onEachFeature: function (feature, layer) {
+            layer.on('click', function(){
+                  $scope.filterText = feature.properties.objectid;
+                  $scope.$apply();
+                  $('#detailsModal').modal({'backdrop' : 'static'});
+                  if (
+                      document.fullscreenElement ||
+                      document.webkitFullscreenElement ||
+                      document.mozFullScreenElement ||
+                      document.msFullscreenElement
+                  ) {
+                    returnToFullscreen = true;
+                  }
+                  if (document.exitFullscreen) {
+                      document.exitFullscreen();
+                  } else if (document.webkitExitFullscreen) {
+                      document.webkitExitFullscreen();
+                  } else if (document.mozCancelFullScreen) {
+                      document.mozCancelFullScreen();
+                  } else if (document.msExitFullscreen) {
+                      document.msExitFullscreen();
+                  }   
+            });
+          }
+        });
+        leafletGeoJsonLayer.addTo(map);
+        map.fitBounds(leafletGeoJsonLayer);
+          if(map.getZoom() > 18){
+            map.setZoom(18);
+          }
+      }
+    };
+
+    var addSearchGeoJsonToMap = function(data, style){
+      return L.geoJson(data, {
+        style: function (feature) {
+          if(style){
+            return style;
+          }
+        },
+        onEachFeature: function (feature, layer) {
+          if(feature.geometry.type === 'Point' && $stateParams.extent !== null && $stateParams.extent !== 'null'){
+            var radiusInMeters = $stateParams.extent*0.3048;
+            var circle = L.circle([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], radiusInMeters, {
+              'fillOpacity' : 0,
+              'opacity' : 0.3
+            });
+            circle.addTo(map);
+              layer.on('click', function(){
+                  
+              });
+          }
+          
+        }
+      });
+    };
+
+    var addOverlayGeoJsonToMap = function(data, style){
+      var overlayLayer =  L.geoJson(data, {
+        style: function (feature) {
+          if(style){
+            return style;
+          }
+        },
+        onEachFeature: function (feature, layer) {
+          layerControl.addOverlay(layer, feature.properties.name);
+          
+        }
+      });
+      overlayLayer.addTo(map);
+    };
+
+
+
+    $scope.loading = true;
+    //!!! Check if dataCache is already defined
+
+    Backend.dataCache()
+      .then(function(data){
+        Backend.topic()
+          .then(function(topic){
+            $scope.topic = topic;
+            $scope.loading = false;
+            if(topic.searchGeojson){
+              addSearchGeoJsonToMap(topic.searchGeojson, {'fillOpacity' : 0,'opacity' : 0.3}).addTo(map);
+            }
+            if(topic.overlays){
+              var overlayLayer = addOverlayGeoJsonToMap(topic.overlays, {'fillOpacity' : 0.1,'opacity' : 0.3});
+            }
+            if(topic.features){
+              if($stateParams.type !== null || $stateParams.type !== 'null'){
+                var filteredTopic = $filter('filter')(topic.features, $stateParams.type, true);
+                addGeoJsonToMap(filteredTopic);
+              }else{
+                addGeoJsonToMap(topic);
+              }             
+            }         
+          });
+      });
+
+    $scope.goToTopics = function(){
+      $state.go('main.topics.list', {'searchtext' : $stateParams.searchtext, 'searchby' : $stateParams.searchby, 'id' : $stateParams.id});
+    };
+
+    $scope.filterBy = function(type){
+
+      if($stateParams.view === 'table'){
+        updateStateParamsAndReloadState('type', type);
+        updateStateParamsAndReloadState('view', 'list');
+      }else if($stateParams.view === 'map' || $stateParams.view === 'list'){
+        updateStateParamsAndReloadState('type', type);
+      }else{
+        //do nothing
+      }
+      $scope.filterText = type;
+    };
+
+
+    $scope.closeModal = function(){
+      if(returnToFullscreen === true){
+        var m = document.getElementById("map");
+ 
+        // go full-screen
+        if (m.requestFullscreen) {
+            m.requestFullscreen();
+        } else if (m.webkitRequestFullscreen) {
+            m.webkitRequestFullscreen();
+        } else if (m.mozRequestFullScreen) {
+            m.mozRequestFullScreen();
+        } else if (m.msRequestFullscreen) {
+            m.msRequestFullscreen();
+        }
+        returnToFullscreen = false;
+      }
+    };
+
+
+    $scope.openDownloadModal = function(){
+      $('#downloadModal').modal({'backdrop' : false});
+    };
+
+
+    $scope.download = function(downloadType, topic){
+      var csvString =  'data:text/csv;charset=utf-8,';
+      if(downloadType === 'summary'){
+        csvString += 'Type, Count' + '\n';
+        for(var key in topic.summary.table){
+          var summaryItemString = key + ',' + topic.summary.table[key].count;
+          csvString += summaryItemString + '\n';
+        }
+      }else if (downloadType === 'complete'){
+        var headerArray = [];
+        
+        for(var attributeKey in topic.features[0].properties){
+          headerArray.push(attributeKey);
+        }
+        for(var geometryKey in topic.features[0].geometry){
+          headerArray.push(geometryKey);
+        }
+        csvString += headerArray.join(',') + '\n';
+        for (var i = 0; i < topic.features.length; i++) {
+          var rowArray = [];
+          for (var x = 0; x < headerArray.length; x++) {
+            if(topic.features[i].properties[headerArray[x]]){
+              // if(topic.features[i].properties[headerArray[x]].constructor === Array){
+              //   rowArray.push(JSON.stringify(topic.features[i].properties[headerArray[x]]));
+              // }else{
+              //   rowArray.push(topic.features[i].properties[headerArray[x]]);
+              // }
+              rowArray.push(topic.features[i].properties[headerArray[x]]);
+            }else if(topic.features[i].geometry[headerArray[x]]){
+              rowArray.push(topic.features[i].geometry[headerArray[x]]);
+            }else{
+              rowArray.push('NULL');
+            }
+          }
+          csvString += rowArray.join(',') + '\n';
+        }
+      }
+      var encodedUri = encodeURI(csvString);
+      window.open(encodedUri);
+    };
+
+
+}]);
+// app.factory('Topic', ['$stateParams', function($stateParams){
+
+//     //****Create the factory object****//
+//     var Topic = {};
+
+//     //****Private variables*****//
+
+
+
+
+//     //Options for the topic's select elements
+//     //The labels are displayed as the select element options
+//     //The values are the values of the select element options
+//     //The values should match any url params
+//     var options = {
+//       'extent' : [
+//         {'value' : 330, 'label' : 'a city block (110 yards)'},
+//         {'value' : 660, 'label' : 'a couple city blocks (1/8 mile)'},
+//         {'value' : 1320, 'label' : 'a quarter mile'}   
+//       ],
+//       'timeframe' : [
+//         {'value' : 'last-30-days', 'label' : 'the last 30 days'},
+//         {'value' : 'last-6-months', 'label' : 'the last 6 months'},
+//         {'value' : 'last-year', 'label' : 'the last year'},
+//         {'value' : 'last-5-years', 'label' : 'the last 5 years'},
+//         {'value' : 'last-10-years', 'label' : 'the last 10 years'},
+//         {'value' : 'all-time', 'label' : 'all time'}
+//       ]
+//     };
+
+//     //We need a date to filter the timeframe, so get today's date
+//     var d = new Date();
+
+//     //filterValues are the actual values used to filter the topic
+//     //filterValues are numberic form of the text values from options
+//     var filterValues = {
+//       'extent' : {
+//         'within-about-a-block' : 330,
+//         'within-an-eighth-of-a-mile' : 660,
+//         'within-a-quarter-mile' : 1320,
+//       },
+//       'timeframe' : {
+//         'last-30-days' : d.setMonth(d.getMonth() - 1),
+//         'last-6-months' : d.setMonth(d.getMonth() - 6),
+//         'last-year' : d.setFullYear(d.getFullYear()-1),
+//         'last-5-years': d.setFullYear(d.getFullYear()-5),
+//         'last-10-years': d.setFullYear(d.getFullYear()-10),
+//         'all-time' : d.setFullYear(d.getFullYear()-100)
+//       }
+//     };
+
+//     //****API*****//
+
+    
+
+//     Topic.options = function(param){
+//       return options[param];
+//     };
+
+//     Topic.getFilterValueFromOption = function(param, option){
+//       return filterValues[param][option];
+//     };
+
+
+//     //****Return the factory object****//
+//     return Topic; 
+
+    
+// }]); //END Topic factory function
 app.controller('TopicsCtrl', ['$scope', '$stateParams', '$state', 'Topics', 'Backend',
  function ($scope, $stateParams, $state, Topics, Backend) {
     $("html, body").animate({'scrollTop' : "0px"});
@@ -2071,446 +2511,6 @@ app.factory('Topics', ['$stateParams', function($stateParams){
 
     
 }]); //END Topics factory function
-app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Topics', 'Backend',
- function ($scope, $stateParams, $state, $filter, Topics, Backend) {
-
-    //****Private variables and methods*****//
-
-    $(function () {
-      $('[data-toggle="tooltip"]').tooltip();
-    });
-    $("html, body").animate({'scrollTop' : "0px"});
-    
-    //!!! This is breaking the back button :-(
-    var updateStateParamsAndReloadState = function(propertyName, value){
-      var stateParams = $stateParams;
-      stateParams[propertyName] = value;
-      $state.transitionTo('main.topics.topic', stateParams, {'reload' : true});
-    };
-
-    //****$scope variables and methods*****//
-
-    //Get properties for a topic
-    $scope.topicProperties = Topics.topicProperties($stateParams.topic);
-
-    var topics = Topics.getTopics();
-    $scope.linkTopics =[];
-    for (var lt = 0; lt < $scope.topicProperties.linkTopics.length; lt++) {
-      for (var t = 0; t < topics.length; t++) {
-        if(topics[t].name === $scope.topicProperties.linkTopics[lt]){
-          $scope.linkTopics.push(topics[t]);
-        }
-      }
-    }
-
-    //Assign stateParams to scope
-    $scope.stateParams = $stateParams;
-
-    //if searchby or id is not defined go back to search with topic defined (after search come back topic)
-    if($stateParams.searchby === null || $stateParams.id === null){
-      $state.go('main.search.composite', {'composite' : $stateParams.topic});
-    //if searchby is defined check topicProperties to determine if valid, if not go to home
-    }else{
-      if($scope.topicProperties.searchby[$stateParams.searchby] === undefined){
-        $state.go('main.search.composite', {'composite' : 'composite'});
-      }
-    }
-
-    // +-+-+-+-+
-    // |v|i|e|w|
-    // +-+-+-+-+
-
-    $scope.headerTemplate = $scope.topicProperties.searchby[$stateParams.searchby].headerTemplate;
-
-    //if view is not defined or if view is not allowed, use default
-    if($stateParams.view === null){
-      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
-    }else if($stateParams.view === 'details' && $scope.topicProperties.detailsViewTemplate === null){
-      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
-    }else if($stateParams.view === 'list' && $scope.topicProperties.listViewTemplate === null){
-      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
-    }else if($stateParams.view === 'table' && $scope.topicProperties.tableViewTemplate === null){
-      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
-    }else if($stateParams.view === 'table' && $stateParams.type !== null){
-      updateStateParamsAndReloadState('type', null);
-    }else{
-      //The view is defined and allowed
-    }
-
-    $scope.onClickChangeView = function(view){
-      updateStateParamsAndReloadState('view', view);
-    };
-
-    // +-+-+-+-+-+-+-+-+-+
-    // |t|i|m|e|f|r|a|m|e|
-    // +-+-+-+-+-+-+-+-+-+
-
-    //if timeframe is not defined is supposed to be, use default
-    if($stateParams.timeframe === null && $scope.topicProperties.searchby[$stateParams.searchby].params.timeframe !== null){
-      updateStateParamsAndReloadState('timeframe', $scope.topicProperties.searchby[$stateParams.searchby].params.timeframe);
-    }
-
-    //get the select options for changing the timeframe
-    $scope.timeframeOptions = Backend.options('timeframe');
-    //define a default select option
-    $scope.timeframeOptionIndex = 0;
-    //find the option that matches the current timeframe defiend in the $stateParams
-    for (var tf = 0; tf < $scope.timeframeOptions.length; tf++) {
-      if($scope.timeframeOptions[tf].value === $stateParams.timeframe){
-        $scope.timeframeOptionIndex = tf;
-      } 
-    }
-
-     $scope.onChangeTimeframeValue = function(timeframeValue){
-      $scope.loading = true;
-      setTimeout(function() {
-        updateStateParamsAndReloadState('timeframe', timeframeValue.value);
-      }, 250);
-      
-    };
-
-    // +-+-+-+-+-+-+
-    // |e|x|t|e|n|t|
-    // +-+-+-+-+-+-+
-
-    //if extent is not defined is supposed to be, use default
-    if($stateParams.extent === null && $scope.topicProperties.searchby[$stateParams.searchby].params.extent !== null){
-      updateStateParamsAndReloadState('extent', $scope.topicProperties.searchby[$stateParams.searchby].params.extent);
-    }
-
-    //get the select options for changing the timeframe
-    $scope.extentOptions = Backend.options('extent');
-    //define a default select option
-    $scope.extentOptionIndex = 0;
-    
-    //find the option that matches the current timeframe defiend in the $stateParams
-    for (var e = 0; e < $scope.extentOptions.length; e++) {
-      if($scope.extentOptions[e].value === Number($stateParams.extent)){
-        $scope.extentOptionIndex = e;
-      } 
-    }
-
-    $scope.onChangeExtentValue = function(extentValue){
-      updateStateParamsAndReloadState('extent', extentValue.value);
-    };
-
-     var openstreetmap = L.tileLayer("http://a.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-        attribution:'&copy; <a href="http://osm.org/copyright" title="OpenStreetMap" target="_blank">OpenStreetMap</a> contributors',
-        maxZoom : 22
-    });
-
-    var esriImagery = L.esri.basemapLayer("Imagery");
-
-
-    var baseMaps = {
-      "Open Street Map" : openstreetmap,
-      "ESRI Imagery" : esriImagery
-    };
-
-
-
-    $(".leaflet-control-attribution").css("maxWidth", "90%");
-
-    var map = L.map('map', {
-        center: [35.5951125,-82.5511088], 
-        zoom : 13,
-        maxZoom : 22,
-        fullscreenControl: true,
-        layers : [openstreetmap]
-    });
-
-    var layerControl = L.control.layers(baseMaps).addTo(map);
-    
-    if($stateParams.type === null || $stateParams.type === 'null'){
-      $scope.filterText = "";
-    }else{
-      $scope.filterText = $stateParams.type;
-    }
-    
-    var returnToFullscreen = false;
-
-    var addGeoJsonToMap = function(data, style){
-      if(data.length > 0){
-        var leafletGeoJsonLayer = L.geoJson(data, {
-          pointToLayer: function(feature, latlng){
-            if(feature.geometry.type === "Point"){
-              return L.circleMarker(latlng, {
-                radius: 10,
-                fillColor: "#"+feature.properties.color,
-                color: "#"+feature.properties.color,
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
-              }); 
-            }else{
-              return false;
-            }
-          },
-          style: function (feature) {
-            if(style){
-              return style;
-            }else if(feature.geometry.type === "LineString"){
-              return {
-                color: "#"+feature.properties.color,
-                weight: 8,
-                opacity: 0.8,
-              }; 
-            }
-          },
-          onEachFeature: function (feature, layer) {
-            layer.on('click', function(){
-                  $scope.filterText = feature.properties.objectid;
-                  $scope.$apply();
-                  $('#detailsModal').modal({'backdrop' : 'static'});
-                  if (
-                      document.fullscreenElement ||
-                      document.webkitFullscreenElement ||
-                      document.mozFullScreenElement ||
-                      document.msFullscreenElement
-                  ) {
-                    returnToFullscreen = true;
-                  }
-                  if (document.exitFullscreen) {
-                      document.exitFullscreen();
-                  } else if (document.webkitExitFullscreen) {
-                      document.webkitExitFullscreen();
-                  } else if (document.mozCancelFullScreen) {
-                      document.mozCancelFullScreen();
-                  } else if (document.msExitFullscreen) {
-                      document.msExitFullscreen();
-                  }   
-            });
-          }
-        });
-        leafletGeoJsonLayer.addTo(map);
-        map.fitBounds(leafletGeoJsonLayer);
-          if(map.getZoom() > 18){
-            map.setZoom(18);
-          }
-      }
-    };
-
-    var addSearchGeoJsonToMap = function(data, style){
-      return L.geoJson(data, {
-        style: function (feature) {
-          if(style){
-            return style;
-          }
-        },
-        onEachFeature: function (feature, layer) {
-          if(feature.geometry.type === 'Point' && $stateParams.extent !== null && $stateParams.extent !== 'null'){
-            var radiusInMeters = $stateParams.extent*0.3048;
-            var circle = L.circle([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], radiusInMeters, {
-              'fillOpacity' : 0,
-              'opacity' : 0.3
-            });
-            circle.addTo(map);
-              layer.on('click', function(){
-                  
-              });
-          }
-          
-        }
-      });
-    };
-
-    var addOverlayGeoJsonToMap = function(data, style){
-      var overlayLayer =  L.geoJson(data, {
-        style: function (feature) {
-          if(style){
-            return style;
-          }
-        },
-        onEachFeature: function (feature, layer) {
-          layerControl.addOverlay(layer, feature.properties.name);
-          
-        }
-      });
-      overlayLayer.addTo(map);
-    };
-
-
-
-    $scope.loading = true;
-    //!!! Check if dataCache is already defined
-
-    Backend.dataCache()
-      .then(function(data){
-        Backend.topic()
-          .then(function(topic){
-            $scope.topic = topic;
-            $scope.loading = false;
-            if(topic.searchGeojson){
-              addSearchGeoJsonToMap(topic.searchGeojson, {'fillOpacity' : 0,'opacity' : 0.3}).addTo(map);
-            }
-            if(topic.overlays){
-              var overlayLayer = addOverlayGeoJsonToMap(topic.overlays, {'fillOpacity' : 0.1,'opacity' : 0.3});
-            }
-            if(topic.features){
-              if($stateParams.type !== null || $stateParams.type !== 'null'){
-                var filteredTopic = $filter('filter')(topic.features, $stateParams.type, true);
-                addGeoJsonToMap(filteredTopic);
-              }else{
-                addGeoJsonToMap(topic);
-              }             
-            }         
-          });
-      });
-
-    $scope.goToTopics = function(){
-      $state.go('main.topics.list', {'searchtext' : $stateParams.searchtext, 'searchby' : $stateParams.searchby, 'id' : $stateParams.id});
-    };
-
-    $scope.filterBy = function(type){
-
-      if($stateParams.view === 'table'){
-        updateStateParamsAndReloadState('type', type);
-        updateStateParamsAndReloadState('view', 'list');
-      }else if($stateParams.view === 'map' || $stateParams.view === 'list'){
-        updateStateParamsAndReloadState('type', type);
-      }else{
-        //do nothing
-      }
-      $scope.filterText = type;
-    };
-
-
-    $scope.closeModal = function(){
-      if(returnToFullscreen === true){
-        var m = document.getElementById("map");
- 
-        // go full-screen
-        if (m.requestFullscreen) {
-            m.requestFullscreen();
-        } else if (m.webkitRequestFullscreen) {
-            m.webkitRequestFullscreen();
-        } else if (m.mozRequestFullScreen) {
-            m.mozRequestFullScreen();
-        } else if (m.msRequestFullscreen) {
-            m.msRequestFullscreen();
-        }
-        returnToFullscreen = false;
-      }
-    };
-
-
-    $scope.openDownloadModal = function(){
-      $('#downloadModal').modal({'backdrop' : false});
-    };
-
-
-    $scope.download = function(downloadType, topic){
-      var csvString =  'data:text/csv;charset=utf-8,';
-      if(downloadType === 'summary'){
-        csvString += 'Type, Count' + '\n';
-        for(var key in topic.summary.table){
-          var summaryItemString = key + ',' + topic.summary.table[key].count;
-          csvString += summaryItemString + '\n';
-        }
-      }else if (downloadType === 'complete'){
-        var headerArray = [];
-        
-        for(var attributeKey in topic.features[0].properties){
-          headerArray.push(attributeKey);
-        }
-        for(var geometryKey in topic.features[0].geometry){
-          headerArray.push(geometryKey);
-        }
-        csvString += headerArray.join(',') + '\n';
-        for (var i = 0; i < topic.features.length; i++) {
-          var rowArray = [];
-          for (var x = 0; x < headerArray.length; x++) {
-            if(topic.features[i].properties[headerArray[x]]){
-              // if(topic.features[i].properties[headerArray[x]].constructor === Array){
-              //   rowArray.push(JSON.stringify(topic.features[i].properties[headerArray[x]]));
-              // }else{
-              //   rowArray.push(topic.features[i].properties[headerArray[x]]);
-              // }
-              rowArray.push(topic.features[i].properties[headerArray[x]]);
-            }else if(topic.features[i].geometry[headerArray[x]]){
-              rowArray.push(topic.features[i].geometry[headerArray[x]]);
-            }else{
-              rowArray.push('NULL');
-            }
-          }
-          csvString += rowArray.join(',') + '\n';
-        }
-      }
-      var encodedUri = encodeURI(csvString);
-      window.open(encodedUri);
-    };
-
-
-}]);
-// app.factory('Topic', ['$stateParams', function($stateParams){
-
-//     //****Create the factory object****//
-//     var Topic = {};
-
-//     //****Private variables*****//
-
-
-
-
-//     //Options for the topic's select elements
-//     //The labels are displayed as the select element options
-//     //The values are the values of the select element options
-//     //The values should match any url params
-//     var options = {
-//       'extent' : [
-//         {'value' : 330, 'label' : 'a city block (110 yards)'},
-//         {'value' : 660, 'label' : 'a couple city blocks (1/8 mile)'},
-//         {'value' : 1320, 'label' : 'a quarter mile'}   
-//       ],
-//       'timeframe' : [
-//         {'value' : 'last-30-days', 'label' : 'the last 30 days'},
-//         {'value' : 'last-6-months', 'label' : 'the last 6 months'},
-//         {'value' : 'last-year', 'label' : 'the last year'},
-//         {'value' : 'last-5-years', 'label' : 'the last 5 years'},
-//         {'value' : 'last-10-years', 'label' : 'the last 10 years'},
-//         {'value' : 'all-time', 'label' : 'all time'}
-//       ]
-//     };
-
-//     //We need a date to filter the timeframe, so get today's date
-//     var d = new Date();
-
-//     //filterValues are the actual values used to filter the topic
-//     //filterValues are numberic form of the text values from options
-//     var filterValues = {
-//       'extent' : {
-//         'within-about-a-block' : 330,
-//         'within-an-eighth-of-a-mile' : 660,
-//         'within-a-quarter-mile' : 1320,
-//       },
-//       'timeframe' : {
-//         'last-30-days' : d.setMonth(d.getMonth() - 1),
-//         'last-6-months' : d.setMonth(d.getMonth() - 6),
-//         'last-year' : d.setFullYear(d.getFullYear()-1),
-//         'last-5-years': d.setFullYear(d.getFullYear()-5),
-//         'last-10-years': d.setFullYear(d.getFullYear()-10),
-//         'all-time' : d.setFullYear(d.getFullYear()-100)
-//       }
-//     };
-
-//     //****API*****//
-
-    
-
-//     Topic.options = function(param){
-//       return options[param];
-//     };
-
-//     Topic.getFilterValueFromOption = function(param, option){
-//       return filterValues[param][option];
-//     };
-
-
-//     //****Return the factory object****//
-//     return Topic; 
-
-    
-// }]); //END Topic factory function
 (function(module) {
 try {
   module = angular.module('simplicity');
@@ -2531,7 +2531,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('search/composite.search.html',
-    '<div style="min-height : 1000px"><div class="col-xs-12"><p class="text-muted text-center lead" style="margin-bottom : 0px; margin-top : 20px">Discover <a ng-init="showCityDataDef = false" ng-click="showCityDataDef = !showCityDataDef">city data</a> about places in your community.</p><p class="text-muted text-center lead"><strong>Search for an address, street, neighborhood, or property to get started!</strong></p></div><div class="col-xs-12"><div class="input-group"><input id="inputSearch" groupindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location..." style="z-index: 0" ng-model="searchText" ng-keyup="doSearch(searchText, $event)" autofocus=""> <span class="input-group-btn"><button class="btn btn-primary" type="button" style="box-shadow : none; font-size : 17px"><i class="fa fa-search"></i></button></span></div></div><div class="" ng-show="errorMessage.show || helperMessage.show || searchGroups.length > 0"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-success">{{helperMessage.message}}</p><div ng-repeat="group in searchGroups"><div class="col-xs-12" style="margin-top : 10px; margin-bottom : 10px"><h4 class="row text-muted"><span class="fa-stack fa-lg" ng-click="goBack()"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span> <strong>{{group.label}}</strong> <span class="badge" style="background : #999">{{group.results.length}}</span></h4><div class="list-group" ng-repeat="candidate in group.results | limitTo : group.offset"><a ng-click="goToTopics(candidate, $event)" ng-keypress="goToTopics(candidate, $event)" class="row list-group-item"><span class="col-xs-2 col-lg-1"><span class="fa-stack fa-lg text-primary"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span></span><p class="col-xs-8 col-lg-9 pull-left text-primary" style="margin-top : 8px">{{candidate.label}}</p><h4 class="col-xs-2 col-lg-2"><i class="fa fa-lg fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="list-group" ng-if="group.results.length > 3"><a ng-click="group.offset = group.offset + 3" class="row list-group-item"><h4 class="col-xs-10 text-primary"><strong>More</strong></h4><h4 class="col-xs-2"><i class="fa fa-lg fa-chevron-down text-primary pull-right"></i></h4></a></div></div></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div><div class="col-xs-12"><h4 class="text-primary text-center">Brought to you by the <strong><a href="http://www.ashevillenc.gov/" target="_blank">City of Asheville</a></strong> <i class="fa fa-smile-o"></i></h4></div><div class="col-xs-12" style="margin-top : 100px"><div class="well col-xs-12 col-md-6 col-md-offset-3" ng-if="showCityDataDef"><p class="lead">city data</p><p><strong>\\ˈsi-tē ˈdā-tə\\</strong></p><p>City data is just information about your city. It includes information about properties, trash collection, recycling pickup, crimes, development, who\'s responsible for fixing the street in front of your house, and more. At the City of Asheville we are working to provide you with better access to data in your city through SimpliCity!</p></div></div></div>');
+    '<div style="min-height : 1000px"><div class="col-xs-12"><p class="text-muted text-center lead" style="margin-bottom : 0px; margin-top : 20px">Discover <a ng-init="showCityDataDef = false" ng-click="showCityDataDef = !showCityDataDef">city data</a> about places in your community.</p><p class="text-muted text-center lead">Search for an address, street, neighborhood, or property to get started!</p></div><div class="col-xs-12"><div class="input-group"><input id="inputSearch" groupindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location..." style="z-index: 0" ng-model="searchText" ng-keyup="doSearch(searchText, $event)" autofocus=""> <span class="input-group-btn"><button class="btn btn-primary" type="button" style="box-shadow : none; font-size : 17px"><i class="fa fa-search"></i></button></span></div></div><div class="" ng-show="errorMessage.show || helperMessage.show || searchGroups.length > 0"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-success">{{helperMessage.message}}</p><div ng-repeat="group in searchGroups"><div class="col-xs-12" style="margin-top : 10px; margin-bottom : 10px"><h4 class="row text-muted"><span class="fa-stack fa-lg" ng-click="goBack()"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span> <strong>{{group.label}}</strong> <span class="badge" style="background : #999">{{group.results.length}}</span></h4><div class="list-group" ng-repeat="candidate in group.results | limitTo : group.offset"><a ng-click="goToTopics(candidate, $event)" ng-keypress="goToTopics(candidate, $event)" class="row list-group-item"><span class="col-xs-2 col-lg-1"><span class="fa-stack fa-lg text-primary"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span></span><p class="col-xs-8 col-lg-9 pull-left text-primary" style="margin-top : 8px">{{candidate.label}}</p><h4 class="col-xs-2 col-lg-2"><i class="fa fa-lg fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="list-group" ng-if="group.results.length > 3"><a ng-click="group.offset = group.offset + 3" class="row list-group-item"><h4 class="col-xs-10 text-primary"><strong>More</strong></h4><h4 class="col-xs-2"><i class="fa fa-lg fa-chevron-down text-primary pull-right"></i></h4></a></div></div></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div><div class="col-xs-12"><h4 class="text-primary text-center">Brought to you by the <a href="http://www.ashevillenc.gov/" target="_blank">City of Asheville</a> <i class="fa fa-smile-o"></i></h4></div><div class="col-xs-12" style="margin-top : 100px"><div class="well col-xs-12 col-md-6 col-md-offset-3" ng-if="showCityDataDef"><p class="lead">city data</p><p style="font-family : Times New Roman"><strong>\\ˈsi-tē ˈdā-tə\\</strong></p><p style="font-family : Times New Roman">City data is just information about your city. It includes information about properties, trash collection, recycling pickup, crimes, development, who\'s responsible for fixing the street in front of your house, and more. At the City of Asheville we are working to provide you with better access to data in your city through SimpliCity!</p></div></div></div>');
 }]);
 })();
 
