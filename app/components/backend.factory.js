@@ -1260,7 +1260,7 @@ app.factory('Backend', ['$http', '$location', '$q', '$filter', '$stateParams',
         };
         queryBackend(featureService.address, neighborhoodQueryParams)
           .then(function(addressResults){
-              var addressFeaturesArray = [];
+            var addressFeaturesArray = [];
               for (var i = 0; i < addressResults.features.length; i++) {
                 //addressResults.features[i].attributes.isincity = dataCacheProperties.inTheCity[addressResults.features[i].attributes.civicaddress_id]
                 addressResults.features[i].attributes.color = '035096';
