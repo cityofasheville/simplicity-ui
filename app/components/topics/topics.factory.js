@@ -1,4 +1,5 @@
-app.factory('Topics', ['$stateParams', function($stateParams){
+simplicity.factory('Topics', ['$q', '$stateParams', 'Crime', 'Development', 'Property', 'Trash', 'Recycling', 'Zoning', 'StreetMaintenance', 'AddressList',
+    function($q, $stateParams, Crime, Development, Property, Trash, Recycling, Zoning, StreetMaintenance, AddressList){
 
     //****Create the factory object****//
     var Topics = {};
@@ -25,7 +26,7 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'extent' : null,
                         'view' : 'details'
                     },
-                    'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
                 },
                 'street_name' : {
                     'params' : {
@@ -34,7 +35,7 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'extent' : null,
                         'view' : 'list'
                     },
-                    'headerTemplate' : 'topic/topic-headers/topic.header.along.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.along.html',
                 },
                 'pinnum' : {
                     'params' : {
@@ -43,7 +44,7 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'extent' : null,
                         'view' : 'details'
                     },
-                    'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
                 },
                 'owner_name' : {
                     'params' : {
@@ -52,13 +53,13 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'extent' : null,
                         'view' : 'details'
                     },
-                    'headerTemplate' : 'topic/topic-headers/topic.header.ownedby.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.ownedby.html',
                 }
             },
             'simpleViewTemplate' : null,
-            'detailsViewTemplate' : 'topic/topic-views/property.view.html',
+            'detailsViewTemplate' : 'topics/topic-components/property/property.view.html',
             'tableViewTemplate' : null,
-            'listViewTemplate' : 'topic/topic-views/property.view.html',
+            'listViewTemplate' : 'topics/topic-components/property/property.view.html',
             'defaultView' : 'details',
             'iconClass' : 'flaticon-real10',
             'linkTopics' : ['crime', 'trash', 'recycling']
@@ -81,7 +82,7 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'view' : 'table'
                     },
                     'requiredParams' : ['timeframe', 'extent'],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.during.within.of.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.during.within.of.html',
                 },
                 'street_name' : {
                     'params' : {
@@ -91,7 +92,7 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'view' : 'table'
                     },
                     'requiredParams' : ['timeframe'],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.during.along.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.during.along.html',
                 },
                 'neighborhood' : {
                     'params' : {
@@ -101,13 +102,13 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'view' : 'table'
                     },
                     'requiredParams' : ['timeframe'],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.during.in.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.during.in.html',
                 }
             },
             'simpleViewTemplate' : null,
             'detailsViewTemplate' : null,
-            'tableViewTemplate' : 'topic/topic-views/table.view.html',
-            'listViewTemplate' : 'topic/topic-views/crime.view.html',
+            'tableViewTemplate' : 'topics/topic-components/crime/crime.table.view.html',
+            'listViewTemplate' : 'topics/topic-components/crime/crime.view.html',
             'defaultView' : 'table',
             'iconClass' : 'flaticon-police19',
             'linkTopics' : ['property', 'trash', 'recycling', 'development']
@@ -131,7 +132,7 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'view' : 'table'
                     },
                     'requiredParams' : ['timeframe', 'extent'],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.during.within.of.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.during.within.of.html',
                 },
                 'street_name' : {
                     'params' : {
@@ -141,7 +142,7 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'view' : 'table'
                     },
                     'requiredParams' : ['timeframe'],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.during.along.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.during.along.html',
                 },
                 'neighborhood' : {
                     'params' : {
@@ -151,13 +152,13 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'view' : 'table'
                     },
                     'requiredParams' : ['timeframe'],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.during.in.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.during.in.html',
                 }
             },
             'simpleViewTemplate' : null,
             'detailsViewTemplate' : null,
-            'tableViewTemplate' : 'topic/topic-views/table.view.html',
-            'listViewTemplate' : 'topic/topic-views/development.view.html',
+            'tableViewTemplate' : 'topics/topic-components/development/development.table.view.html',
+            'listViewTemplate' : 'topics/topic-components/development/development.view.html',
             'defaultView' : 'table',
             'iconClass' : 'flaticon-building33',
             'linkTopics' : ['property', 'trash', 'recycling', 'crime']
@@ -180,10 +181,10 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'view' : 'simple'
                     },
                     'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
                 }
             },
-            'simpleViewTemplate' : 'topic/topic-views/trash-collection.view.html',
+            'simpleViewTemplate' : 'topics/topic-components/trash-collection/trash-collection.view.html',
             'detailsViewTemplate' : null,
             'tableViewTemplate' : null,
             'listViewTemplate' : null,
@@ -210,10 +211,10 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'view' : 'simple'
                     },
                     'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
                 }
             },
-            'simpleViewTemplate' : 'topic/topic-views/recycling-collection.view.html',
+            'simpleViewTemplate' : 'topics/topic-components/recycling-collection/recycling-collection.view.html',
             'detailsViewTemplate' : null,
             'tableViewTemplate' : null,
             'listViewTemplate' : null,
@@ -240,11 +241,11 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'view' : 'details'
                     },
                     'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
                 }
             },
             'simpleViewTemplate' : null,
-            'detailsViewTemplate' : 'topic/topic-views/zoning.view.html',
+            'detailsViewTemplate' : 'topics/topic-components/zoning/zoning.view.html',
             'tableViewTemplate' : null,
             'listViewTemplate' : null,
             'defaultView' : 'details',
@@ -269,7 +270,7 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'view' : 'map'
                     },
                     'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.at.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
                 },
                 'street_name' : {
                     'params' : {
@@ -279,13 +280,13 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'view' : 'map'
                     },
                     'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.along.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.along.html',
                 }
             },
             'simpleViewTemplate' : null,
-            'detailsViewTemplate' : 'topic/topic-views/street-maintenance.view.html',
+            'detailsViewTemplate' : 'topics/topic-components/street-maintenance/street-maintenance.view.html',
             'tableViewTemplate' : null,
-            'listViewTemplate' : 'topic/topic-views/street-maintenance.view.html',
+            'listViewTemplate' : 'topics/topic-components/street-maintenance/street-maintenance.view.html',
             'defaultView' : 'map',
             'linkTopics' : ['property'],
             'iconClass' : 'flaticon-location38'
@@ -308,7 +309,7 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'view' : 'table'
                     },
                     'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.along.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.along.html',
                 },
                 'neighborhood' : {
                     'params' : {
@@ -318,13 +319,13 @@ app.factory('Topics', ['$stateParams', function($stateParams){
                         'view' : 'table'
                     },
                     'requiredParams' : [],
-                    'headerTemplate' : 'topic/topic-headers/topic.header.in.html',
+                    'headerTemplate' : 'topics/topic-headers/topic.header.in.html',
                 }
             },
             'simpleViewTemplate' : null,
             'detailsViewTemplate' : null,
-            'tableViewTemplate' : 'topic/topic-views/address-list.table.view.html',
-            'listViewTemplate' : 'topic/topic-views/address-list.view.html',
+            'tableViewTemplate' : 'topics/topic-components/address-list/address-list.table.view.html',
+            'listViewTemplate' : 'topics/topic-components/address-list/address-list.view.html',
             'defaultView' : 'simple',
             'iconClass' : 'flaticon-address7',
             'linkTopics' : ['property']
@@ -415,6 +416,17 @@ app.factory('Topics', ['$stateParams', function($stateParams){
         }
     };
 
+    var topicAccessor = {
+        'crime' : Crime,
+        'development' : Development,
+        'property' : Property,
+        'trash' : Trash,
+        'recycling' : Recycling,
+        'zoning' : Zoning,
+        'streetmaintenance' : StreetMaintenance,
+        'addresslist' : AddressList
+    }
+
     Topics.topicProperties = function(topic){
         for (var i = 0; i < topicsArray.length; i++) {
             if(topicsArray[i].name === topic){
@@ -422,6 +434,16 @@ app.factory('Topics', ['$stateParams', function($stateParams){
             }
         }
     };
+
+
+    Topics.getTopic = function(){
+        var q = $q.defer();
+        topicAccessor[$stateParams.topic].get()
+            .then(function(topic){
+                q.resolve(topic);
+            })
+        return q.promise;
+    }
 
 
 

@@ -1,5 +1,5 @@
-app.controller('TopicsCtrl', ['$scope', '$stateParams', '$state', 'Topics', 'Backend',
- function ($scope, $stateParams, $state, Topics, Backend) {
+simplicity.controller('TopicListCtrl', ['$scope', '$stateParams', '$state', 'Topics', 'AddressCache',
+ function ($scope, $stateParams, $state, Topics, AddressCache) {
     $("html, body").animate({'scrollTop' : "0px"});
     $scope.$on('$stateChangeSuccess', function (event, toState) {
         if (toState.name === 'main.topics') {           
@@ -23,15 +23,15 @@ app.controller('TopicsCtrl', ['$scope', '$stateParams', '$state', 'Topics', 'Bac
     if($stateParams.searchby === 'address'){
       $scope.anAddress = true;
       $scope.loading = true;
-      Backend.dataCache()
-      .then(function(data){
-        $scope.loading = false;
-        if(data.inTheCity === true){
-          $scope.inTheCity = true;
-        }else{
-          $scope.inTheCity = false;
-        }
-      });
+      AddressCache.query()
+        .then(function(data){
+          $scope.loading = false;
+          if(data.inTheCity === true){
+            $scope.inTheCity = true;
+          }else{
+            $scope.inTheCity = false;
+          }
+        });
     }
 
 

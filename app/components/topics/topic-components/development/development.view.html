@@ -47,14 +47,16 @@
 		</div>
 		<div class = "col-xs-12" ng-init = 'showComments = false' ng-show = 'showComments'>
 			<h4><strong class = "text-muted">Comments</strong></h4>
-			<ul class="list-group" style = "overflow : scroll">
-				<li class = "list-group-item list-card-panel" ng-repeat = "comment in feature.properties.commentsArray">{{comment}}</li>
+			<ul class="list-group" style = "overflow : scroll; margin-bottom : 20px">
+				<li class = "list-group-item list-item-panel" style = "margin : 5px" ng-repeat = "comment in feature.properties.commentsArray">{{comment}}</li>
 			</ul>
 		</div>
-		<a  ng-click = "showComments = !showComments">
-			<h4 class = 'text-center' ng-if = '!showComments'>Show Comments</h4>
-			<h4 class = 'text-center' ng-if = 'showComments'>Hide Comments</h4>
-		</a>
+		<div class="col-xs-12">
+			<a  ng-click = "showComments = !showComments">
+				<h4 class = 'text-center' ng-if = '!showComments'>Show Comments</h4>
+				<h4 class = 'text-center' ng-if = 'showComments'>Hide Comments</h4>
+			</a>
+		</div>
 	</div>
 	<a  ng-click = "showMore = !showMore">
 		<h4 class = 'text-center' ng-if = '!showMore'>Show More</h4>

@@ -1,4 +1,4 @@
-app.controller('MainCtrl', ['$scope', '$state', '$stateParams', '$location', '$http', '$timeout',
+simplicity.controller('MainCtrl', ['$scope', '$state', '$stateParams', '$location', '$http', '$timeout',
   function ($scope, $state, $stateParams, $location, $http, $timeout) {
 
 

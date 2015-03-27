@@ -1,0 +1,28 @@
+<div>
+  <div class = "col-xs-12" ng-if = "topic.features.length === 0">
+    <div class="col-xs-12"><hr></div>
+    <h3 class = "text-muted text-center"><strong>We couldn't find any results.</strong></h3>
+    <h4 class = "text-muted text-center"><strong>Try expanding the time frame or extent of your search.</strong></h4>
+  </div>
+  <table ng-if = "topic.features.length !== 0" class="table table-hover col-xs-12" >
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th class = "text-center">Count</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat = "(key, value) in topic.summary.table">
+        <td ng-click = "filterBy(key)" style = "cursor : pointer">
+          <i class="fa fa-circle" style = "color: #{{value.color}}"></i> {{key}}
+          <br>
+          <p class = 'text-muted'>{{developmentExplanations[key]}}</p>
+        </td>
+        <td class = "text-center">{{value.count}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+

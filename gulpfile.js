@@ -167,7 +167,13 @@ gulp.task('js', function () {
 	    }))
 	    .pipe(concat('templateCache.js'));
 	//Collect application JavaScript into a stream
-	var applicationJavaScript = gulp.src('app/**/*.js');
+	var applicationJavaScript = gulp.src([
+    'app/adapters/simplicity.arcgis.rest.api.adapter.js', 
+    'app/simplicity.http.js',
+    'app/simplicity.frontend.config.js', 
+    'app/simplicity.backend.config.js', 
+    'app/simplicity.js',
+    'app/**/*.js']);
 	//Merges to two streams of JavaScript files
 	return es.merge(applicationJavaScript, htmlTemplateCacheJavaScript)
 	    .pipe(concat('app.js'))

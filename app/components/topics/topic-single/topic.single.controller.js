@@ -1,5 +1,5 @@
-app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Topics', 'Backend',
- function ($scope, $stateParams, $state, $filter, Topics, Backend) {
+simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Topics', 'Backend', 'AddressCache',
+ function ($scope, $stateParams, $state, $filter, Topics, Backend, AddressCache) {
 
     //****Private variables and methods*****//
 
@@ -261,9 +261,9 @@ app.controller('TopicCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Top
     $scope.loading = true;
     //!!! Check if dataCache is already defined
 
-    Backend.dataCache()
+    AddressCache.query()
       .then(function(data){
-        Backend.topic()
+        Topics.getTopic()
           .then(function(topic){
             $scope.topic = topic;
             $scope.loading = false;

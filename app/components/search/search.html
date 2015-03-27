@@ -1,1 +1,79 @@
-<div ui-view></div>
+<div ui-view></div><div style = "min-height : 1000px">
+  <div class = "col-xs-12">
+
+     <p class=" text-muted text-center lead" style = "margin-bottom : 0px; margin-top : 20px">Discover <a ng-init = "showCityDataDef = false" ng-click = "showCityDataDef = !showCityDataDef">city data</a> about places in your community.</p>
+     <p class=" text-muted text-center lead">Search for an address, street, neighborhood, or property to get started!</p>
+  </div>
+  <div class="col-xs-12">
+    <div class="input-group">
+      <input id = "inputSearch" groupindex = '1' type="text" autocomplete = "on" class="form-control" placeholder = "Enter a location..." style = "z-index: 0" ng-model = "searchText" ng-keyup = "doSearch(searchText, $event)" autofocus>
+      <span class="input-group-btn">
+        <button class="btn btn-primary" type="button" style = "box-shadow : none; font-size : 17px"><i class="fa fa-search"></i></button>
+      </span>
+    </div>
+    
+  </div>
+  
+  
+  <div class="" ng-show = "errorMessage.show || helperMessage.show || searchGroups.length > 0">
+
+    <p ng-show = "errorMessage.show" class="text-danger">{{errorMessage.message}}</p>
+    <p ng-show = "helperMessage.show" class="text-success">{{helperMessage.message}}</p>
+    <div ng-repeat  = "group in searchGroups" >
+        <div class="col-xs-12" style = "margin-top : 10px; margin-bottom : 10px">
+            <h4 class="row text-muted">
+              <span class="fa-stack fa-lg" ng-click = "goBack()">
+            <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-stack-1x fa-inverse" ng-class = "group.iconClass"></i>
+          </span>
+              <strong>{{group.label}} </strong>
+              <span class="badge" style = "background : #999">{{group.results.length}}</span>
+            </h4>
+            <div class="list-group" ng-repeat = "candidate in group.results | limitTo : group.offset" >
+                <a  ng-click = "goToTopics(candidate, $event)" ng-keypress = "goToTopics(candidate, $event)" class = "row list-group-item" > 
+                  <span class="col-xs-2 col-lg-1">
+                    <span class="fa-stack fa-lg text-primary">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-stack-1x fa-inverse" ng-class = "group.iconClass"></i>
+              </span>
+                  </span>
+                  
+                <p class="col-xs-8 col-lg-9 pull-left text-primary" style = "margin-top : 8px">{{candidate.label}}</p>
+                <h4 class="col-xs-2 col-lg-2">
+                    <i class="fa fa-lg fa-chevron-right text-primary pull-right"></i>
+                </h4>
+              </a> 
+            </div>
+            <div class="list-group" ng-if = "group.results.length > 3">
+          <a  ng-click = "group.offset = group.offset + 3" class = "row list-group-item" > 
+            <h4 class="col-xs-10 text-primary">
+              <strong>More</strong>
+            </h4>
+            <h4 class="col-xs-2">
+              <i class="fa fa-lg fa-chevron-down text-primary pull-right"></i>
+            </h4>
+          </a> 
+            </div>
+        </div> 
+    </div>
+    <p ng-show = "errorMessage.show" class="text-danger">{{errorMessage.message}}</p>
+  </div>
+  <div class="col-xs-12">
+    <h4 class="text-primary text-center">
+      Brought to you by the 
+      <a href="http://www.ashevillenc.gov/" target = "_blank">City of Asheville </a>
+      <i class="fa fa-smile-o"></i>
+    </h4>
+  </div>
+  <div class="col-xs-12" style = "margin-top : 100px">
+    <div class="well col-xs-12 col-md-6 col-md-offset-3" ng-if = "showCityDataDef">
+      <p class = "lead">city data</p>
+      <p style = "font-family : Times New Roman"><strong>\ˈsi-tē ˈdā-tə\</strong> </p>
+      <p style = "font-family : Times New Roman">City data is just information about your city. It includes information about properties, trash collection, recycling pickup, crimes, development, who's responsible for fixing the street in front of your house, and more. At the City of Asheville we are working to provide you with better access to data in your city through SimpliCity!</p>
+      
+    </div>
+  </div>
+
+  
+  <!-- <a><p class="text-center">Or view a list of topics</p></a> -->
+</div>

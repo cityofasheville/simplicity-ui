@@ -1,0 +1,72 @@
+simplicity.factory('Zoning', ['$q', '$stateParams', 'AddressCache', 'simplicityBackend', 'CODELINKS',
+  function($q, $stateParams, AddressCache, simplicityBackend, CODELINKS){   
+
+    var Zoning = {};
+
+    var formatZoningPropertyForAnAddress = function(){
+      var addressCache = AddressCache.get();
+      var pinnum2civicaddressid = AddressCache.pinnum2civicaddressid();
+      var formattedZoningArray = [];
+      for (var z = 0; z < addressCache.zoning.length; z++) {
+        var zoningDistrict = addressCache.zoning[z];
+        if(CODELINKS[zoningDistrict] === undefined){
+          formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : 'disable'});
+        }else{
+          formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : CODELINKS[zoningDistrict]});
+        }
+      };
+      console.log(formattedZoningArray);
+      return formattedZoningArray;
+    }
+
+    Zoning.get = function(){
+      var q = $q.defer();
+      var addressCache = AddressCache.get();
+      var codelink;
+      if(CODELINKS[addressCache.zoning] === undefined){
+        codelink = 'disable';
+      }else{
+        codelink = CODELINKS[addressCache.zoning];
+      }
+      var geojson = {
+        'type' : 'FeatureCollection',
+        'summary' : {},
+        'searchGeojson' : addressCache.searchGeojson,
+        'features' : [{
+            'type' : 'Feature',
+            'properties' : {
+              'zoning' : formatZoningPropertyForAnAddress(),
+              'zoningOverlays' : addressCache.zoningOverlays,
+            },
+            'geometry' : {
+              'type' : 'Point',
+              'coordinates' : [addressCache.searchGeojson.features[0].geometry.coordinates[0], addressCache.searchGeojson.features[0].geometry.coordinates[1]]
+            }
+        }]
+      };
+      if(addressCache.zoningOverlays){
+        var zoningOverlaysSplit = addressCache.zoningOverlays.split('-');
+        simplicityBackend.simplicityQuery('zoningOverlays', {'zoningOverlayName' : zoningOverlaysSplit[0]})
+            .then(function(zoningOverlayLayer){
+              geojson.overlays = zoningOverlayLayer;
+              q.resolve(geojson);
+            });
+      }else{
+        q.resolve(geojson);
+      }
+            
+      return q.promise;
+    };
+
+    //****Return the factory object****//
+    return Zoning; 
+
+    
+}]); //END Zoning factory function
+
+
+
+
+   
+
+
