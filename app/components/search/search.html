@@ -30,7 +30,7 @@
               <span class="badge" style = "background : #999">{{group.results.length}}</span>
             </h4>
             <div class="list-group" ng-repeat = "candidate in group.results | limitTo : group.offset" >
-                <a  ng-click = "goToTopics(candidate, $event)" ng-keypress = "goToTopics(candidate, $event)" class = "row list-group-item" > 
+                <a analytics-on="click" analytics-category="Search" analytics-label="{{candidate.type}}" analytics-event="{{candidate.label}}" ng-click = "goToTopics(candidate, $event)" ng-keypress = "goToTopics(candidate, $event)" class = "row list-group-item" > 
                   <span class="col-xs-2 col-lg-1">
                     <span class="fa-stack fa-lg text-primary">
                 <i class="fa fa-circle fa-stack-2x"></i>

@@ -1,5 +1,5 @@
 //instatiate an AngularJS module and inject an dependancy modules
-var simplicity = angular.module('simplicity', ['simplicity.frontend.config', 'simplicity.backend.config', 'ui.router', 'ngAnimate']);
+var simplicity = angular.module('simplicity', ['angulartics', 'angulartics.google.analytics', 'simplicity.frontend.config', 'simplicity.backend.config', 'ui.router', 'ngAnimate']);
  
 //Configure application states and routes
 simplicity.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
