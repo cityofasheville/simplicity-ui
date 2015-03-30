@@ -6,7 +6,7 @@
 			: 
 			<span ng-if = "feature.properties.zoning.length > 0" ng-repeat = "zoning in feature.properties.zoning">
 				<span ng-if = "zoning.codelink === 'disable'">{{zoning.zoningDistrict}}</span>
-				<a target = "_blank" href="{{zoning.codelink}}"><strong> {{zoning.zoningDistrict}}<span ng-if = "$index !==  feature.properties.zoning.length - 1 && feature.properties.zoning.length !== 1">, </span></strong></a>
+				<a target = "_blank" href="{{zoning.codelink}}" analytics-on ="click"  analytics-category="Topic Link" analytics-label="{{zoning.zoningDistrict}}" analytics-event="{{stateParams.topic}} zoning"><strong> {{zoning.zoningDistrict}}<span ng-if = "$index !==  feature.properties.zoning.length - 1 && feature.properties.zoning.length !== 1">, </span></strong></a>
 			</span>
 			<span ng-if = "feature.properties.zoning.length === 0 || feature.properties.zoning === undefined">No City of Asheville Zoning</span>
 		</h5>

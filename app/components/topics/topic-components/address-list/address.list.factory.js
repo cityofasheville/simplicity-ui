@@ -50,13 +50,7 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
       var civicaddressIdArray = AddressCache.civicaddressIdArray();
 
       if($stateParams.searchby === "street_name"){
-        // var addressQueryParams = {
-        //   'where' : "civicaddress_id in (" + civicaddressIdArray.join(',') + ")", 
-        //   'f' : 'json',
-        //   'outFields' : '*'
-        // };
         simplicityBackend.simplicityQuery('addresses', {'civicaddressIds' : civicaddressIdArray.join(',')})
-        //queryBackend(featureService.address, addressQueryParams)
           .then(function(addressResults){
               var addressFeaturesArray = [];
               for (var i = 0; i < addressResults.features.length; i++) {
@@ -79,13 +73,7 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
               q.resolve(geojson);
           });
       }else if($stateParams.searchby === "neighborhood"){
-        // var neighborhoodQueryParams = {
-        //   'where' : "neighborhood = '" + $stateParams.id + "'", 
-        //   'f' : 'json',
-        //   'outFields' : '*'
-        // };
         simplicityBackend.simplicityQuery('addresses', {'neighborhoodName' : $stateParams.id })
-        //queryBackend(featureService.address, neighborhoodQueryParams)
           .then(function(addressResults){
             var addressFeaturesArray = [];
               for (var i = 0; i < addressResults.features.length; i++) {
