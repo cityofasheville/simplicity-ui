@@ -1,5 +1,3 @@
-'use strict';
-
 angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter', 'simplicity.http'])
   .constant('TABLES', {
     'crimes' : {
@@ -60,11 +58,11 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
         simplicityAdapter.search(SEARCH_CONFIG.searchUrl, searchText)
           .then(function(searchResults){
             q.resolve(searchResults);
-          })
+          });
 
 
         return q.promise;
-      }
+      };
 
       simplicityBackend.simplicityQuery = function(table, queryValues){
         var q = $q.defer();
@@ -77,10 +75,14 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
             //should I check the dataApi property here? or only allow one dataApi for all tables
             //if I allow multiple dataApis, I won't be able to inject adapters as a generic simplicityAdapter
             q.resolve(simplicityAdapter.formatHttpResults(httpResults));
-          })
+          });
 
         return q.promise;
-      }
+      };
+
+      simplicityBackend.formatTimeForQuery = function(jsDate){
+        return simplicityAdapter.formatTimeForQuery(jsDate);
+      };
 
 
 

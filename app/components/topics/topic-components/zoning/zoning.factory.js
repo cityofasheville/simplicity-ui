@@ -3,6 +3,35 @@ simplicity.factory('Zoning', ['$q', '$stateParams', 'AddressCache', 'simplicityB
 
     var Zoning = {};
 
+    var topicProperties = {
+      'name' : 'zoning',
+      'title' : 'Zoning',
+      'position' : 6,
+      'searchby' : {
+        'address' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'view' : 'details'
+          },
+          'requiredParams' : [],
+          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+        }
+      },
+      'simpleViewTemplate' : null,
+      'detailsViewTemplate' : 'topics/topic-components/zoning/zoning.view.html',
+      'tableViewTemplate' : null,
+      'listViewTemplate' : null,
+      'defaultView' : 'details',
+      'iconClass' : 'flaticon-map104',
+      'linkTopics' : ['property', 'crime', 'development'],
+      'questions' : {
+        'topic' :  'Do you want to know about a zoning?', 
+        'address' :  'Do you want to know about the zoning at this address?'
+      }
+    };
+
     var formatZoningPropertyForAnAddress = function(){
       var addressCache = AddressCache.get();
       var pinnum2civicaddressid = AddressCache.pinnum2civicaddressid();
@@ -14,12 +43,11 @@ simplicity.factory('Zoning', ['$q', '$stateParams', 'AddressCache', 'simplicityB
         }else{
           formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : CODELINKS[zoningDistrict]});
         }
-      };
-      console.log(formattedZoningArray);
+      }
       return formattedZoningArray;
-    }
+    };
 
-    Zoning.get = function(){
+    Zoning.build = function(){
       var q = $q.defer();
       var addressCache = AddressCache.get();
       var codelink;
@@ -56,6 +84,10 @@ simplicity.factory('Zoning', ['$q', '$stateParams', 'AddressCache', 'simplicityB
       }
             
       return q.promise;
+    };
+
+    Zoning.getTopicProperties = function(){
+      return topicProperties;
     };
 
     //****Return the factory object****//

@@ -1,24 +1,58 @@
-simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stateParams', 'AddressCache', 'simplicityBackend', 'COLORS',
-  function($http, $location, $q, $filter, $stateParams, AddressCache, simplicityBackend, COLORS){   
+simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stateParams', 'AddressCache', 'simplicityBackend', 'TimeFrame','COLORS',
+  function($http, $location, $q, $filter, $stateParams, AddressCache, simplicityBackend, TimeFrame, COLORS){   
 
     var Development = {};
 
-    var last30days = new Date();
-    var last6months = new Date();
-    var lastyear = new Date();
-    var last5years = new Date();
-    var last10years = new Date();
-    var allTime = new Date();
-
-    var timeframeLookup = {
-      'last-30-days' : last30days.setMonth(last30days.getMonth() - 1),
-      'last-6-months' : last6months.setMonth(last6months.getMonth() - 6),
-      'last-year' : lastyear.setFullYear(lastyear.getFullYear()-1),
-      'last-5-years': last5years.setFullYear(last5years.getFullYear()-5),
-      'last-10-years': last10years.setFullYear(last10years.getFullYear()-10),
-      'all-time' : allTime.setFullYear(allTime.getFullYear()-100)
+    var topicProperties = {
+      'name' : 'development',
+      'title' : 'Development',
+      'position' : 3, 
+      'searchby' : {
+        'address' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : 'last-year',
+            'extent' : 660,
+            'view' : 'table'
+          },
+          'requiredParams' : ['timeframe', 'extent'],
+          'headerTemplate' : 'topics/topic-headers/topic.header.during.within.of.html',
+        },
+        'street_name' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : 'last-year',
+            'extent' : 82.5,
+            'view' : 'table'
+          },
+          'requiredParams' : ['timeframe'],
+          'headerTemplate' : 'topics/topic-headers/topic.header.during.along.html',
+        },
+        'neighborhood' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : 'last-year',
+            'extent' : null,
+            'view' : 'table'
+          },
+          'requiredParams' : ['timeframe'],
+          'headerTemplate' : 'topics/topic-headers/topic.header.during.in.html',
+        }
+      },
+      'simpleViewTemplate' : null,
+      'detailsViewTemplate' : null,
+      'tableViewTemplate' : 'topics/topic-components/development/development.table.view.html',
+      'listViewTemplate' : 'topics/topic-components/development/development.view.html',
+      'defaultView' : 'table',
+      'iconClass' : 'flaticon-building33',
+      'linkTopics' : ['property', 'trash', 'recycling', 'crime'],
+      'questions' : {
+        'topic' : 'Do you want to know about development?',
+        'address' : 'Do you want to know about development near this address?',
+        'street_name' : 'Do you want to know about development along this street?',
+        'neighborhood' : 'Do you want to know about development in this neighborhood?'
+      }
     };
-
 
 
     var formatDevelopmentData = function(development){
@@ -64,17 +98,12 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
     };//END formatDevelopmentData
 
     
-    Development.get = function(){
+    Development.build = function(){
       var q = $q.defer();
 
-      //So we can filter by time
-      var time = new Date(timeframeLookup[$stateParams.timeframe]);
-      var year = time.getFullYear();
-      var month = time.getMonth() + 1;
-      var date = time.getDate();
 
-      //!!! TODO: THIS IS AN ESRI FORMATTED DATE, NEED TO ABSTRACT 
-      var timeExpression = "'" + year + "-" + month + "-" + date + "'";
+      var time = new Date(TimeFrame.get($stateParams.timeframe));
+      var timeExpression = simplicityBackend.formatTimeForQuery(time);
 
       var addressCache = AddressCache.get();
 
@@ -84,7 +113,7 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
           queryValues = {
             'neighborhoodName' : $stateParams.id,
             'time' : timeExpression,
-          }
+          };
           simplicityBackend.simplicityQuery('development', queryValues)
             .then(function(development){
                 q.resolve(formatDevelopmentData(development));
@@ -106,7 +135,7 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
               queryValues = {
                 'permitIds' : stringOfPermitIds,
                 'time' : timeExpression
-              }
+              };
               simplicityBackend.simplicityQuery('development', queryValues)
                 .then(function(development){
                     q.resolve(formatDevelopmentData(development));
@@ -122,6 +151,10 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
         q.resolve(formatDevelopmentData({'features' : []}));
       }
       return q.promise;
+    };
+
+    Development.getTopicProperties = function(){
+      return topicProperties;
     };
 
 

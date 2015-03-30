@@ -478,7 +478,7 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
       //return the promise using q
       return q.promise;
 
-    }
+    };
 
     simplicityArcGisRestApiAdapter.formatHttpResults = function(data){
 
@@ -486,7 +486,7 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
 
       for (var i = 0; i < data.features.length; i++) {
         featuresArray.push(L.esri.Util.arcgisToGeojson(data.features[i]));
-      };
+      }
 
       var geoJson = {
         'type' : 'FeatureCollection',
@@ -494,8 +494,23 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
       };
 
       //return the promise using q
-      return geoJson
-    }
+      return geoJson;
+    };
+
+    simplicityArcGisRestApiAdapter.formatTimeForQuery = function(jsDate){
+
+      //So we can filter by time
+      var d = new Date(jsDate);
+      var year = d.getFullYear();
+      var month = d.getMonth() + 1;
+      var date = d.getDate();
+
+      //!!! TODO: THIS IS AN ESRI FORMATTED DATE, NEED TO ABSTRACT 
+      var timeExpression = "'" + year + "-" + month + "-" + date + "'";
+
+      return timeExpression;
+    };
+
 
 
     //****Return the factory object****//

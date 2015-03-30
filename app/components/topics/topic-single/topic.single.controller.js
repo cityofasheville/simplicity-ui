@@ -1,14 +1,12 @@
-simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Topics', 'Backend', 'AddressCache',
- function ($scope, $stateParams, $state, $filter, Topics, Backend, AddressCache) {
+simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Topics', 'AddressCache', 'SELECT_OPTIONS',
+ function ($scope, $stateParams, $state, $filter, Topics, AddressCache, SELECT_OPTIONS) {
 
     //****Private variables and methods*****//
 
     $(function () {
       $('[data-toggle="tooltip"]').tooltip();
     });
-    //$("html, body").animate({'scrollTop' : "0px"});
-    
-    //!!! This is breaking the back button :-(
+
     var updateStateParamsAndReloadState = function(propertyName, value){
       var stateParams = $stateParams;
       stateParams[propertyName] = value;
@@ -78,7 +76,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
     }
 
     //get the select options for changing the timeframe
-    $scope.timeframeOptions = Backend.options('timeframe');
+    $scope.timeframeOptions = SELECT_OPTIONS.timeframe;
     //define a default select option
     $scope.timeframeOptionIndex = 0;
     //find the option that matches the current timeframe defiend in the $stateParams
@@ -106,7 +104,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
     }
 
     //get the select options for changing the timeframe
-    $scope.extentOptions = Backend.options('extent');
+    $scope.extentOptions = SELECT_OPTIONS.extent;
     //define a default select option
     $scope.extentOptionIndex = 0;
     
@@ -121,9 +119,14 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
       updateStateParamsAndReloadState('extent', extentValue.value);
     };
 
-     var openstreetmap = L.tileLayer("http://a.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-        attribution:'&copy; <a href="http://osm.org/copyright" title="OpenStreetMap" target="_blank">OpenStreetMap</a> contributors',
-        maxZoom : 22
+
+    // +-+-+-+ 
+    // |m|a|p| 
+    // +-+-+-+ 
+
+    var openstreetmap = L.tileLayer("http://a.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+      attribution:'&copy; <a href="http://osm.org/copyright" title="OpenStreetMap" target="_blank">OpenStreetMap</a> contributors',
+      maxZoom : 22
     });
 
     var esriImagery = L.esri.basemapLayer("Imagery");
@@ -261,9 +264,18 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
     $scope.loading = true;
     //!!! Check if dataCache is already defined
 
+
+
+    //  _   _                _   _     _           _             _                                   _   _     _             
+    // | | | | ___ _   _    | |_| |__ (_)___   ___| |_ __ _ _ __| |_ ___    _____   _____ _ __ _   _| |_| |__ (_)_ __   __ _ 
+    // | |_| |/ _ \ | | |   | __| '_ \| / __| / __| __/ _` | '__| __/ __|  / _ \ \ / / _ \ '__| | | | __| '_ \| | '_ \ / _` |
+    // |  _  |  __/ |_| |_  | |_| | | | \__ \ \__ \ || (_| | |  | |_\__ \ |  __/\ V /  __/ |  | |_| | |_| | | | | | | | (_| |
+    // |_| |_|\___|\__, ( )  \__|_| |_|_|___/ |___/\__\__,_|_|   \__|___/  \___| \_/ \___|_|   \__, |\__|_| |_|_|_| |_|\__, |
+    //             |___/|/                                                                     |___/                   |___/ 
+
     AddressCache.query()
       .then(function(data){
-        Topics.getTopic()
+        Topics.buildTopic()
           .then(function(topic){
             $scope.topic = topic;
             $scope.loading = false;

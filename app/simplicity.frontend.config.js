@@ -1,4 +1,3 @@
-'use strict';
 //keywords crimeIds, time(time needs some formatting), neighborhoodName
 angular.module('simplicity.frontend.config', [])
   .constant('COLORS', {
@@ -29,7 +28,9 @@ angular.module('simplicity.frontend.config', [])
       'NATIONAL PARK SERVICE' : {'color' : '000080'}
     }
   })
-  .constant('SELECT-OPTIONS', {
+  //The extent values are in feet
+  //Make sure that if you change the timeframe values here, that you ALSO!!!! change the TimeFrame factory below
+  .constant('SELECT_OPTIONS', {
       'extent' : [
         {'value' : 82.5, 'label' : 'a quarter block (27.5 yards)'},
         {'value' : 165, 'label' : 'half a block (55 yards)'},
@@ -90,7 +91,44 @@ angular.module('simplicity.frontend.config', [])
       'UP-CZ' : 'disable',
       'URD' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-25URREDI',
       'UV' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-23URVIDI',
-    });
+    })
+  .factory('TimeFrame', [
+    function(){
+
+      var TimeFrame = {};
+
+      
+      TimeFrame.get = function(timeframe){
+        
+        var d = new Date();
+        
+        if(timeframe === 'last-30-days'){
+          d.setMonth(d.getMonth() - 1);
+        }else if (timeframe === 'last-6-months') {
+          d.setMonth(d.getMonth() - 6);
+        }else if(timeframe === 'last-year'){
+          d.setFullYear(d.getFullYear()-1);
+        }else if(timeframe === 'last-5-years'){
+          d.setFullYear(d.getFullYear()-5);
+        }else if(timeframe === 'last-10-years'){
+          d.setFullYear(d.getFullYear()-10);
+        }else if(timeframe === 'all-time'){
+          d.setFullYear(d.getFullYear()-100);
+        }else{
+          d.setMonth(d.getMonth() - 1);
+        }
+
+        return d;
+      };
+
+
+      //****Return the factory object****//
+      return TimeFrame;   
+  }]); //END TimeFrame factory function
+
+
+
+ 
   
 
 

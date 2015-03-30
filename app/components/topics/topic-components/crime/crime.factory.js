@@ -1,24 +1,58 @@
-simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParams', 'AddressCache', 'simplicityBackend', 'COLORS',
-  function($http, $location, $q, $filter, $stateParams, AddressCache, simplicityBackend, COLORS){   
+simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParams', 'AddressCache', 'simplicityBackend', 'TimeFrame', 'COLORS',
+  function($http, $location, $q, $filter, $stateParams, AddressCache, simplicityBackend, TimeFrame, COLORS){   
 
     var Crime = {};
 
-    var last30days = new Date();
-    var last6months = new Date();
-    var lastyear = new Date();
-    var last5years = new Date();
-    var last10years = new Date();
-    var allTime = new Date();
-
-    var timeframeLookup = {
-      'last-30-days' : last30days.setMonth(last30days.getMonth() - 1),
-      'last-6-months' : last6months.setMonth(last6months.getMonth() - 6),
-      'last-year' : lastyear.setFullYear(lastyear.getFullYear()-1),
-      'last-5-years': last5years.setFullYear(last5years.getFullYear()-5),
-      'last-10-years': last10years.setFullYear(last10years.getFullYear()-10),
-      'all-time' : allTime.setFullYear(allTime.getFullYear()-100)
+    var topicProperties = {
+      'name' : 'crime',
+      'title' : 'Crime',
+      'position' : 2,
+      'searchby' : {
+        'address' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : 'last-year',
+            'extent' : 660,
+            'view' : 'table'
+          },
+          'requiredParams' : ['timeframe', 'extent'],
+          'headerTemplate' : 'topics/topic-headers/topic.header.during.within.of.html',
+        },
+        'street_name' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : 'last-year',
+            'extent' : 82.5,
+            'view' : 'table'
+          },
+          'requiredParams' : ['timeframe'],
+          'headerTemplate' : 'topics/topic-headers/topic.header.during.along.html',
+        },
+        'neighborhood' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : 'last-year',
+            'extent' : null,
+            'view' : 'table'
+          },
+          'requiredParams' : ['timeframe'],
+          'headerTemplate' : 'topics/topic-headers/topic.header.during.in.html',
+        }
+      },
+      'simpleViewTemplate' : null,
+      'detailsViewTemplate' : null,
+      'tableViewTemplate' : 'topics/topic-components/crime/crime.table.view.html',
+      'listViewTemplate' : 'topics/topic-components/crime/crime.view.html',
+      'defaultView' : 'table',
+      'iconClass' : 'flaticon-police19',
+      'linkTopics' : ['property', 'trash', 'recycling', 'development'],
+      'questions' : {
+        'topic' : 'Do you want to know about crime?',
+        'address' : 'Do you want to know about crimes near this address?',
+        'street_name' : 'Do you want to know about crimes along this street?',
+        'neighborhood' : 'Do you want to know about crimes in this neighborhood?'
+      }
     };
-
 
 
     var formatCrimeData = function(crimes){
@@ -59,17 +93,11 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
     };//END formatCrimeData
 
     
-    Crime.get = function(){
+    Crime.build = function(){
       var q = $q.defer();
 
-      //So we can filter by time
-      var time = new Date(timeframeLookup[$stateParams.timeframe]);
-      var year = time.getFullYear();
-      var month = time.getMonth() + 1;
-      var date = time.getDate();
-
-      //!!! TODO: THIS IS AN ESRI FORMATTED DATE, NEED TO ABSTRACT 
-      var timeExpression = "'" + year + "-" + month + "-" + date + "'";
+      var time = new Date(TimeFrame.get($stateParams.timeframe));
+      var timeExpression = simplicityBackend.formatTimeForQuery(time);
 
       var addressCache = AddressCache.get();
 
@@ -79,11 +107,10 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
           queryValues = {
             'neighborhoodName' : $stateParams.id,
             'time' : timeExpression,
-          }
+          };
           simplicityBackend.simplicityQuery('crimes', queryValues)
             .then(function(crimes){
                 q.resolve(formatCrimeData(crimes));
-                console.log(crimes);
             });
         }else{
           if(addressCache.crime){ 
@@ -91,11 +118,10 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
               queryValues = {
                 'crimeIds' : addressCache.crime[Number($stateParams.extent)],
                 'time' : timeExpression,
-              }
+              };
               simplicityBackend.simplicityQuery('crimes', queryValues)
                 .then(function(crimes){
                     q.resolve(formatCrimeData(crimes));
-                    console.log(crimes);
                 });
             }else{
               q.resolve(formatCrimeData({'features' : []}));
@@ -108,6 +134,10 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
         q.resolve(formatCrimeData({'features' : []}));
       }
       return q.promise;
+    };
+
+    Crime.getTopicProperties = function(){
+      return topicProperties;
     };
 
 

@@ -246,15 +246,15 @@ simplicity.factory('AddressCache', ['$http', '$q', '$stateParams', 'simplicityBa
 
     AddressCache.get = function(){
       return addressCache;
-    }
+    };
 
     AddressCache.pinnum2civicaddressid = function(){
       return pinnum2civicaddressid;
-    }
+    };
 
     AddressCache.civicaddressIdArray = function(){
       return civicaddressIdArray;
-    }
+    };
 
 
     //****Return the factory object****//

@@ -1,5 +1,3 @@
-'use strict';
-
 //instatiate an AngularJS module and inject an dependancy modules
 var simplicity = angular.module('simplicity', ['simplicity.frontend.config', 'simplicity.backend.config', 'ui.router', 'ngAnimate']);
  

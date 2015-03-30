@@ -3,6 +3,46 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
 
     var AddressList = {};
 
+    var topicProperties = {
+      'name' : 'addresslist',
+      'title' : 'Address List',
+      'position' : 8,
+      'searchby' : {
+        'street_name' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : 82.5,
+            'view' : 'table'
+          },
+          'requiredParams' : [],
+          'headerTemplate' : 'topics/topic-headers/topic.header.along.html',
+        },
+        'neighborhood' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'view' : 'table'
+          },
+          'requiredParams' : [],
+          'headerTemplate' : 'topics/topic-headers/topic.header.in.html',
+        }
+      },
+      'simpleViewTemplate' : null,
+      'detailsViewTemplate' : null,
+      'tableViewTemplate' : 'topics/topic-components/address-list/address-list.table.view.html',
+      'listViewTemplate' : 'topics/topic-components/address-list/address-list.view.html',
+      'defaultView' : 'simple',
+      'iconClass' : 'flaticon-address7',
+      'linkTopics' : ['property'],
+      'questions' : {
+        'topic' :  'Do you want a list of addresses?',
+        'street_name' : 'Do you want a list of addresses along this street?',
+        'neighborhood' :  'Do you want a list of addresses in this neighborhood?'
+      }
+    };
+
     AddressList.get = function(){
       var q = $q.defer();
 
@@ -63,6 +103,10 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
       }
 
       return q.promise;
+    };
+
+    AddressList.getTopicProperties = function(){
+      return topicProperties;
     };
 
     //****Return the factory object****//

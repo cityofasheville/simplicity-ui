@@ -3,6 +3,65 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
 
     var Property = {};
 
+
+    var topicProperties = {
+      'name' : 'property',
+      'title' : 'Property',
+      'position' : 1,
+      'searchby' : {
+        'address' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'view' : 'details'
+          },
+          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+        },
+        'street_name' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'view' : 'list'
+          },
+          'headerTemplate' : 'topics/topic-headers/topic.header.along.html',
+        },
+        'pinnum' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'view' : 'details'
+          },
+          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+        },
+        'owner_name' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'view' : 'details'
+          },
+          'headerTemplate' : 'topics/topic-headers/topic.header.ownedby.html',
+        }
+      },
+      'simpleViewTemplate' : null,
+      'detailsViewTemplate' : 'topics/topic-components/property/property.view.html',
+      'tableViewTemplate' : null,
+      'listViewTemplate' : 'topics/topic-components/property/property.view.html',
+      'defaultView' : 'details',
+      'iconClass' : 'flaticon-real10',
+      'linkTopics' : ['crime', 'trash', 'recycling'],
+      'questions' : {
+        'topic' : 'Do you want to know about a property?',
+        'address' : 'Do you want to know about the property at this address?',
+        'street_name' : 'Do you want to know about the properties along this street?',
+        'pinnum' : 'Do you want to know about the property for this PIN?',
+        'owner_name' : 'Do you want to know about the properties owned by this owner?'
+      }
+    };
+
     var formatZoningPropertyForAnAddress = function(){
       var addressCache = AddressCache.get();
       var pinnum2civicaddressid = AddressCache.pinnum2civicaddressid();
@@ -14,10 +73,10 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
         }else{
           formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : CODELINKS[zoningDistrict]});
         }
-      };
+      }
       console.log(formattedZoningArray);
       return formattedZoningArray;
-    }
+    };
 
     var formatZoningPropertyForMultipleAddressess = function(civicaddressId){
       var addressCache = AddressCache.get();
@@ -31,13 +90,12 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
           }else{
             formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : CODELINKS[zoningDistrict]});
           }
-        };
+        }
         return formattedZoningArray;
       }else{
         return undefined;
-      }
-      
-    }
+      }  
+    };
 
 
     var formatPropertyData = function(property){
@@ -57,7 +115,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
         }else if($stateParams.searchby === 'pinnum' || $stateParams.searchby === 'owner_name' || $stateParams.searchby === 'street_name'){
           property.features[p].properties.civicaddress_id = pinnum2civicaddressid[property.features[p].properties.pinnum];
           if(addressCache.zoning){
-            property.features[p].properties.zoning = formatZoningPropertyForMultipleAddressess(property.features[p].properties.civicaddress_id)
+            property.features[p].properties.zoning = formatZoningPropertyForMultipleAddressess(property.features[p].properties.civicaddress_id);
           }          
         }
         property.features[p].properties.color = '035096';
@@ -83,7 +141,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
     //We need to use the pinnum to lookup property information 
     //We can access the pinnum by cross-referencing the cividaddress id or centerline id in the xref table
     //WE can acess the civicaddress id from the stateParams
-    Property.get = function(){
+    Property.build = function(){
       var addressCache = AddressCache.get();
       var pinnum2civicaddressid = AddressCache.pinnum2civicaddressid();
       var q = $q.defer();
@@ -109,11 +167,11 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
         simplicityBackend.simplicityQuery('xrefs', {'centerlineIds' : idArray.join()})
           .then(function(xRefPin){
             var xrefPinString = '';
-            for (var i = 0; i < xRefPin.features.length; i++) {
+            for (var x = 0; x < xRefPin.features.length; x++) {
               if(i === 0){
-                xrefPinString = xrefPinString + "'" + xRefPin.features[i].properties.pinnum + "'";
+                xrefPinString = xrefPinString + "'" + xRefPin.features[x].properties.pinnum + "'";
               }else{
-                xrefPinString = xrefPinString + ",'" + xRefPin.features[i].properties.pinnum + "'";
+                xrefPinString = xrefPinString + ",'" + xRefPin.features[x].properties.pinnum + "'";
               }         
             }
             simplicityBackend.simplicityQuery('properties', {'pinnums' : xrefPinString})
@@ -124,11 +182,11 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
       }else if ($stateParams.searchby === 'pinnum' || $stateParams.searchby === 'owner_name'){
         var pinArray = $stateParams.id.split(',');
         var pinString = '';
-        for (var i = 0; i < pinArray.length; i++) {
-          if(i === 0){
-            pinString = pinString + "'" + pinArray[i] + "'";
+        for (var p = 0; p < pinArray.length; p++) {
+          if(p === 0){
+            pinString = pinString + "'" + pinArray[p] + "'";
           }else{
-            pinString = pinString + ",'" + pinArray[i] + "'";
+            pinString = pinString + ",'" + pinArray[p] + "'";
           }         
         }
 
@@ -139,6 +197,10 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
       }
       return q.promise;
     };//END property function
+
+    Property.getTopicProperties = function(){
+      return topicProperties;
+    };
 
 
     //****Return the factory object****//

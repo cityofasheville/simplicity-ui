@@ -1,4 +1,3 @@
-'use strict';
 //All HTTP requests are routed this this module
 angular.module('simplicity.http', [])
   .factory('simplicityHttp', ['$http', '$q',
@@ -38,11 +37,11 @@ angular.module('simplicity.http', [])
         for (var i = 0; i < queryTemplate.sqlArray.length; i++) {
 
           if(queryValues[queryTemplate.sqlArray[i]] !== undefined){
-            sqlArray.push(queryValues[queryTemplate.sqlArray[i]])
+            sqlArray.push(queryValues[queryTemplate.sqlArray[i]]);
           }else{
-            sqlArray.push(queryTemplate.sqlArray[i])
+            sqlArray.push(queryTemplate.sqlArray[i]);
           }
-        };
+        }
 
         var sqlExpression = sqlArray.join('');
         
@@ -51,7 +50,7 @@ angular.module('simplicity.http', [])
         queryParams[queryTemplate.sqlParamName] = sqlExpression;
 
         return queryParams;
-      }
+      };
 
 
       //****Return the factory object****//
