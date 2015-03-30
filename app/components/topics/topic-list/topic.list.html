@@ -1,6 +1,6 @@
 <div>
   <div class="col-xs-12 btn-group btn-group-justified" style = "margin-top : 15px">
-    <a href = "#/search/composite" class="btn btn-primary"><i class="fa fa-search"></i> <strong> Search</strong></a>
+    <a href = "#/search/composite" class="btn btn-primary" style = "font-size : 18px"><i class="fa fa-search"></i> Search</a>
   </div>
   <div class="col-xs-12">
     <hr>
@@ -24,7 +24,7 @@
   </h3>
 
   <div class="list-group" style = "margin-top : 20px">
-    <a class="row list-group-item list-item-panel" href = '{{topic.linkTo}}' style = "margin-bottom : 5px" ng-repeat = "topic in topics">
+    <a class="row list-group-item list-item-panel" href = '{{topic.linkTo}}' style = "margin-bottom : 5px" ng-repeat = "topic in topics |orderBy:'position'">
       <!-- mobile -->
       <span class="visible-xs col-xs-8"><p class="text-primary text-center"> {{topic.question}}</p></span>
       <i ng-class="topic.iconClass" class = "visible-xs pull-left col-xs-3 text-primary" ></i>

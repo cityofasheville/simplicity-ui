@@ -1,5 +1,5 @@
-app.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'Backend',
- function ($scope, $stateParams, $state, $timeout, Backend) {
+simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'simplicityBackend',
+ function ($scope, $stateParams, $state, $timeout, simplicityBackend) {
     var getType = function(unformattedType){
         var nameKey = {
             'street_name' : 'street',
@@ -46,7 +46,7 @@ app.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'B
         }
 
         //Search usign searchText
-        Backend.compositeSearch(searchText)
+        simplicityBackend.simplicitySearch(searchText)
             .then(function(searchResults){
                 if(searchText === ""){
                     $scope.searchGroups = [];
