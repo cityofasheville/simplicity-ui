@@ -52,6 +52,10 @@ simplicity.factory('AddressCache', ['$http', '$q', '$stateParams', 'simplicityBa
         'neighborhood' : {
           'table' : 'neighborhoods',
           'queryValues' : {'neighborhoodNames' : idArray.join()}
+        },
+        'owner_name' : {
+          'table' : 'addresses',
+          'queryValues' : {'civicaddressIds' : idArray.join()}
         }
       };
 
@@ -223,7 +227,6 @@ simplicity.factory('AddressCache', ['$http', '$q', '$stateParams', 'simplicityBa
             pinString = pinString + ",'" + pinArray[p] + "'";
           }         
         }
-
         simplicityBackend.simplicityQuery('xrefs', {'pinnums' : pinString})
           .then(function(pinXrefResults){
             civicaddressIdArray = [];

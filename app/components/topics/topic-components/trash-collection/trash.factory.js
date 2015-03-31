@@ -13,17 +13,17 @@ simplicity.factory('Trash', ['$q', '$stateParams', 'AddressCache',
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'view' : 'simple'
+            'defaultView' : 'simple',
+            'validViews' : ['simple']
           },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         }
       },
+       'views' : {
+        'simple' : {'label' : 'Simple View', 'template' : 'topics/topic-components/trash-collection/trash.collection.simple.view.html'}
+      },
       'simpleViewTemplate' : 'topics/topic-components/trash-collection/trash-collection.view.html',
-      'detailsViewTemplate' : null,
-      'tableViewTemplate' : null,
-      'listViewTemplate' : null,
-      'defaultView' : 'simple',
       'iconClass' : 'flaticon-garbage5',
       'linkTopics' : ['recycling', 'property'],
       'questions' : {

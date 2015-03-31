@@ -96,6 +96,15 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
           'outFields' : '*' 
         }
       },
+      'owner_name' : {
+        'sqlArray' : ['civicaddress_id in (', 'civicaddressIds', ')'],
+        'sqlParamName' : 'where',
+        'queryParams' : {
+          'where' : '',
+          'f' : 'json',
+          'outFields' : '*' 
+        }
+      },
       'neighborhood' : {
         'sqlArray' : ["neighborhood = '", 'neighborhoodName', "'"],
         'sqlParamName' : 'where',
@@ -255,7 +264,7 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
         }
       },
       'owner_name' : {
-        'sqlArray' : ['pinnum in (', 'pinnum', ')'],
+        'sqlArray' : ['pinnum in (', 'pinnums', ')'],
         'sqlParamName' : 'where',
         'queryParams' : {
           'where' : '',

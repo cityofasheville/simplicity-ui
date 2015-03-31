@@ -47,20 +47,26 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
 
     $scope.headerTemplate = $scope.topicProperties.searchby[$stateParams.searchby].headerTemplate;
 
+    //check if view is valid
+    var viewIsValid = function(){
+      var validity = false
+      for (var i = 0; i < $scope.topicProperties.searchby[$stateParams.searchby].params.validViews.length; i++) {
+        if($scope.topicProperties.searchby[$stateParams.searchby].params.validViews[i] === $stateParams.view){
+          validity = true;
+        }
+      }
+      return validity;
+    }
     //if view is not defined or if view is not allowed, use default
     if($stateParams.view === null){
-      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
-    }else if($stateParams.view === 'details' && $scope.topicProperties.detailsViewTemplate === null){
-      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
-    }else if($stateParams.view === 'list' && $scope.topicProperties.listViewTemplate === null){
-      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
-    }else if($stateParams.view === 'table' && $scope.topicProperties.tableViewTemplate === null){
-      updateStateParamsAndReloadState('view', $scope.topicProperties.defaultView);
-    }else if($stateParams.view === 'table' && $stateParams.type !== null){
-      updateStateParamsAndReloadState('type', null);
+      updateStateParamsAndReloadState('view', $scope.topicProperties.searchby[$stateParams.searchby].params.defaultView);
     }else{
-      //The view is defined and allowed
+      if(!viewIsValid()){
+        updateStateParamsAndReloadState('view', $scope.topicProperties.searchby[$stateParams.searchby].params.defaultView);
+      }
     }
+   
+
 
     $scope.onClickChangeView = function(view){
       updateStateParamsAndReloadState('view', view);
@@ -133,8 +139,8 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
 
 
     var baseMaps = {
-      "Open Street Map" : openstreetmap,
-      "ESRI Imagery" : esriImagery
+      "Street Map" : openstreetmap,
+      "Imagery" : esriImagery
     };
 
 
@@ -279,6 +285,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
           .then(function(topic){
             $scope.topic = topic;
             $scope.loading = false;
+            console.log(topic);
             if(topic.searchGeojson){
               addSearchGeoJsonToMap(topic.searchGeojson, {'fillOpacity' : 0,'opacity' : 0.3}).addTo(map);
             }

@@ -13,17 +13,17 @@ simplicity.factory('Zoning', ['$q', '$stateParams', 'AddressCache', 'simplicityB
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'view' : 'details'
+            'defaultView' : 'details',
+            'validViews' : ['details', 'map']
           },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         }
       },
-      'simpleViewTemplate' : null,
-      'detailsViewTemplate' : 'topics/topic-components/zoning/zoning.view.html',
-      'tableViewTemplate' : null,
-      'listViewTemplate' : null,
-      'defaultView' : 'details',
+      'views' : {
+        'details' : {'label' : 'Details View', 'template' : 'topics/topic-components/zoning/zoning.view.html'},
+        'map' : {'label' : 'Map View', 'template' : null}
+      },
       'iconClass' : 'flaticon-map104',
       'linkTopics' : ['property', 'crime', 'development'],
       'questions' : {

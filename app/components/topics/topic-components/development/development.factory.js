@@ -13,7 +13,8 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
             'type' : null,
             'timeframe' : 'last-year',
             'extent' : 660,
-            'view' : 'table'
+            'defaultView' : 'summary',
+            'validViews' : ['summary', 'list', 'map']
           },
           'requiredParams' : ['timeframe', 'extent'],
           'headerTemplate' : 'topics/topic-headers/topic.header.during.within.of.html',
@@ -23,7 +24,8 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
             'type' : null,
             'timeframe' : 'last-year',
             'extent' : 82.5,
-            'view' : 'table'
+            'defaultView' : 'summary',
+            'validViews' : ['summary', 'list', 'map']
           },
           'requiredParams' : ['timeframe'],
           'headerTemplate' : 'topics/topic-headers/topic.header.during.along.html',
@@ -33,17 +35,18 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
             'type' : null,
             'timeframe' : 'last-year',
             'extent' : null,
-            'view' : 'table'
+            'defaultView' : 'summary',
+            'validViews' : ['summary', 'list', 'map']
           },
           'requiredParams' : ['timeframe'],
           'headerTemplate' : 'topics/topic-headers/topic.header.during.in.html',
         }
       },
-      'simpleViewTemplate' : null,
-      'detailsViewTemplate' : null,
-      'tableViewTemplate' : 'topics/topic-components/development/development.table.view.html',
-      'listViewTemplate' : 'topics/topic-components/development/development.view.html',
-      'defaultView' : 'table',
+      'views' : {
+        'map' : {'label' : 'Map View', 'template' : null},
+        'summary' : {'label' : 'Summary', 'template' : 'topics/topic-components/development/development.summary.view.html'},
+        'list' : {'label' : 'List View', 'template' : 'topics/topic-components/development/development.list.view.html'},
+      },
       'iconClass' : 'flaticon-building33',
       'linkTopics' : ['property', 'trash', 'recycling', 'crime'],
       'questions' : {

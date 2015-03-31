@@ -14,7 +14,8 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'view' : 'details'
+            'defaultView' : 'details',
+            'validViews' : ['details', 'map']
           },
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         },
@@ -23,7 +24,8 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'view' : 'list'
+            'defaultView' : 'list',
+            'validViews' : ['list', 'map']
           },
           'headerTemplate' : 'topics/topic-headers/topic.header.along.html',
         },
@@ -32,7 +34,8 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'view' : 'details'
+            'defaultView' : 'details',
+            'validViews' : ['details', 'map']
           },
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         },
@@ -41,16 +44,17 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'view' : 'details'
+            'defaultView' : 'list',
+            'validViews' : ['list', 'map']
           },
           'headerTemplate' : 'topics/topic-headers/topic.header.ownedby.html',
         }
       },
-      'simpleViewTemplate' : null,
-      'detailsViewTemplate' : 'topics/topic-components/property/property.view.html',
-      'tableViewTemplate' : null,
-      'listViewTemplate' : 'topics/topic-components/property/property.view.html',
-      'defaultView' : 'details',
+      'views' : {
+        'map' : {'label' : 'Map View', 'template' : null},
+        'details' : {'label' : 'Details View', 'template' : 'topics/topic-components/property/property.details.view.html'},
+        'list' : {'label' : 'List View', 'template' : 'topics/topic-components/property/property.list.view.html'},
+      },
       'iconClass' : 'flaticon-real10',
       'linkTopics' : ['crime', 'trash', 'recycling'],
       'questions' : {
@@ -74,7 +78,6 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
           formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : CODELINKS[zoningDistrict]});
         }
       }
-      console.log(formattedZoningArray);
       return formattedZoningArray;
     };
 
@@ -102,6 +105,9 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
       var addressCache = AddressCache.get();
       var pinnum2civicaddressid = AddressCache.pinnum2civicaddressid();
       var q = $q.defer();
+      if(property.features.length > 1){
+        property.searchGeojson = addressCache.searchGeojson;
+      }
 
       for (var p = 0; p < property.features.length; p++) {
 
@@ -114,6 +120,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
           
         }else if($stateParams.searchby === 'pinnum' || $stateParams.searchby === 'owner_name' || $stateParams.searchby === 'street_name'){
           property.features[p].properties.civicaddress_id = pinnum2civicaddressid[property.features[p].properties.pinnum];
+          console.log(property.features[p].properties.civicaddress_id);
           if(addressCache.zoning){
             property.features[p].properties.zoning = formatZoningPropertyForMultipleAddressess(property.features[p].properties.civicaddress_id);
           }          
@@ -130,7 +137,6 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
               q.resolve(property);
             });
         }else{
-          console.log(property);
           q.resolve(property);
         }
       }
@@ -168,7 +174,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
           .then(function(xRefPin){
             var xrefPinString = '';
             for (var x = 0; x < xRefPin.features.length; x++) {
-              if(i === 0){
+              if(x === 0){
                 xrefPinString = xrefPinString + "'" + xRefPin.features[x].properties.pinnum + "'";
               }else{
                 xrefPinString = xrefPinString + ",'" + xRefPin.features[x].properties.pinnum + "'";
@@ -189,7 +195,6 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             pinString = pinString + ",'" + pinArray[p] + "'";
           }         
         }
-
         simplicityBackend.simplicityQuery('properties', {'pinnums' : pinString})
           .then(function(property){
             q.resolve(formatPropertyData(property));

@@ -13,7 +13,8 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
             'type' : null,
             'timeframe' : 'last-year',
             'extent' : 660,
-            'view' : 'table'
+            'defaultView' : 'summary',
+            'validViews' : ['summary', 'list', 'map']
           },
           'requiredParams' : ['timeframe', 'extent'],
           'headerTemplate' : 'topics/topic-headers/topic.header.during.within.of.html',
@@ -23,7 +24,8 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
             'type' : null,
             'timeframe' : 'last-year',
             'extent' : 82.5,
-            'view' : 'table'
+            'defaultView' : 'summary',
+            'validViews' : ['summary', 'list', 'map']
           },
           'requiredParams' : ['timeframe'],
           'headerTemplate' : 'topics/topic-headers/topic.header.during.along.html',
@@ -33,17 +35,18 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
             'type' : null,
             'timeframe' : 'last-year',
             'extent' : null,
-            'view' : 'table'
+            'defaultView' : 'summary',
+            'validViews' : ['summary', 'list', 'map']
           },
           'requiredParams' : ['timeframe'],
           'headerTemplate' : 'topics/topic-headers/topic.header.during.in.html',
         }
       },
-      'simpleViewTemplate' : null,
-      'detailsViewTemplate' : null,
-      'tableViewTemplate' : 'topics/topic-components/crime/crime.table.view.html',
-      'listViewTemplate' : 'topics/topic-components/crime/crime.view.html',
-      'defaultView' : 'table',
+      'views' : {
+        'map' : {'label' : 'Map View', 'template' : null},
+        'summary' : {'label' : 'Summary', 'template' : 'topics/topic-components/crime/crime.summary.view.html'},
+        'list' : {'label' : 'List View', 'template' : 'topics/topic-components/crime/crime.list.view.html'},
+      },
       'iconClass' : 'flaticon-police19',
       'linkTopics' : ['property', 'trash', 'recycling', 'development'],
       'questions' : {
