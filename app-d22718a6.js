@@ -836,7 +836,7 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
 var simplicity = angular.module('simplicity', ['angulartics', 'angulartics.google.analytics', 'simplicity.frontend.config', 'simplicity.backend.config', 'ui.router', 'ngAnimate']);
  
 //Configure application states and routes
-simplicity.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
+simplicity.config(["$stateProvider", "$urlRouterProvider", "$httpProvider", function ($stateProvider, $urlRouterProvider, $httpProvider) {
     
     $urlRouterProvider.when('/topics', '/topics/list');
     $urlRouterProvider.when('', '/search');
@@ -871,7 +871,7 @@ simplicity.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
           templateUrl: 'topics/topic-single/topic.single.html',
           controller: 'TopicSingleCtrl'
         });
-  });//END config
+  }]);//END config
 
 simplicity.factory('AddressCache', ['$http', '$q', '$stateParams', 'simplicityBackend',
   function($http, $q, $stateParams, simplicityBackend){
