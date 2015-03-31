@@ -73,9 +73,11 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
     $scope.goToTopics = function(candidate, event){
         var label = "";
         for (var i = 0; i < candidate.label.length; i++) {
-            if(candidate.label.charAt(i) !== '&'){
+            if(candidate.label.charAt(i) === '&'){
+                label = label + 'AND';
+            }else{
                 label = label + candidate.label.charAt(i);
-            } 
+            }
         }
         if(candidate.type === 'civicaddressid'){
             candidate.type = "address";

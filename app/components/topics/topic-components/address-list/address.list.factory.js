@@ -13,7 +13,8 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
             'type' : null,
             'timeframe' : null,
             'extent' : 82.5,
-            'view' : 'table'
+            'defaultView' : 'list',
+            'validViews' : ['list', 'map']
           },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.along.html',
@@ -23,11 +24,16 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'view' : 'table'
+            'defaultView' : 'list',
+            'validViews' : ['list', 'map']
           },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.in.html',
         }
+      },
+      'views' : {
+        'map' : {'label' : 'Map View', 'template' : null},
+        'list' : {'label' : 'List View', 'template' : 'topics/topic-components/address-list/address-list.view.html'},
       },
       'simpleViewTemplate' : null,
       'detailsViewTemplate' : null,
@@ -43,7 +49,7 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
       }
     };
 
-    AddressList.get = function(){
+    AddressList.build = function(){
       var q = $q.defer();
 
       var addressCache = AddressCache.get();

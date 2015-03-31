@@ -13,7 +13,8 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'view' : 'map'
+            'defaultView' : 'list',
+            'validViews' : ['list', 'map']
           },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
@@ -23,17 +24,18 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
             'type' : null,
             'timeframe' : null,
             'extent' : 82.5,
-            'view' : 'map'
+            'defaultView' : 'list',
+            'validViews' : ['list', 'map']
           },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.along.html',
         }
       },
-      'simpleViewTemplate' : null,
-      'detailsViewTemplate' : 'topics/topic-components/street-maintenance/street-maintenance.view.html',
-      'tableViewTemplate' : null,
-      'listViewTemplate' : 'topics/topic-components/street-maintenance/street-maintenance.view.html',
-      'defaultView' : 'map',
+      'views' : {
+        'map' : {'label' : 'Map View', 'template' : null},
+        'list' : {'label' : 'List View', 'template' : 'topics/topic-components/street-maintenance/street.maintenance.list.view.html'},
+      },
+      'defaultView' : 'list',
       'iconClass' : 'flaticon-location38',
       'linkTopics' : ['property'],
       'questions' : {

@@ -24,56 +24,26 @@
 
       <!-- view header -->
       <div ng-if = "stateParams.view !== 'simple'">
+
+
+         <!-- SM SCREEN SIZE AND LARGER-->
         <div class="hidden-xs col-xs-12">
-          <h2 ng-if = "stateParams.view === 'details'" class = "pull-left" style = "margin-right : 10px">Details View </h2>
-          <h2 ng-if = "stateParams.view === 'list'" class = "pull-left" style = "margin-right : 10px">List View </h2>
-          <h2 ng-if = "stateParams.view === 'table'" class = "pull-left" style = "margin-right : 10px">Table View </h2>
-          <h2 ng-if = "stateParams.view === 'map'" class = "pull-left" style = "margin-right : 10px">Map View </h2>
+          <h2 class = "pull-left" style = "margin-right : 10px">{{topicProperties.views[stateParams.view].label}}</h2>
 
           <div class="btn-group pull-right" role="group" aria-label="..." style= "margin-top : 15px">
-            <button 
-              ng-if = "topicProperties.detailsViewTemplate" 
-              ng-class = "{'active' : stateParams.view === 'details'}" 
-              ng-click = "onClickChangeView('details')"
+            
+            <!-- CHANGE VIEW BUTTONS -->
+            <button ng-repeat = "view in topicProperties.searchby[stateParams.searchby].params.validViews"
+              ng-class = "{'active' : stateParams.view === view}"
+              ng-click = "onClickChangeView(view)"
               analytics-on ="click" 
               analytics-category="Topic View" 
               analytics-label="{{stateParams.topic}}" 
-              analytics-event="Detail View"
-              class = "btn btn-primary">
-                <i class="fa fa-lg fa-th fa-fw"></i> Details
-            </button>
-            <button 
-              ng-if = "topicProperties.listViewTemplate" 
-              ng-class = "{'active' : stateParams.view === 'list'}" 
-              ng-click = "onClickChangeView('list')"
-              analytics-on ="click" 
-              analytics-category="Topic View" 
-              analytics-label="{{stateParams.topic}}" 
-              analytics-event="List View"
-              class = "btn btn-primary">
-                <i class="fa fa-lg fa-list-alt fa-fw"></i> List
-            </button>
-            <button 
-              ng-if = "topicProperties.tableViewTemplate" 
-              ng-class = "{'active' : stateParams.view === 'table'}"
-              ng-click = "onClickChangeView('table')"
-              analytics-on ="click" 
-              analytics-category="Topic View" 
-              analytics-label="{{stateParams.topic}}" 
-              analytics-event="Table View"
+              analytics-event="{{topicProperties.views[view].label}}"
               class = "btn btn-primary"> 
-                <i class="fa fa-lg fa-table fa-fw"></i> Table
+                {{topicProperties.views[view].label}}
             </button>
-            <button 
-              ng-class = "{'active' : stateParams.view === 'map'}"
-              ng-click = "onClickChangeView('map')"
-              analytics-on ="click" 
-              analytics-category="Topic View" 
-              analytics-label="{{stateParams.topic}}" 
-              analytics-event="Map View"
-              class = "btn btn-primary" > 
-                <i class="fa fa-lg fa-map-marker fa-fw"></i> Map
-            </button>
+            <!-- FILTER DROPDOWN -->
             <div ng-if = "topicParams.view === 'list' || (topicParams.view === 'map' || topic.summary !== undefined)" class="btn-group" role="group" >
               <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
                   Filter
@@ -97,83 +67,43 @@
                   </li>
               </ul>
             </div>
-            <!-- <button type="button" class="btn btn-primary" data-toggle = "tooltip" title = "Share"><i class="fa fa-lg fa-share"></i></button> -->
+            <!-- DOWNLOAD BUTTON -->
             <button ng-click = "openDownloadModal()" type="button" class="btn btn-primary" data-toggle = "tooltip" title = "Download"><i class="fa fa-lg fa-cloud-download" ></i> Download</button>
           </div>
           <div ng-if = "stateParams.type !== null" class="col-xs-12">
             <h5 class = "text-muted">Filtered by <strong >{{stateParams.type}}</strong></h5>
           </div>
-          
         </div>
+
+
+        <!-- XS SCREEN SIZE -->
         <div class="visible-xs" style = "text-align : center; width : 100%">
-          <h2 ng-if = "stateParams.view === 'details'">Details View </h2>
-          <h2 ng-if = "stateParams.view === 'list'">List View </h2>
-          <h2 ng-if = "stateParams.view === 'table'">Table View </h2>
-          <h2 ng-if = "stateParams.view === 'map'">Map View </h2>
+          <h2 class = "pull-left" style = "margin-right : 10px">{{topicProperties.views[stateParams.view].label}} View </h2>
           <div class="btn-group" role="group" aria-label="..." style= "margin-top : 15px">
             <div class="btn-group" role="group" >
+              <!-- CHANGE VIEW DROPDOWN -->
               <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
                   Change View
                   <span class="caret"></span>
               </button>
               <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
                   <li 
-                    ng-if = "topicProperties.detailsViewTemplate" 
-                    ng-class = "{'active' : stateParams.view === 'details'}" 
-                    ng-click = "onClickChangeView('details')"
+                    ng-repeat = "view in topicProperties.searchby[stateParams.searchby].params.validViews"
+                    ng-class = "{'active' : stateParams.view === view}"
+                    ng-click = "onClickChangeView(view)"
                     analytics-on ="click" 
                     analytics-category="Topic View" 
                     analytics-label="{{stateParams.topic}}" 
-                    analytics-event="Detail View"
+                    analytics-event="{{topicProperties.views[view].label}} View"
                     class = "text-primary" 
                     role="presentation">
                     <a role="menuitem" tabindex="-1">
-                      <i class="fa fa-lg fa-th fa-fw"></i> Details
-                    </a>
-                  </li>
-                  <li 
-                    ng-if = "topicProperties.listViewTemplate" 
-                    ng-class = "{'active' : stateParams.view === 'list'}" 
-                    ng-click = "onClickChangeView('list')"
-                    analytics-on ="click" 
-                    analytics-category="Topic View" 
-                    analytics-label="{{stateParams.topic}}" 
-                    analytics-event="List View"
-                    class = "text-primary" 
-                    role="presentation">
-                    <a role="menuitem" tabindex="-1">
-                      <i class="fa fa-lg fa-list-alt fa-fw"></i> List
-                    </a>
-                  </li>
-                  <li 
-                    ng-if = "topicProperties.tableViewTemplate" 
-                    ng-class = "{'active' : stateParams.view === 'table'}"
-                    ng-click = "onClickChangeView('table')"
-                    analytics-on ="click" 
-                    analytics-category="Topic View" 
-                    analytics-label="{{stateParams.topic}}" 
-                    analytics-event="Table View"
-                    class = "text-primary" 
-                    role="presentation">
-                    <a role="menuitem" tabindex="-1">
-                      <i class="fa fa-lg fa-table fa-fw"></i> Table
-                    </a>
-                  </li>
-                  <li 
-                    ng-class = "{'active' : stateParams.view === 'map'}"
-                    ng-click = "onClickChangeView('map')"
-                    analytics-on ="click" 
-                    analytics-category="Topic View" 
-                    analytics-label="{{stateParams.topic}}" 
-                    analytics-event="Map View"
-                    class = "text-primary"  
-                    role="presentation">
-                    <a role="menuitem" tabindex="-1">
-                      <i class="fa fa-lg fa-map-marker fa-fw"></i> Map
+                      {{topicProperties.views[view].label}}
                     </a>
                   </li>
               </ul>
             </div>
+            <!-- FILTER DROPDOWN -->
             <div ng-if = "topicParams.view === 'list' || (topicParams.view === 'map' || topic.summary !== undefined)" class="btn-group" role="group" >
               <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
                   Filter
@@ -200,137 +130,132 @@
           </div>
           <div class="col-xs-12" style = "height : 10px"></div>
         </div>
-
-
       </div>
+
+      <!-- VIEWS -->
+
+
       <!-- simple -->
       <div 
-        ng-if = "topicPropteries.simpleViewTemplate !== null" 
+        ng-if = "topicPropteries.viewTemplates.simple !== null" 
         ng-show = "stateParams.view === 'simple'" 
-        ng-include = "topicProperties.simpleViewTemplate">
+        ng-include = "topicProperties.views.simple.template">
       </div>
 
       <!-- details -->
       <div 
-        ng-if = "topicPropteries.detailsViewTemplate !== null" 
+        ng-if = "topicPropteries.viewTemplates.details !== null" 
         ng-show = "stateParams.view === 'details'" 
-        ng-include = "topicProperties.detailsViewTemplate">
+        ng-include = "topicProperties.views.details.template">
       </div>
 
       <!-- list -->
       <div 
-        ng-if = "topicPropteries.listViewTemplate !== null" 
+        ng-if = "topicPropteries.viewTemplates.list !== null" 
         ng-show = "stateParams.view === 'list'" 
-        ng-include = "topicProperties.listViewTemplate">
+        ng-include = "topicProperties.views.list.template">
       </div>
 
       <!-- table -->
       <div 
-        ng-if = "topicPropteries.tableViewTemplate !== null" 
-        ng-show = "stateParams.view === 'table'" 
-        ng-include = "topicProperties.tableViewTemplate">
+        ng-if = "topicPropteries.viewTemplates.summary !== null" 
+        ng-show = "stateParams.view === 'summary'" 
+        ng-include = "topicProperties.views.summary.template">
       </div>
       <div>
-        <!-- map -->
-        <div 
-          ng-show = "stateParams.view === 'map'"
-          class = "col-xs-12" 
-          style = "height : 400px; margin-bottom : 20px" 
-          id="map">
-          <div ng-if = "topic.summary.table !== undefined">
-           <!--  <div  ng-init = "showLegend = true" ng-show = "!showLegend" ng-click = "showLegend = !showLegend" style = "position : absolute; top : 50px; right : 10px; height : 36px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7">
-              
-              
-            </div> -->
-            <button ng-init = "showLegend = true" ng-show = "!showLegend" ng-click = "showLegend = !showLegend" class="btn btn-primary btn-sm" style = "position : absolute; top : 50px; right : 10px;z-index : 7">Legend <i  class="fa fa-expand " ></i></button>
-            <div ng-show = "showLegend" style = "position : absolute; top : 50px; right : 10px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7">
-              <div class="col-xs-12" >
-                <h4 class="pull-left">Legend</h4>
-                <button ng-click = "showLegend = !showLegend" class="btn btn-primary btn-sm pull-right" style = "margin-top : 5px"><i class = "fa fa-times" ></i></button>
-              </div>
-              
-              <table ng-if = "topic.features.length !== 0" class="table table-hover" >
-                <tbody>
-                  <tr ng-repeat = "(key, value) in topic.summary.table">
-                    <td ng-click = "getDetails(key)" style = "cursor : pointer">
-                      <i class="fa fa-circle" style = "color: #{{value.color}}"></i> {{key}}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
+      <!-- map -->
+      <div 
+        ng-show = "stateParams.view === 'map'"
+        class = "col-xs-12" 
+        style = "height : 400px; margin-bottom : 20px" 
+        id="map">
+        <div ng-if = "topic.summary.table !== undefined">
+          <button ng-init = "showLegend = true" ng-show = "!showLegend" ng-click = "showLegend = !showLegend" class="btn btn-primary btn-sm" style = "position : absolute; top : 50px; right : 10px;z-index : 7">Legend <i  class="fa fa-expand " ></i></button>
+          <div ng-show = "showLegend" style = "position : absolute; top : 50px; right : 10px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7">
+            <div class="col-xs-12" >
+              <h4 class="pull-left">Legend</h4>
+              <button ng-click = "showLegend = !showLegend" class="btn btn-primary btn-sm pull-right" style = "margin-top : 5px"><i class = "fa fa-times" ></i></button>
             </div>
+            
+            <table ng-if = "topic.features.length !== 0" class="table table-hover" >
+              <tbody>
+                <tr ng-repeat = "(key, value) in topic.summary.table">
+                  <td ng-click = "getDetails(key)" style = "cursor : pointer">
+                    <i class="fa fa-circle" style = "color: #{{value.color}}"></i> {{key}}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
           </div>
         </div>
-        <!-- DETAILS MODAL -->
-        <div id = "detailsModal" class="modal fade" >
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button ng-click = "closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Location Details</h4>
-              </div>
-              <div class="modal-body" >
-                <div ng-include = "topicProperties.listViewTemplate"></div>
-              </div>
-            </div><!-- /.modal-content -->
-          </div><!-- /.modal-dialog -->
-        </div><!-- /.modal -->
       </div>
+      <!-- DETAILS MODAL -->
+      <div id = "detailsModal" class="modal fade" >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button ng-click = "closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Location Details</h4>
+            </div>
+            <div class="modal-body" >
+              <div ng-include = "topicProperties.views.list.template"></div>
+            </div>
+          </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
     </div>
+  </div>
 
-    <!-- RELATED LINKS -->
-    <div ng-if = "linkTopics.length > 0" class="col-xs-12 list-item-panel" style = "margin-top : 30px">
-      <h2>Related Links</h2>
-      <div class="list-group" style = "margin-top : 20px">
-        <a class="row list-group-item list-item-panel" analytics-category="Related Link" analytics-label="{{stateParams.topic}}" analytics-event="{{linkTopic.linkTo}}" href = '{{linkTopic.linkTo}}' style = "margin-bottom : 5px" ng-repeat = "linkTopic in linkTopics">
-          <!-- mobile -->
-          <span class="visible-xs col-xs-8"><p class="text-primary text-center"> {{linkTopic.question}}</p></span>
-          <i ng-class="linkTopic.iconClass" class = "visible-xs pull-left col-xs-3 text-primary" ></i>
-          <div ng-class="linkTopic.iconClass" class = "hidden-xs col-sm-2 text-primary" ></div>
-          <!-- desktop -->
-          <h4 class="hidden-xs col-sm-9 text-primary" style = "margin-top : 20px">{{linkTopic.question}}</h4>
-          <h4 class="col-sm-1 hidden-xs"><i  class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4>
-        </a>
-      </div>
-      <div class="col-xs-12 text-center">
-        List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a>
-     under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.
-      </div>
+  <!-- RELATED LINKS -->
+  <div ng-if = "linkTopics.length > 0" class="col-xs-12 list-item-panel" style = "margin-top : 30px">
+    <h2>Related Links</h2>
+    <div class="list-group" style = "margin-top : 20px">
+      <a class="row list-group-item list-item-panel" analytics-category="Related Link" analytics-label="{{stateParams.topic}}" analytics-event="{{linkTopic.linkTo}}" href = '{{linkTopic.linkTo}}' style = "margin-bottom : 5px" ng-repeat = "linkTopic in linkTopics">
+        <!-- mobile -->
+        <span class="visible-xs col-xs-8"><p class="text-primary text-center"> {{linkTopic.question}}</p></span>
+        <i ng-class="linkTopic.iconClass" class = "visible-xs pull-left col-xs-3 text-primary" ></i>
+        <div ng-class="linkTopic.iconClass" class = "hidden-xs col-sm-2 text-primary" ></div>
+        <!-- desktop -->
+        <h4 class="hidden-xs col-sm-9 text-primary" style = "margin-top : 20px">{{linkTopic.question}}</h4>
+        <h4 class="col-sm-1 hidden-xs"><i  class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4>
+      </a>
     </div>
+    <div class="col-xs-12 text-center">
+      List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a>
+   under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.
+    </div>
+  </div>
 
-    
 
-
-    <!-- DOWNLOAD MODAL -->
-    <div id = "downloadModal" class="modal fade" style = "z-index : 3000">
-      <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            <h4 class="modal-title">Download</h4>
+  <!-- DOWNLOAD MODAL -->
+  <div id = "downloadModal" class="modal fade" style = "z-index : 3000">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          <h4 class="modal-title">Download</h4>
+        </div>
+        <div class="modal-body">
+          <div ng-if= "stateParams.topic === 'property'">
+            <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Property Details <i class="fa fa-cloud-download"></i></button>
           </div>
-          <div class="modal-body">
-            <div ng-if= "stateParams.topic === 'property'">
-              <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Property Details <i class="fa fa-cloud-download"></i></button>
-            </div>
-            <div ng-if = "stateParams.topic === 'crime' || stateParams.topic === 'development'">
-              <button class="btn btn-primary col-xs-12" ng-click = "download('summary', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="summary" analytics-event="{{stateParams.topic}}">Summary Table <i class="fa fa-cloud-download"></i></button>
-              <button class="btn btn-primary col-xs-12" style = "margin-top : 3px" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Detailed records <i class="fa fa-cloud-download"></i></button>
-              <p class = "text-muted text-center">based on selected filters</p>
-            </div>
-            <div ng-if= "stateParams.topic === 'zoning'">
-              <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Zoning Data <i class="fa fa-cloud-download"></i></button>
-            </div>
-            <div ng-if= "stateParams.topic === 'addresslist'">
-              <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Address List <i class="fa fa-cloud-download"></i></button>
-            </div>
-            <div ng-if= "stateParams.topic === 'streetmaintenance'">
-              <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Street Details <i class="fa fa-cloud-download"></i></button>
-            </div>
+          <div ng-if = "stateParams.topic === 'crime' || stateParams.topic === 'development'">
+            <button class="btn btn-primary col-xs-12" ng-click = "download('summary', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="summary" analytics-event="{{stateParams.topic}}">Summary Table <i class="fa fa-cloud-download"></i></button>
+            <button class="btn btn-primary col-xs-12" style = "margin-top : 3px" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Detailed records <i class="fa fa-cloud-download"></i></button>
+            <p class = "text-muted text-center">based on selected filters</p>
           </div>
-        </div><!-- /download modal-content -->
-      </div><!-- /download modal-dialog -->
-    </div><!-- /download modal -->
-    
+          <div ng-if= "stateParams.topic === 'zoning'">
+            <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Zoning Data <i class="fa fa-cloud-download"></i></button>
+          </div>
+          <div ng-if= "stateParams.topic === 'addresslist'">
+            <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Address List <i class="fa fa-cloud-download"></i></button>
+          </div>
+          <div ng-if= "stateParams.topic === 'streetmaintenance'">
+            <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Street Details <i class="fa fa-cloud-download"></i></button>
+          </div>
+        </div>
+      </div><!-- /download modal-content -->
+    </div><!-- /download modal-dialog -->
+  </div><!-- /download modal -->  
 </div>
