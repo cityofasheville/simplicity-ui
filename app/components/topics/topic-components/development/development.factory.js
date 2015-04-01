@@ -1,5 +1,5 @@
-simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stateParams', 'AddressCache', 'simplicityBackend', 'TimeFrame','COLORS',
-  function($http, $location, $q, $filter, $stateParams, AddressCache, simplicityBackend, TimeFrame, COLORS){   
+simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stateParams', 'AddressCache', 'simplicityBackend', 'TimeFrame','COLORS', 'DESCRIPTIONS',
+  function($http, $location, $q, $filter, $stateParams, AddressCache, simplicityBackend, TimeFrame, COLORS, DESCRIPTIONS){   
 
     var Development = {};
 
@@ -73,11 +73,12 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
       for (var i = 0; i < development.features.length; i++) {
       
         //set color by record_type
-        development.features[i].properties.color = COLORS.development[development.features[i].properties.record_type];          
+        development.features[i].properties.color = COLORS.development[development.features[i].properties.record_type];    
+        development.features[i].properties.description = DESCRIPTIONS.development[development.features[i].properties.record_type];       
         //build a summary object
         if(filteredFeaturesSummary.table[development.features[i].properties.record_type] === undefined){
 
-          filteredFeaturesSummary.table[development.features[i].properties.record_type] = {'color' : COLORS.development[development.features[i].properties.record_type], 'count' : 1 };
+          filteredFeaturesSummary.table[development.features[i].properties.record_type] = {'color' : COLORS.development[development.features[i].properties.record_type], 'count' : 1, 'description' : DESCRIPTIONS.development[development.features[i].properties.record_type]};
 
         }else{
           filteredFeaturesSummary.table[development.features[i].properties.record_type].count = filteredFeaturesSummary.table[development.features[i].properties.record_type].count + 1;

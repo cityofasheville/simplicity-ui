@@ -12,6 +12,9 @@
           <span ng-if = "feature.properties.unit_number !== null"> Unit {{feature.properties.unit_number}}</span>
         </h2>
       </div>
+      <div class="col-xs-12">
+        <a target = "_blank" href="{{feature.properties.googleDirectionsLink}}">Google Maps Directions</a>
+      </div>
       <div class="col-xs-12 col-sm-6">
         <h4><strong class = "text-muted">Civic Address Id</strong> : <span>{{feature.properties.civicaddress_id}}</span></h4>
         <h4><strong class = "text-muted">PIN</strong> : <span>{{feature.properties.pinnum}}</span></h4>

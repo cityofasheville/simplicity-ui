@@ -8,6 +8,8 @@
 	<div class="col-xs-12">
 		<h3 class = 'hidden-xs'><strong class = "text-muted">{{feature.properties.offense}}</strong></h3>
 		<h3 class = 'visible-xs text-center'><strong class = "text-muted">{{feature.properties.offense}}</strong></h3>
+		<p class="text-muted">{{feature.properties.description}}</p>
+    <a ng-if = "stateParams.view !== 'map'" ng-click = "onChangeMapCenter(feature.properties, feature.properties.x, feature.properties.y)">Zoom to this crime on the map</a>
 		<hr>
 		<div class="col-xs-12 col-sm-6">
 			<h4 class = 'pull-left hidden-xs'>{{feature.properties.address}}</h4>

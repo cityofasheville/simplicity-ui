@@ -7,6 +7,9 @@
 <div ng-repeat = "feature in topic.features | orderBy:'-properties.thedate' | filter:filterText" class="col-xs-12 list-item-panel" style = "margin-bottom : 20px">
 	<h3 class = 'text-center text-muted'><strong>{{feature.properties.record_type}}</strong></h3>
 	<h3 class = 'text-center'>{{feature.properties.address}}</h3>
+	<a ng-if = "stateParams.view !== 'map'" ng-click = "onChangeMapCenter(feature.properties, feature.properties.longitude, feature.properties.latitude)"><p class="text-center">Zoom to this development on the map</p></a>
+	<p class = "text-muted text-center">{{feature.properties.description}}</p>
+
 	<div class="col-xs-12">
 		<h4 class="col-xs-12 col-sm-4 text-center">
 			<strong class = "text-muted">Opened</strong>
@@ -21,9 +24,7 @@
 			<p>{{feature.properties.record_status}}</p>
 		</h4>
 	</div>
-	<h4 class="col-xs-12">
-		<p><strong class = "text-muted">Description: </strong> {{feature.properties.description}}</p>
-	</h4>
+
 	<div class = "col-xs-12 list-item-panel" ng-init = 'showMore = false' ng-show = 'showMore'>
 		<div class="col-xs-12">
 			<h4 class="col-sm-6 text-center">

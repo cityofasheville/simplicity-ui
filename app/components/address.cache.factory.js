@@ -105,7 +105,6 @@ simplicity.factory('AddressCache', ['$http', '$q', '$stateParams', 'simplicityBa
               //Do nothing
             }
           }
-          console.log(addressCache);
           q.resolve(addressCache);
           
         });

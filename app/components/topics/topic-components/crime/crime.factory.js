@@ -1,5 +1,5 @@
-simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParams', 'AddressCache', 'simplicityBackend', 'TimeFrame', 'COLORS',
-  function($http, $location, $q, $filter, $stateParams, AddressCache, simplicityBackend, TimeFrame, COLORS){   
+simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParams', 'AddressCache', 'simplicityBackend', 'TimeFrame', 'COLORS', 'DESCRIPTIONS',
+  function($http, $location, $q, $filter, $stateParams, AddressCache, simplicityBackend, TimeFrame, COLORS, DESCRIPTIONS){   
 
     var Crime = {};
 
@@ -73,10 +73,11 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
       for (var i = 0; i < crimes.features.length; i++) {
         //set color by offense
         crimes.features[i].properties.color = COLORS.crime[crimes.features[i].properties.offense]; 
+        crimes.features[i].properties.description = DESCRIPTIONS.crime[crimes.features[i].properties.offense]; 
         //build a summary object
         if(filteredFeaturesSummary.table[crimes.features[i].properties.offense] === undefined){
 
-          filteredFeaturesSummary.table[crimes.features[i].properties.offense] = {'color' : COLORS.crime[crimes.features[i].properties.offense], 'count' : 1 };
+          filteredFeaturesSummary.table[crimes.features[i].properties.offense] = {'color' : COLORS.crime[crimes.features[i].properties.offense], 'count' : 1, 'description' : DESCRIPTIONS.crime[crimes.features[i].properties.offense]};
 
         }else{
           filteredFeaturesSummary.table[crimes.features[i].properties.offense].count = filteredFeaturesSummary.table[crimes.features[i].properties.offense].count + 1;
