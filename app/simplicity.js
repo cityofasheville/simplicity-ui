@@ -33,7 +33,7 @@ simplicity.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
           controller : 'TopicListCtrl'
         })
         .state('main.topics.topic', {
-          url: '/:topic?searchtext&searchby&id&view&timeframe&extent&type',
+          url: '/:topic?searchtext&searchby&id&view&timeframe&extent&type&mapcenter',
           templateUrl: 'topics/topic-single/topic.single.html',
           controller: 'TopicSingleCtrl'
         });

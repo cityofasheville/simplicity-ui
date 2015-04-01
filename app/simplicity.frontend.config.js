@@ -47,6 +47,42 @@ angular.module('simplicity.frontend.config', [])
         {'value' : 'all-time', 'label' : 'all time'}
       ]
     })
+  .constant('DESCRIPTIONS', {
+      'crime' : {
+        'Aggravated Assault' : 'The unlawful attack by one person upon another for the purpose of inflicting severe bodily harm.',
+        'Burglary' : 'The unlawful entry of a structure to commit a felony or theft.',
+        'Drug Arrest' : 'State and/or local offenses relating to the unlawful possession, sale, use, growing, manufacturing, and making of narcotic drugs including opium or cocaine and their derivatives, marijuana, synthetic narcotics, and dangerous nonnarcotic drugs such as barbiturates.',
+        'Homicide' : 'The willful (nonnegligent) killing of one human being by another.',
+        'Larceny' : 'The unlawful taking or stealing of property without the use of force, violence, or fraud.',
+        'Larceny of Motor Vehicle' : 'The unlawful taking or stealing of a motor vehicle, including attempts.',
+        'Rape' : 'The carnal knowledge of a female forcibly and against her will.',
+        'Robbery' : 'The taking or attempting to take anything of value by force or threat.',
+        'Vandalism' : 'The malicious destruction, injury, disfigurement or defacement of real or personal property.'
+      },
+      'development' : {
+        'Conditional Use Permit':'All Level III projects or use is determined to require a conditional use permit by the zoning district where it is located.',
+        'Conditional Zoning Permit':'Changing the zoning of a property for a specific site plan and specific use.',
+        'Planning Level I':'Commercial construction less than 35,000 square feet or less than 20 multi-family units; Level I permits are reviewed at the city staff level.',
+        'Planning Level II':'Commercial construction 35,000-100,000 square feet or 20-50 multi-family units; Level II projects are reviewed by city staff, the Technical Review Committee (TRC), and the Planning and Zoning Commission.',
+        'Planning Level III':'Commercial construction larger than 100,000 square feet or more than 50 multi-family units; Level III projects are reviewed by city staff, the Technical Review Committee (TRC), the Planning and Zoning Commission and Asheville City Council.',
+        'Planning Signage Plan':''
+      }
+    })
+  .constant('STREET_MAINTENANCE_CONTACTS', {
+      'NCDOT' : 'https://apps.dot.state.nc.us/contactus/PostComment.aspx?Unit=PIO',
+      'CITY OF ASHEVILLE' : 'http://www.ashevillenc.gov/Departments/StreetServices/StreetMaintenance.aspx',
+      'PRIVATE' : null,
+      'UNKNOWN' : null,
+      'NATIONAL PARK SERVICE' : 'http://www.nps.gov/blri/contacts.htm'
+    })
+  .constant('STREET_MAINTENANCE_CITIZEN_SERVICE_REQUESTS', {
+      'NCDOT' : {'brand' : null, 'url' : null},
+      'CITY OF ASHEVILLE' : {'brand' : "The Asheville App", 'url' : 'http://www.ashevillenc.gov/Departments/ITServices/OnlineServices/CitizenServiceRequests.aspx'},
+      'PRIVATE' : {'brand' : null, 'url' : null},
+      'UNKNOWN' : {'brand' : null, 'url' : null},
+      'NATIONAL PARK SERVICE' : {'brand' : null, 'url' : null},
+    })
+  //These are the correct zoning code links for asheville, the ones in the database are wrong
   .constant('CODELINKS', {
       'CBD' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-18CEBUDI',
       'CBI' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-12COBUIDI',

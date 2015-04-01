@@ -14,6 +14,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'type' : null,
             'timeframe' : null,
             'extent' : null,
+            'centermap' : null,
             'defaultView' : 'details',
             'validViews' : ['details', 'map']
           },
@@ -24,6 +25,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'type' : null,
             'timeframe' : null,
             'extent' : null,
+            'centermap' : null,
             'defaultView' : 'list',
             'validViews' : ['list', 'map']
           },
@@ -34,6 +36,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'type' : null,
             'timeframe' : null,
             'extent' : null,
+            'centermap' : null,
             'defaultView' : 'details',
             'validViews' : ['details', 'map']
           },
@@ -44,6 +47,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'type' : null,
             'timeframe' : null,
             'extent' : null,
+            'centermap' : null,
             'defaultView' : 'list',
             'validViews' : ['list', 'map']
           },
@@ -120,11 +124,11 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
           
         }else if($stateParams.searchby === 'pinnum' || $stateParams.searchby === 'owner_name' || $stateParams.searchby === 'street_name'){
           property.features[p].properties.civicaddress_id = pinnum2civicaddressid[property.features[p].properties.pinnum];
-          console.log(property.features[p].properties.civicaddress_id);
           if(addressCache.zoning){
             property.features[p].properties.zoning = formatZoningPropertyForMultipleAddressess(property.features[p].properties.civicaddress_id);
           }          
         }
+        property.features[p].properties.googleDirectionsLink = "http://www.google.com/maps/dir/" + property.features[p].properties.center_y + "," + property.features[p].properties.center_x;
         property.features[p].properties.color = '035096';
         property.features[p].properties.zoningOverlays = addressCache.zoningOverlays;
         

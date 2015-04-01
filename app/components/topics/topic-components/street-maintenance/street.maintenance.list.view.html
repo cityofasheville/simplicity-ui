@@ -1,4 +1,7 @@
 <div ng-repeat = "feature in topic.features | filter:filterText" class="col-xs-12 list-item-panel" style = "margin-bottom : 20px">
+  <div ng-if = "stateParams.view !== 'map'" class="col-xs-12 text-center">
+    <a clas = "pull-right" ng-click = "onChangeMapCenter(feature.properties, feature.properties.center_x, feature.properties.center_y)">Zoom to this centerline on the map</a>
+  </div>
   <div class="col-sm-6 col-xs-12">
     <h5 class="text-center">Name</h5>
     <h4 class = "text-muted text-center" style = "margin-top : 20px; margin-botton : 20px">
@@ -13,8 +16,30 @@
     </h4>
   </div>
   
-  <h5 class="text-center">Responsibility</h5>
-   <h2 class = "text-muted text-center" style = "margin-top : 20px; margin-botton : 20px">
+
+  
+  <div class="col-xs-12">
+  <h5 class="col-xs-12 text-center">Responsibility</h5>
+  <h2 ng-if = "feature.properties.street_responsibility_contact === null" class = "text-muted text-center" style = "margin-top : 20px; margin-botton : 20px">
     <strong>{{feature.properties.street_responsibility}}</strong>
   </h2>
+  <a ng-if = "feature.properties.street_responsibility_contact !== null" target = "_blank" href="{{feature.properties.street_responsibility_contact}}">   
+    <h2 class = "text-center" style = "margin-top : 20px;">
+      <strong>{{feature.properties.street_responsibility}}</strong>
+    </h2>
+  </a>
+  <a ng-if = "feature.properties.street_responsibility_contact !== null" target = "_blank" href="{{feature.properties.street_responsibility_contact}}">
+    <h4 class = "text-center" style = "margin-botton : 20px">
+      Click here to contact the maintanace authority
+    </h4>
+  </a>
+  <a ng-if = "feature.properties.street_responsibility_citizen_service_requests.brand !== null" target = "_blank" href="{{feature.properties.street_responsibility_citizen_service_requests.url}}">
+    <h4 class = "text-center" style = "margin-botton : 20px">
+      Or click here to make citizen service request using the {{feature.properties.street_responsibility_citizen_service_requests.brand}}
+    </h4>
+  </a>
+  </div>
+
+
+
 </div>

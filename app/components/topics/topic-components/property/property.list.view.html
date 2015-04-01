@@ -14,6 +14,15 @@
           </h2>
         </a>
       </div>
+      <div class="col-xs-12">
+        <div class="col-md-6">
+          <a target = "_blank" href="{{feature.properties.googleDirectionsLink}}">Google Maps Directions</a>
+        </div>
+        <div ng-if = "stateParams.view !== 'map'" class="col-md-6">
+          <a ng-click = "onChangeMapCenter(feature.properties, feature.properties.center_x, feature.properties.center_y)">Zoom to this property on the map</a>
+        </div>
+        
+      </div>
       <div class="col-xs-12 col-sm-6">
         <h4><strong class = "text-muted">Civic Address Id</strong> : <span>{{feature.properties.civicaddress_id}}</span></h4>
         <h4><strong class = "text-muted">PIN</strong> : <span>{{feature.properties.pinnum}}</span></h4>

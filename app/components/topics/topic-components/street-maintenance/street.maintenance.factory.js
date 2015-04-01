@@ -1,5 +1,5 @@
-simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', 'simplicityBackend', 'COLORS',
-  function($q, $stateParams, AddressCache, simplicityBackend, COLORS){   
+simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', 'simplicityBackend', 'COLORS', 'STREET_MAINTENANCE_CONTACTS', 'STREET_MAINTENANCE_CITIZEN_SERVICE_REQUESTS',
+  function($q, $stateParams, AddressCache, simplicityBackend, COLORS, STREET_MAINTENANCE_CONTACTS, STREET_MAINTENANCE_CITIZEN_SERVICE_REQUESTS){   
 
     var StreetMaintenance = {};
 
@@ -56,9 +56,13 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
                 if(streetResults.features[i].properties.street_responsibility === 'UNKOWN'){
                   streetResults.features[i].properties.street_responsibility = 'UNKNOWN';
                 }
+
                 if(!streetMaintenanceColors[streetResults.features[i].properties.street_responsibility]){
                   streetMaintenanceColors[streetResults.features[i].properties.street_responsibility] = COLORS.streetmaintenance[streetResults.features[i].properties.street_responsibility];
                 }
+                streetResults.features[i].properties.street_responsibility_contact = STREET_MAINTENANCE_CONTACTS[streetResults.features[i].properties.street_responsibility];
+                streetResults.features[i].properties.street_responsibility_citizen_service_requests = STREET_MAINTENANCE_CITIZEN_SERVICE_REQUESTS[streetResults.features[i].properties.street_responsibility];
+
                 streetResults.features[i].properties.color = COLORS.streetmaintenance[streetResults.features[i].properties.street_responsibility].color;
                 streetFeaturesArray.push(streetResults.features[i]);
               }
@@ -71,6 +75,7 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
                 'searchGeojson' : addressCache.searchGeojson,
                 'features' : streetFeaturesArray
               };
+              console.log(geojson);
               q.resolve(geojson);
           });
         return q.promise;
