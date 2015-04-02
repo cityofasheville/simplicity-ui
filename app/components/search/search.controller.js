@@ -1,5 +1,5 @@
-simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'simplicityBackend',
- function ($scope, $stateParams, $state, $timeout, simplicityBackend) {
+simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'simplicityBackend', 'Topics',
+ function ($scope, $stateParams, $state, $timeout, simplicityBackend, Topics) {
     var getType = function(unformattedType){
         var nameKey = {
             'street_name' : 'street',
@@ -12,6 +12,8 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
         return nameKey[unformattedType];
     };
 
+    $('#searchContent').css({'minHeight' : $(window).height()});
+
     $("#addressSearch").focus();
     $scope.searchText = '';
 
@@ -23,6 +25,21 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
         show : false,
         message : 'Please choose one of the options below.'
     };
+
+    $scope.discoverText = "places";
+    $scope.searchFor = "an address, street, neighborhood, or property";
+
+    var topicProperties = {};
+
+    $scope.showTopicsLink = true;
+
+    //if a topic is defined we want to show topic specific text
+    if($stateParams.topic !== null){
+        topicProperties = Topics.topicProperties();
+        $scope.showTopicsLink = false;
+        $scope.discoverText = topicProperties.plural;
+        $scope.searchFor = topicProperties.searchForText;
+    }
 
 
 
@@ -48,11 +65,24 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
         //Search usign searchText
         simplicityBackend.simplicitySearch(searchText)
             .then(function(searchResults){
+                console.log(searchResults);
                 if(searchText === ""){
                     $scope.searchGroups = [];
                 }else{
                     if(searchResults.length !== 0){
-                        $scope.searchGroups = searchResults;   
+                        if($stateParams.topic !== null){
+                            for (var i = searchResults.length - 1; i >= 0; i--) {
+
+                                if(topicProperties.searchby[searchResults[i].name] === undefined){
+                                    console.log(searchResults[i].name);
+                                    searchResults.splice(i, 1);
+                                }
+                            };
+                            $scope.searchGroups = searchResults; 
+                        }else{
+                           $scope.searchGroups = searchResults; 
+                        }
+                           
                     }
                 } 
             });
@@ -63,6 +93,8 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
         $scope.searchGroups = []; 
         }, 100); 
     };
+
+
 
 
 
@@ -82,8 +114,12 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
         if(candidate.type === 'civicaddressid'){
             candidate.type = "address";
         }
-
-        $state.go('main.topics.list', {'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});
+        if($stateParams.topic !== null){
+            $state.go('main.topics.topic', {'topic' : $stateParams.topic, 'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});
+        }else{
+          $state.go('main.topics.list', {'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});  
+        }
+        
     };
 
 

@@ -1,8 +1,8 @@
-<div ui-view></div><div style = "min-height : 1000px">
-  <div class = "col-xs-12">
-
-     <p class=" text-muted text-center lead" style = "margin-bottom : 0px; margin-top : 20px">Discover <a ng-init = "showCityDataDef = false" ng-click = "showCityDataDef = !showCityDataDef">city data</a> about places in your community.</p>
-     <p class=" text-muted text-center lead">Search for an address, street, neighborhood, or property to get started!</p>
+<div ui-view></div>
+<div id = "searchContent">
+  <div class = "col-xs-12" style = "margin-top : 20px">
+     <p class=" text-muted text-center lead" style = "margin-bottom : 0px; margin-top : 20px">Discover city data about <strong>{{discoverText}}</strong> in your community.</p>
+     <p class=" text-muted text-center lead">Search for {{searchFor}} to get started!</p>
   </div>
   <div class="col-xs-12">
     <div class="input-group">
@@ -58,20 +58,16 @@
     </div>
     <p ng-show = "errorMessage.show" class="text-danger">{{errorMessage.message}}</p>
   </div>
-  <div class="col-xs-12">
+  <div ng-show = "showTopicsLink" class = "col-xs-12 col-md-6 col-md-offset-3 text-center well" style = "margin-top : 60px; margin-bottom : 40px; background : #fff; border : 2px solid #ecf0f1">
+      <h4 class = "text-info">Not sure what you can find with SimpliCity?</h4>
+      <a href="#/topics/list"><h2>Click here to view topics</h2></a>
+  </div>
+  <div style = "position : absolute; bottom : 0px; width : 100%">
     <h4 class="text-primary text-center">
       Brought to you by the 
       <a href="http://www.ashevillenc.gov/" target = "_blank">City of Asheville </a>
       <i class="fa fa-smile-o"></i>
     </h4>
-  </div>
-  <div class="col-xs-12" style = "margin-top : 100px">
-    <div class="well col-xs-12 col-md-6 col-md-offset-3" ng-if = "showCityDataDef">
-      <p class = "lead">city data</p>
-      <p style = "font-family : Times New Roman"><strong>\ˈsi-tē ˈdā-tə\</strong> </p>
-      <p style = "font-family : Times New Roman">City data is just information about your city. It includes information about properties, trash collection, recycling pickup, crimes, development, who's responsible for fixing the street in front of your house, and more. At the City of Asheville we are working to provide you with better access to data in your city through SimpliCity!</p>
-      
-    </div>
   </div>
 
   

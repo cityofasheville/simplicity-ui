@@ -6,7 +6,9 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
 
     var topicProperties = {
       'name' : 'property',
+      'plural' : 'properties',
       'title' : 'Property',
+      'searchForText' : 'an address, street, owner, or PIN',
       'position' : 1,
       'searchby' : {
         'address' : {
@@ -128,7 +130,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             property.features[p].properties.zoning = formatZoningPropertyForMultipleAddressess(property.features[p].properties.civicaddress_id);
           }          
         }
-        property.features[p].properties.googleDirectionsLink = "http://www.google.com/maps/dir/" + property.features[p].properties.center_y + "," + property.features[p].properties.center_x;
+        property.features[p].properties.googleDirectionsLink = "http://maps.google.com/maps?daddr=" + property.features[p].properties.center_y + "," + property.features[p].properties.center_x;
         property.features[p].properties.color = '035096';
         property.features[p].properties.zoningOverlays = addressCache.zoningOverlays;
         

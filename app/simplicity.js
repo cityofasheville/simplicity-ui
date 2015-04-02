@@ -18,7 +18,7 @@ simplicity.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
         controller: 'MainCtrl'
       })
       .state('main.search', {
-        url: '/search',
+        url: '/search?topic',
         templateUrl: 'search/search.html',
         controller: 'SearchCtrl'
       })

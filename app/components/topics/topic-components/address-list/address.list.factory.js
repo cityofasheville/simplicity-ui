@@ -6,6 +6,8 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
     var topicProperties = {
       'name' : 'addresslist',
       'title' : 'Address List',
+      'plural' : 'address lists',
+      'searchForText' : 'a street or a neighborhood',
       'position' : 8,
       'searchby' : {
         'street_name' : {

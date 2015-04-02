@@ -6,6 +6,8 @@ simplicity.factory('Trash', ['$q', '$stateParams', 'AddressCache',
     var topicProperties = {
       'name' : 'trash',
       'title' : 'Trash Collection',
+      'plural' : 'trash collection',
+      'searchForText' : 'an address',
       'position' : 4,
       'searchby' : {
         'address' : {

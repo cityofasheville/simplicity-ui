@@ -6,6 +6,8 @@ simplicity.factory('Zoning', ['$q', '$stateParams', 'AddressCache', 'simplicityB
     var topicProperties = {
       'name' : 'zoning',
       'title' : 'Zoning',
+      'plural' : 'zoning',
+      'searchForText' : 'an address',
       'position' : 6,
       'searchby' : {
         'address' : {
