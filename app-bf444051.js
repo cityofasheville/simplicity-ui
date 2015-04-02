@@ -888,7 +888,7 @@ simplicity.config(["$stateProvider", "$urlRouterProvider", "$httpProvider", func
         controller: 'MainCtrl'
       })
       .state('main.search', {
-        url: '/search',
+        url: '/search?topic',
         templateUrl: 'search/search.html',
         controller: 'SearchCtrl'
       })
@@ -1206,8 +1206,8 @@ simplicity.controller('MainCtrl', ['$scope', '$state', '$stateParams', '$locatio
 
 
 }]);
-simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'simplicityBackend',
- function ($scope, $stateParams, $state, $timeout, simplicityBackend) {
+simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'simplicityBackend', 'Topics',
+ function ($scope, $stateParams, $state, $timeout, simplicityBackend, Topics) {
     var getType = function(unformattedType){
         var nameKey = {
             'street_name' : 'street',
@@ -1220,6 +1220,8 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
         return nameKey[unformattedType];
     };
 
+    $('#searchContent').css({'minHeight' : $(window).height()});
+
     $("#addressSearch").focus();
     $scope.searchText = '';
 
@@ -1231,6 +1233,21 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
         show : false,
         message : 'Please choose one of the options below.'
     };
+
+    $scope.discoverText = "places";
+    $scope.searchFor = "an address, street, neighborhood, or property";
+
+    var topicProperties = {};
+
+    $scope.showTopicsLink = true;
+
+    //if a topic is defined we want to show topic specific text
+    if($stateParams.topic !== null){
+        topicProperties = Topics.topicProperties();
+        $scope.showTopicsLink = false;
+        $scope.discoverText = topicProperties.plural;
+        $scope.searchFor = topicProperties.searchForText;
+    }
 
 
 
@@ -1256,11 +1273,24 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
         //Search usign searchText
         simplicityBackend.simplicitySearch(searchText)
             .then(function(searchResults){
+                console.log(searchResults);
                 if(searchText === ""){
                     $scope.searchGroups = [];
                 }else{
                     if(searchResults.length !== 0){
-                        $scope.searchGroups = searchResults;   
+                        if($stateParams.topic !== null){
+                            for (var i = searchResults.length - 1; i >= 0; i--) {
+
+                                if(topicProperties.searchby[searchResults[i].name] === undefined){
+                                    console.log(searchResults[i].name);
+                                    searchResults.splice(i, 1);
+                                }
+                            };
+                            $scope.searchGroups = searchResults; 
+                        }else{
+                           $scope.searchGroups = searchResults; 
+                        }
+                           
                     }
                 } 
             });
@@ -1271,6 +1301,8 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
         $scope.searchGroups = []; 
         }, 100); 
     };
+
+
 
 
 
@@ -1290,8 +1322,12 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
         if(candidate.type === 'civicaddressid'){
             candidate.type = "address";
         }
-
-        $state.go('main.topics.list', {'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});
+        if($stateParams.topic !== null){
+            $state.go('main.topics.topic', {'topic' : $stateParams.topic, 'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});
+        }else{
+          $state.go('main.topics.list', {'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});  
+        }
+        
     };
 
 
@@ -1334,12 +1370,18 @@ simplicity.factory('Topics', ['$q', '$stateParams', 'Crime', 'Development', 'Pro
 
 	Topics.getTopics = function(){
 		var topicsArray = collectTopicProperties();
+		console.log(topicsArray);
+
 		if($stateParams.id === null){
+			console.log($stateParams.id);
 			var topicsToShowBeforeAnIdHasBeenSet = [];
 			for (var i = 0; i < topicsArray.length; i++) {
-				// topicsToShowBeforeAnIdHasBeenSet.push(topicsArray[i]);
-				// topicsToShowBeforeAnIdHasBeenSet[i].question = questions[topicsArray[i].name].topic;
-				// topicsToShowBeforeAnIdHasBeenSet[i].linkTo = '#/search/' + topicsArray[i].name;
+				if(topicsArray[i].questions.topic !== undefined){
+				   topicsArray[i].question = topicsArray[i].questions.topic; 
+				}
+				var linkTo = '#/search?topic=' + topicsArray[i].name;            
+				topicsArray[i].linkTo = linkTo;
+				topicsToShowBeforeAnIdHasBeenSet.push(topicsArray[i]);
 			}
 			return topicsToShowBeforeAnIdHasBeenSet;
 		}else{
@@ -1406,8 +1448,13 @@ simplicity.controller('TopicListCtrl', ['$scope', '$stateParams', '$state', 'Top
     //you can't have more tha
     $scope.heading = 'Topics for ';
     
-
-    $scope.searchText = $stateParams.searchtext + '?';
+    if($stateParams.searchtext){
+      $scope.searchText = $stateParams.searchtext;
+    }else{
+      $scope.heading = 'Topics';
+      $scope.searchText = "";
+    }
+    
 
     $scope.topics = Topics.getTopics($stateParams);
     
@@ -1923,6 +1970,8 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
     var topicProperties = {
       'name' : 'addresslist',
       'title' : 'Address List',
+      'plural' : 'address lists',
+      'searchForText' : 'a street or a neighborhood',
       'position' : 8,
       'searchby' : {
         'street_name' : {
@@ -2041,6 +2090,8 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
     var topicProperties = {
       'name' : 'crime',
       'title' : 'Crime',
+      'plural' : 'crimes',
+      'searchForText' : 'an address, street, or neighborhood',
       'position' : 2,
       'searchby' : {
         'address' : {
@@ -2201,6 +2252,8 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
     var topicProperties = {
       'name' : 'development',
       'title' : 'Development',
+      'plural' : 'development',
+      'searchForText' : 'an address, street, or neighborhood',
       'position' : 3, 
       'searchby' : {
         'address' : {
@@ -2378,7 +2431,9 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
 
     var topicProperties = {
       'name' : 'property',
+      'plural' : 'properties',
       'title' : 'Property',
+      'searchForText' : 'an address, street, owner, or PIN',
       'position' : 1,
       'searchby' : {
         'address' : {
@@ -2500,7 +2555,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             property.features[p].properties.zoning = formatZoningPropertyForMultipleAddressess(property.features[p].properties.civicaddress_id);
           }          
         }
-        property.features[p].properties.googleDirectionsLink = "http://www.google.com/maps/dir/" + property.features[p].properties.center_y + "," + property.features[p].properties.center_x;
+        property.features[p].properties.googleDirectionsLink = "http://maps.google.com/maps?daddr=" + property.features[p].properties.center_y + "," + property.features[p].properties.center_x;
         property.features[p].properties.color = '035096';
         property.features[p].properties.zoningOverlays = addressCache.zoningOverlays;
         
@@ -2605,6 +2660,8 @@ simplicity.factory('Recycling', ['$q', '$stateParams', 'AddressCache',
     var topicProperties = {
       'name' : 'recycling',
       'title' : 'Recycling Collection',
+      'plural' : 'recycling collection',
+      'searchForText' : 'an address',
       'position' : 5,
       'searchby' : {
         'address' : {
@@ -2693,6 +2750,8 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
     var topicProperties = {
       'name' : 'streetmaintenance',
       'title' : 'Street Maintenance',
+      'plural' : 'street maintenance responsibility',
+      'searchForText' : 'an address or a street',
       'position' : 7,
       'searchby' : {
         'address' : {
@@ -2814,6 +2873,8 @@ simplicity.factory('Trash', ['$q', '$stateParams', 'AddressCache',
     var topicProperties = {
       'name' : 'trash',
       'title' : 'Trash Collection',
+      'plural' : 'trash collection',
+      'searchForText' : 'an address',
       'position' : 4,
       'searchby' : {
         'address' : {
@@ -2879,6 +2940,8 @@ simplicity.factory('Zoning', ['$q', '$stateParams', 'AddressCache', 'simplicityB
     var topicProperties = {
       'name' : 'zoning',
       'title' : 'Zoning',
+      'plural' : 'zoning',
+      'searchForText' : 'an address',
       'position' : 6,
       'searchby' : {
         'address' : {
@@ -2996,7 +3059,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('search/search.html',
-    '<div ui-view=""></div><div style="min-height : 1000px"><div class="col-xs-12"><p class="text-muted text-center lead" style="margin-bottom : 0px; margin-top : 20px">Discover <a ng-init="showCityDataDef = false" ng-click="showCityDataDef = !showCityDataDef">city data</a> about places in your community.</p><p class="text-muted text-center lead">Search for an address, street, neighborhood, or property to get started!</p></div><div class="col-xs-12"><div class="input-group"><input id="inputSearch" groupindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location..." style="z-index: 0" ng-model="searchText" ng-keyup="doSearch(searchText, $event)" autofocus=""> <span class="input-group-btn"><button class="btn btn-primary" type="button" style="box-shadow : none; font-size : 17px"><i class="fa fa-search"></i></button></span></div></div><div class="" ng-show="errorMessage.show || helperMessage.show || searchGroups.length > 0"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-success">{{helperMessage.message}}</p><div ng-repeat="group in searchGroups"><div class="col-xs-12" style="margin-top : 10px; margin-bottom : 10px"><h4 class="row text-muted"><span class="fa-stack fa-lg" ng-click="goBack()"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span> <strong>{{group.label}}</strong> <span class="badge" style="background : #999">{{group.results.length}}</span></h4><div class="list-group" ng-repeat="candidate in group.results | limitTo : group.offset"><a analytics-on="click" analytics-category="Search" analytics-label="{{candidate.type}}" analytics-event="{{candidate.label}}" ng-click="goToTopics(candidate, $event)" ng-keypress="goToTopics(candidate, $event)" class="row list-group-item"><span class="col-xs-2 col-lg-1"><span class="fa-stack fa-lg text-primary"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span></span><p class="col-xs-8 col-lg-9 pull-left text-primary" style="margin-top : 8px">{{candidate.label}}</p><h4 class="col-xs-2 col-lg-2"><i class="fa fa-lg fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="list-group" ng-if="group.results.length > 3"><a ng-click="group.offset = group.offset + 3" class="row list-group-item"><h4 class="col-xs-10 text-primary"><strong>More</strong></h4><h4 class="col-xs-2"><i class="fa fa-lg fa-chevron-down text-primary pull-right"></i></h4></a></div></div></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div><div class="col-xs-12"><h4 class="text-primary text-center">Brought to you by the <a href="http://www.ashevillenc.gov/" target="_blank">City of Asheville</a> <i class="fa fa-smile-o"></i></h4></div><div class="col-xs-12" style="margin-top : 100px"><div class="well col-xs-12 col-md-6 col-md-offset-3" ng-if="showCityDataDef"><p class="lead">city data</p><p style="font-family : Times New Roman"><strong>\\ˈsi-tē ˈdā-tə\\</strong></p><p style="font-family : Times New Roman">City data is just information about your city. It includes information about properties, trash collection, recycling pickup, crimes, development, who\'s responsible for fixing the street in front of your house, and more. At the City of Asheville we are working to provide you with better access to data in your city through SimpliCity!</p></div></div></div>');
+    '<div ui-view=""></div><div id="searchContent"><div class="col-xs-12" style="margin-top : 20px"><p class="text-muted text-center lead" style="margin-bottom : 0px; margin-top : 20px">Discover city data about <strong>{{discoverText}}</strong> in your community.</p><p class="text-muted text-center lead">Search for {{searchFor}} to get started!</p></div><div class="col-xs-12"><div class="input-group"><input id="inputSearch" groupindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location..." style="z-index: 0" ng-model="searchText" ng-keyup="doSearch(searchText, $event)" autofocus=""> <span class="input-group-btn"><button class="btn btn-primary" type="button" style="box-shadow : none; font-size : 17px"><i class="fa fa-search"></i></button></span></div></div><div class="" ng-show="errorMessage.show || helperMessage.show || searchGroups.length > 0"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-success">{{helperMessage.message}}</p><div ng-repeat="group in searchGroups"><div class="col-xs-12" style="margin-top : 10px; margin-bottom : 10px"><h4 class="row text-muted"><span class="fa-stack fa-lg" ng-click="goBack()"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span> <strong>{{group.label}}</strong> <span class="badge" style="background : #999">{{group.results.length}}</span></h4><div class="list-group" ng-repeat="candidate in group.results | limitTo : group.offset"><a analytics-on="click" analytics-category="Search" analytics-label="{{candidate.type}}" analytics-event="{{candidate.label}}" ng-click="goToTopics(candidate, $event)" ng-keypress="goToTopics(candidate, $event)" class="row list-group-item"><span class="col-xs-2 col-lg-1"><span class="fa-stack fa-lg text-primary"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span></span><p class="col-xs-8 col-lg-9 pull-left text-primary" style="margin-top : 8px">{{candidate.label}}</p><h4 class="col-xs-2 col-lg-2"><i class="fa fa-lg fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="list-group" ng-if="group.results.length > 3"><a ng-click="group.offset = group.offset + 3" class="row list-group-item"><h4 class="col-xs-10 text-primary"><strong>More</strong></h4><h4 class="col-xs-2"><i class="fa fa-lg fa-chevron-down text-primary pull-right"></i></h4></a></div></div></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div><div ng-show="showTopicsLink" class="col-xs-12 col-md-6 col-md-offset-3 text-center well" style="margin-top : 60px; margin-bottom : 40px; background : #fff; border : 2px solid #ecf0f1"><h4 class="text-info">Not sure what you can find with SimpliCity?</h4><a href="#/topics/list"><h2>Click here to view topics</h2></a></div><div style="position : absolute; bottom : 0px; width : 100%"><h4 class="text-primary text-center">Brought to you by the <a href="http://www.ashevillenc.gov/" target="_blank">City of Asheville</a> <i class="fa fa-smile-o"></i></h4></div></div>');
 }]);
 })();
 
@@ -3116,7 +3179,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topic-single/topic.single.html',
-    '<div><div class="col-xs-12 btn-group btn-group-justified" style="margin-top : 15px"><a href="#/search/composite" class="btn btn-primary" style="font-size : 18px" analytics-on="click" analytics-category="Navigation" analytics-label="Topics Single Page" analytics-event="To Search"><i class="fa fa-search fa-fw"></i> Search</a> <a ng-click="goToTopics()" class="btn btn-primary" style="font-size : 18px" analytics-on="click" analytics-category="Navigation" analytics-label="Topics Single Page" analytics-event="To Search"><i class="fa fa-bars fa-fw"></i> View Topics</a></div><div class="col-xs-12"><hr></div><div ng-include="headerTemplate"></div><div class="col-xs-12" style="height : 200px; text-align : center; margin-top : 30px" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div class="col-xs-12 list-item-panel" ng-show="!loading"><div ng-if="stateParams.view !== \'simple\'"><div class="hidden-xs col-xs-12"><h2 class="pull-left" style="margin-right : 10px">{{topicProperties.views[stateParams.view].label}}</h2><div class="btn-group pull-right" role="group" aria-label="..." style="margin-top : 15px"><button ng-repeat="view in topicProperties.searchby[stateParams.searchby].params.validViews" ng-class="{\'active\' : stateParams.view === view}" ng-click="onClickChangeView(view)" analytics-on="click" analytics-category="Topic View" analytics-label="{{stateParams.topic}}" analytics-event="{{topicProperties.views[view].label}}" class="btn btn-primary">{{topicProperties.views[view].label}}</button><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div><button ng-click="openDownloadModal()" type="button" class="btn btn-primary" data-toggle="tooltip" title="Download"><i class="fa fa-lg fa-cloud-download"></i> Download</button></div><div ng-if="stateParams.type !== null" class="col-xs-12"><h5 class="text-muted">Filtered by <strong>{{stateParams.type}}</strong></h5></div></div><div class="visible-xs" style="text-align : center; width : 100%"><h2 class="pull-left" style="margin-right : 10px">{{topicProperties.views[stateParams.view].label}} View</h2><div class="btn-group" role="group" aria-label="..." style="margin-top : 15px"><div class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Change View <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li ng-repeat="view in topicProperties.searchby[stateParams.searchby].params.validViews" ng-class="{\'active\' : stateParams.view === view}" ng-click="onClickChangeView(view)" analytics-on="click" analytics-category="Topic View" analytics-label="{{stateParams.topic}}" analytics-event="{{topicProperties.views[view].label}} View" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1">{{topicProperties.views[view].label}}</a></li></ul></div><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div></div><div class="col-xs-12" style="height : 10px"></div></div></div><div ng-if="topicPropteries.viewTemplates.simple !== null" ng-show="stateParams.view === \'simple\'" ng-include="topicProperties.views.simple.template"></div><div ng-if="topicPropteries.viewTemplates.details !== null" ng-show="stateParams.view === \'details\'" ng-include="topicProperties.views.details.template"></div><div ng-if="topicPropteries.viewTemplates.list !== null" ng-show="stateParams.view === \'list\'" ng-include="topicProperties.views.list.template"></div><div ng-if="topicPropteries.viewTemplates.summary !== null" ng-show="stateParams.view === \'summary\'" ng-include="topicProperties.views.summary.template"></div><div><div ng-show="stateParams.view === \'map\'" class="col-xs-12" style="height : 400px; margin-bottom : 20px" id="map"><div ng-if="topic.summary.table !== undefined"><h5 ng-init="showLegend = true" ng-show="showLegend" ng-click="showLegend = !showLegend" class="text-primary" style="position : absolute; top : 50px; right : 10px;z-index : 7; cursor : pointer; background : white; padding : 5px; border-radius : 4px; border : 2px solid #2780E3"><strong>Legend</strong> <i class="fa fa-expand"></i></h5><div ng-show="!showLegend" style="position : absolute; top : 50px; right : 10px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7; border : 2px solid #2780E3"><div class="col-xs-12"><h4 class="pull-left">Legend</h4><p ng-click="showLegend = !showLegend" class="text-primary pull-right" style="margin-top : 5px; cursor : pointer"><i class="fa fa-2x fa-times"></i></p></div><table ng-if="topic.features.length !== 0" class="table table-hover"><tbody><tr ng-repeat="(key, value) in topic.summary.table"><td ng-click="getDetails(key)" style="cursor : pointer"><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}</td></tr></tbody></table></div></div></div><div id="detailsModal" class="modal fade"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button ng-click="closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">Location Details</h4></div><div class="modal-body"><div ng-include="topicProperties.views.list.template"></div></div></div></div></div></div></div><div ng-if="linkTopics.length > 0" class="col-xs-12 list-item-panel" style="margin-top : 30px"><h2>Related Links</h2><div class="list-group" style="margin-top : 20px"><a class="row list-group-item list-item-panel" analytics-category="Related Link" analytics-label="{{stateParams.topic}}" analytics-event="{{linkTopic.linkTo}}" href="{{linkTopic.linkTo}}" style="margin-bottom : 5px" ng-repeat="linkTopic in linkTopics"><span class="visible-xs col-xs-8"><p class="text-primary text-center">{{linkTopic.question}}</p></span> <i ng-class="linkTopic.iconClass" class="visible-xs pull-left col-xs-3 text-primary"></i><div ng-class="linkTopic.iconClass" class="hidden-xs col-sm-2 text-primary"></div><h4 class="hidden-xs col-sm-9 text-primary" style="margin-top : 20px">{{linkTopic.question}}</h4><h4 class="col-sm-1 hidden-xs"><i class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="col-xs-12 text-center">List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a> under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.</div></div><div id="downloadModal" class="modal fade" style="z-index : 3000"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">Download</h4></div><div class="modal-body"><div ng-if="stateParams.topic === \'property\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Property Details <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'crime\' || stateParams.topic === \'development\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'summary\', topic)" analytics-on="click" analytics-category="Download" analytics-label="summary" analytics-event="{{stateParams.topic}}">Summary Table <i class="fa fa-cloud-download"></i></button> <button class="btn btn-primary col-xs-12" style="margin-top : 3px" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Detailed records <i class="fa fa-cloud-download"></i></button><p class="text-muted text-center">based on selected filters</p></div><div ng-if="stateParams.topic === \'zoning\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Zoning Data <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'addresslist\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Address List <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'streetmaintenance\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Street Details <i class="fa fa-cloud-download"></i></button></div></div></div></div></div></div>');
+    '<div><div class="col-xs-12 btn-group btn-group-justified" style="margin-top : 15px"><a href="#/search/composite" class="btn btn-primary" style="font-size : 18px" analytics-on="click" analytics-category="Navigation" analytics-label="Topics Single Page" analytics-event="To Search"><i class="fa fa-search fa-fw"></i> Search</a> <a ng-click="goToTopics()" class="btn btn-primary" style="font-size : 18px" analytics-on="click" analytics-category="Navigation" analytics-label="Topics Single Page" analytics-event="To Search"><i class="fa fa-bars fa-fw"></i> View Topics</a></div><div class="col-xs-12"><hr></div><div ng-include="headerTemplate"></div><div class="col-xs-12" style="height : 200px; text-align : center; margin-top : 30px" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div class="col-xs-12 list-item-panel" ng-show="!loading"><div ng-if="stateParams.view !== \'simple\'"><div class="hidden-xs col-xs-12"><h2 class="pull-left" style="margin-right : 10px">{{topicProperties.views[stateParams.view].label}}</h2><div class="btn-group pull-right" role="group" aria-label="..." style="margin-top : 15px"><button ng-repeat="view in topicProperties.searchby[stateParams.searchby].params.validViews" ng-class="{\'active\' : stateParams.view === view}" ng-click="onClickChangeView(view)" analytics-on="click" analytics-category="Topic View" analytics-label="{{stateParams.topic}}" analytics-event="{{topicProperties.views[view].label}}" class="btn btn-primary">{{topicProperties.views[view].label}}</button><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div><button ng-click="openDownloadModal()" type="button" class="btn btn-primary" data-toggle="tooltip" title="Download"><i class="fa fa-lg fa-cloud-download"></i> Download</button></div><div ng-if="stateParams.type !== null" class="col-xs-12"><h5 class="text-muted">Filtered by <strong>{{stateParams.type}}</strong></h5></div></div><div class="visible-xs" style="text-align : center; width : 100%"><h2 class="pull-left" style="margin-right : 10px">{{topicProperties.views[stateParams.view].label}} View</h2><div class="btn-group" role="group" aria-label="..." style="margin-top : 15px"><div class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Change View <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li ng-repeat="view in topicProperties.searchby[stateParams.searchby].params.validViews" ng-class="{\'active\' : stateParams.view === view}" ng-click="onClickChangeView(view)" analytics-on="click" analytics-category="Topic View" analytics-label="{{stateParams.topic}}" analytics-event="{{topicProperties.views[view].label}} View" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1">{{topicProperties.views[view].label}}</a></li></ul></div><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div></div><div class="col-xs-12" style="height : 10px"></div></div></div><div ng-if="topicPropteries.viewTemplates.simple !== null" ng-show="stateParams.view === \'simple\'" ng-include="topicProperties.views.simple.template"></div><div ng-if="topicPropteries.viewTemplates.details !== null" ng-show="stateParams.view === \'details\'" ng-include="topicProperties.views.details.template"></div><div ng-if="topicPropteries.viewTemplates.list !== null" ng-show="stateParams.view === \'list\'" ng-include="topicProperties.views.list.template"></div><div ng-if="topicPropteries.viewTemplates.summary !== null" ng-show="stateParams.view === \'summary\'" ng-include="topicProperties.views.summary.template"></div><div><div ng-show="stateParams.view === \'map\'" class="col-xs-12" style="height : 400px; margin-bottom : 20px" id="map"><div ng-if="topic.summary.table !== undefined"><h5 ng-init="showLegend = true" ng-show="showLegend" ng-click="showLegend = !showLegend" class="text-primary" style="position : absolute; top : 50px; right : 10px;z-index : 7; cursor : pointer; background : white; padding : 5px; border-radius : 4px; border : 2px solid #2780E3; box-shadow: 0 1px 5px rgba(0,0,0,0.4)"><strong>Legend</strong> <i class="fa fa-expand"></i></h5><div ng-show="!showLegend" style="position : absolute; top : 50px; right : 10px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7; border : 2px solid #2780E3"><div class="col-xs-12"><h4 class="pull-left">Legend</h4><p ng-click="showLegend = !showLegend" class="text-primary pull-right" style="margin-top : 5px; cursor : pointer"><i class="fa fa-2x fa-times"></i></p></div><table ng-if="topic.features.length !== 0" class="table table-hover"><tbody><tr ng-repeat="(key, value) in topic.summary.table"><td ng-click="getDetails(key)" style="cursor : pointer"><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}</td></tr></tbody></table></div></div></div><div id="detailsModal" class="modal fade"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button ng-click="closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">Location Details</h4></div><div class="modal-body"><div ng-include="topicProperties.views.list.template"></div></div></div></div></div></div></div><div ng-if="linkTopics.length > 0" class="col-xs-12 list-item-panel" style="margin-top : 30px"><h2>Related Links</h2><div class="list-group" style="margin-top : 20px"><a class="row list-group-item list-item-panel" analytics-category="Related Link" analytics-label="{{stateParams.topic}}" analytics-event="{{linkTopic.linkTo}}" href="{{linkTopic.linkTo}}" style="margin-bottom : 5px" ng-repeat="linkTopic in linkTopics"><span class="visible-xs col-xs-8"><p class="text-primary text-center">{{linkTopic.question}}</p></span> <i ng-class="linkTopic.iconClass" class="visible-xs pull-left col-xs-3 text-primary"></i><div ng-class="linkTopic.iconClass" class="hidden-xs col-sm-2 text-primary"></div><h4 class="hidden-xs col-sm-9 text-primary" style="margin-top : 20px">{{linkTopic.question}}</h4><h4 class="col-sm-1 hidden-xs"><i class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="col-xs-12 text-center">List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a> under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.</div></div><div id="downloadModal" class="modal fade" style="z-index : 3000"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">Download</h4></div><div class="modal-body"><div ng-if="stateParams.topic === \'property\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Property Details <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'crime\' || stateParams.topic === \'development\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'summary\', topic)" analytics-on="click" analytics-category="Download" analytics-label="summary" analytics-event="{{stateParams.topic}}">Summary Table <i class="fa fa-cloud-download"></i></button> <button class="btn btn-primary col-xs-12" style="margin-top : 3px" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Detailed records <i class="fa fa-cloud-download"></i></button><p class="text-muted text-center">based on selected filters</p></div><div ng-if="stateParams.topic === \'zoning\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Zoning Data <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'addresslist\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Address List <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'streetmaintenance\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Street Details <i class="fa fa-cloud-download"></i></button></div></div></div></div></div></div>');
 }]);
 })();
 
