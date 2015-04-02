@@ -6,6 +6,8 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
     var topicProperties = {
       'name' : 'development',
       'title' : 'Development',
+      'plural' : 'development',
+      'searchForText' : 'an address, street, or neighborhood',
       'position' : 3, 
       'searchby' : {
         'address' : {

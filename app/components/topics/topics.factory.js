@@ -34,12 +34,18 @@ simplicity.factory('Topics', ['$q', '$stateParams', 'Crime', 'Development', 'Pro
 
 	Topics.getTopics = function(){
 		var topicsArray = collectTopicProperties();
+		console.log(topicsArray);
+
 		if($stateParams.id === null){
+			console.log($stateParams.id);
 			var topicsToShowBeforeAnIdHasBeenSet = [];
 			for (var i = 0; i < topicsArray.length; i++) {
-				// topicsToShowBeforeAnIdHasBeenSet.push(topicsArray[i]);
-				// topicsToShowBeforeAnIdHasBeenSet[i].question = questions[topicsArray[i].name].topic;
-				// topicsToShowBeforeAnIdHasBeenSet[i].linkTo = '#/search/' + topicsArray[i].name;
+				if(topicsArray[i].questions.topic !== undefined){
+				   topicsArray[i].question = topicsArray[i].questions.topic; 
+				}
+				var linkTo = '#/search?topic=' + topicsArray[i].name;            
+				topicsArray[i].linkTo = linkTo;
+				topicsToShowBeforeAnIdHasBeenSet.push(topicsArray[i]);
 			}
 			return topicsToShowBeforeAnIdHasBeenSet;
 		}else{

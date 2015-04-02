@@ -12,8 +12,13 @@ simplicity.controller('TopicListCtrl', ['$scope', '$stateParams', '$state', 'Top
     //you can't have more tha
     $scope.heading = 'Topics for ';
     
-
-    $scope.searchText = $stateParams.searchtext + '?';
+    if($stateParams.searchtext){
+      $scope.searchText = $stateParams.searchtext;
+    }else{
+      $scope.heading = 'Topics';
+      $scope.searchText = "";
+    }
+    
 
     $scope.topics = Topics.getTopics($stateParams);
     

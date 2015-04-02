@@ -6,6 +6,8 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
     var topicProperties = {
       'name' : 'streetmaintenance',
       'title' : 'Street Maintenance',
+      'plural' : 'street maintenance responsibility',
+      'searchForText' : 'an address or a street',
       'position' : 7,
       'searchby' : {
         'address' : {
