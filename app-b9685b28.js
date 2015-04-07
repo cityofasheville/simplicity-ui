@@ -1,5 +1,116 @@
 'use strict';
 //keys: crimeIds, time, civicaddressId, civicaddressIds, centerlineIds, neighborhoodName, neighborhoodNames
+angular.module('simplicity.google.place.api.adapter', [])
+  .constant('PLACES_API_CONFIG', {
+      'location' : '35.5951125,-82.5511088',
+      'radius' : 80000,
+      'key' : 'AIzaSyDV6CtVSMRpAXBNxGZ9-ClGTA84E4PTsF4'
+    })
+  .factory('simplicityGooglePlacesApiAdapter', ['$http', '$location', '$q', '$filter', 'PLACES_API_CONFIG',
+  function($http, $location, $q, $filter, PLACES_API_CONFIG){
+    
+
+    var simplicityGooglePlacesApiAdapter = {};
+
+
+    var service = new google.maps.places.PlacesService(document.getElementById('stupid-required-google-input'));
+
+    simplicityGooglePlacesApiAdapter.search = function(searchText){
+      //use $q promises to handle the http request asynchronously
+      var q = $q.defer();
+
+      
+
+      var googleCallback = function(results, status){
+        if (status == google.maps.places.PlacesServiceStatus.OK) {
+            var formattedResults = [];
+            for (var i = 0; i < results.length; i++) {
+              var resultObj = {
+                'id' : results[i].place_id,
+                'label' : results[i].name + ' | ' + results[i].vicinity,
+                'type' : 'google-place',
+                'googleResult' : true
+              }
+              formattedResults.push(resultObj);
+            };
+            var googleResults = {
+              'groupOrder' : 0,
+              'iconClass' : 'fa-google',
+              'label' : 'Google Places',
+              'name' : 'google_places',
+              'offset' : 3,
+              'results' : formattedResults
+            }
+            q.resolve(googleResults);
+        }else{
+          q.resolve('no google results');
+        }
+    }
+
+      var locationCenter = new google.maps.LatLng(35.5951125,-82.5511088);
+
+      var googleRequest = {
+          'name' : searchText,
+          'location' : locationCenter,
+          'radius' : 30000,
+          'types' : ['establishment']
+      }
+
+      service.nearbySearch(googleRequest, googleCallback);
+
+
+
+      //return the promise using q
+      return q.promise;
+
+    };
+
+    simplicityGooglePlacesApiAdapter.getDetails = function(place_id){
+      //use $q promises to handle the http request asynchronously
+      var q = $q.defer();
+
+      
+
+      var googleCallback = function(results, status){
+        if (status == google.maps.places.PlacesServiceStatus.OK) {
+            q.resolve(results);
+        }else{
+          q.resolve('no google results');
+        }
+    }
+
+      var locationCenter = new google.maps.LatLng(35.5951125,-82.5511088);
+
+      var googleRequest = {
+          'placeId' : place_id,
+      }
+
+      service.getDetails(googleRequest, googleCallback);
+
+
+
+      //return the promise using q
+      return q.promise;
+
+    };
+
+
+
+    //****Return the factory object****//
+    return simplicityGooglePlacesApiAdapter; 
+
+    
+}]); //END simplicityGooglePlacesApiAdapter factory function
+
+
+
+
+   
+
+
+
+'use strict';
+//keys: crimeIds, time, civicaddressId, civicaddressIds, centerlineIds, neighborhoodName, neighborhoodNames
 angular.module('simplicity.arcgis.rest.api.adapter', [])
   .constant('SIMPLICITY_ARCGIS_QUERIES', {
 
@@ -382,7 +493,7 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
           'id' :  compositeGeocoderResults.candidates[i].attributes.User_fld,
           'label' : compositeGeocoderResults.candidates[i].attributes.Match_addr,
           'type' : compositeGeocoderResults.candidates[i].attributes.Loc_name,
-          'linkTo' : '#/topics/list?searchby=' + compositeGeocoderResults.candidates[i].attributes.Loc_name + '&id=' + compositeGeocoderResults.candidates[i].attributes.User_fld
+          'googleResult' : false
         };
         if(groupsObj[result.type] === undefined){
           var tempObj = {
@@ -489,6 +600,7 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
 
     };
 
+
     simplicityArcGisRestApiAdapter.formatHttpResults = function(data){
 
       var featuresArray = [];
@@ -528,7 +640,11 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
     
 }]); //END simplicityArcGisRestApiAdapter factory function
 
+82.5507929450601
+82.55079294249586
 
+35.59279067919887
+35.5927906715647
 
 
    
@@ -766,7 +882,7 @@ angular.module('simplicity.frontend.config', [])
 
 
 
-angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter', 'simplicity.http'])
+angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter', 'simplicity.google.place.api.adapter', 'simplicity.http'])
   .constant('TABLES', {
     'crimes' : {
       'url' : 'http://arcgis-arcgisserver1-1222684815.us-east-1.elb.amazonaws.com/arcgis/rest/services/opendata/FeatureServer/0/query',
@@ -810,8 +926,8 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
     'returnFields' : ['Match_addr', 'User_fld', 'Loc_name'],
     'searchEngine' : 'ArcGisRestApiGeocoder'
   })
-  .factory('simplicityBackend', ['$http', '$location', '$q', '$filter', '$stateParams', 'simplicityHttp', 'simplicityArcGisRestApiAdapter', 'SIMPLICITY_ARCGIS_QUERIES', 'TABLES', 'SEARCH_CONFIG',
-    function($http, $location, $q, $filter, $stateParams, simplicityHttp, simplicityAdapter, QUERIES, TABLES, SEARCH_CONFIG){
+  .factory('simplicityBackend', ['$http', '$location', '$q', '$filter', '$stateParams', 'simplicityHttp', 'simplicityArcGisRestApiAdapter', 'simplicityGooglePlacesApiAdapter', 'SIMPLICITY_ARCGIS_QUERIES', 'TABLES', 'SEARCH_CONFIG',
+    function($http, $location, $q, $filter, $stateParams, simplicityHttp, simplicityAdapter, googlePlacesApiAdapter, QUERIES, TABLES, SEARCH_CONFIG){
       
       //The factory object (this is what will be returned from the factory)
       var simplicityBackend = {};
@@ -820,15 +936,24 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
       simplicityBackend.simplicitySearch = function(searchText){
         var q = $q.defer();
 
+        var searchResultsArray = [];
 
         //should I check the dataApi property here? or only allow one dataApi for all tables
         //if I allow multiple dataApis, I won't be able to inject adapters as a generic simplicityAdapter
         simplicityAdapter.search(SEARCH_CONFIG.searchUrl, searchText)
           .then(function(searchResults){
-            q.resolve(searchResults);
+            searchResultsArray = searchResults;
+            googlePlacesApiAdapter.search(searchText)
+              .then(function(googleResults){
+                if(googleResults === 'no google results'){
+                  q.resolve(searchResultsArray);
+                }else{
+                  searchResultsArray.push(googleResults);
+                  q.resolve(searchResultsArray);
+                }
+              });
+
           });
-
-
         return q.promise;
       };
 
@@ -847,6 +972,54 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
 
         return q.promise;
       };
+
+      simplicityBackend.simplicityFindGoogleAddress = function(candidate){
+        var q = $q.defer();
+
+        googlePlacesApiAdapter.getDetails(candidate.id)
+          .then(function(details){
+            var searchText;
+            var vicinity = candidate.label.split("|");
+            var streetAddressOnly = vicinity[1].split(",");
+            if(details.address_components.length === 6){
+              searchText = streetAddressOnly[0] + ", " + details.address_components[5].short_name
+            }else{
+              searchText = streetAddressOnly[0]
+            }
+
+
+            simplicityAdapter.search(SEARCH_CONFIG.searchUrl, searchText)
+              .then(function(searchResults){
+                var completed = false;
+                for (var i = 0; i < searchResults.length; i++) {
+                  if (searchResults[i].name === 'address') {
+                    if(searchResults[i].results.length > 0){
+                      for (var x = 0; x < searchResults[i].results.length; x++) {
+                          var splitSearchText = searchText.split(" ");
+                          var splitLabel = searchResults[i].results[x].label.split(" ");
+                          if(splitLabel.length === splitSearchText.length){
+                            completed = true;
+                            q.resolve(searchResults[i].results[x])
+                          }
+                      };
+                      
+                  }else{
+                      q.resolve('could not find address');
+                    }
+                  }
+                };
+                if(!completed){
+                  q.resolve('could not find address');
+                }
+
+
+              });
+          })
+        
+
+        return q.promise;
+      };
+
 
       simplicityBackend.formatTimeForQuery = function(jsDate){
         return simplicityAdapter.formatTimeForQuery(jsDate);
@@ -1248,7 +1421,7 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
         $scope.discoverText = topicProperties.plural;
         $scope.searchFor = topicProperties.searchForText;
     }
-
+    
 
 
     //Geocodes the search results     
@@ -1270,10 +1443,11 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
             }, 2000);
         }
 
+
+
         //Search usign searchText
         simplicityBackend.simplicitySearch(searchText)
             .then(function(searchResults){
-                console.log(searchResults);
                 if(searchText === ""){
                     $scope.searchGroups = [];
                 }else{
@@ -1282,7 +1456,6 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
                             for (var i = searchResults.length - 1; i >= 0; i--) {
 
                                 if(topicProperties.searchby[searchResults[i].name] === undefined){
-                                    console.log(searchResults[i].name);
                                     searchResults.splice(i, 1);
                                 }
                             };
@@ -1323,9 +1496,27 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
             candidate.type = "address";
         }
         if($stateParams.topic !== null){
-            $state.go('main.topics.topic', {'topic' : $stateParams.topic, 'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});
+            if(candidate.googleResult === true){
+                simplicityBackend.simplicityFindGoogleAddress(candidate)
+                    .then(function(addressResults){
+                        $state.go('main.topics.topic', {'topic' : $stateParams.topic, 'searchtext' : addressResults.label, 'searchby' : addressResults.type, 'id' : addressResults.id});
+                    })
+            }else{
+                $state.go('main.topics.topic', {'topic' : $stateParams.topic, 'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});
+            }
+           
+
+
         }else{
-          $state.go('main.topics.list', {'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});  
+            if(candidate.googleResult === true){
+                simplicityBackend.simplicityFindGoogleAddress(candidate)
+                    .then(function(addressResults){
+                        $state.go('main.topics.list', {'searchtext' : addressResults.label, 'searchby' : addressResults.type, 'id' : addressResults.id});
+                    })
+
+            }else{
+                $state.go('main.topics.list', {'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});  
+            }
         }
         
     };
@@ -1370,10 +1561,7 @@ simplicity.factory('Topics', ['$q', '$stateParams', 'Crime', 'Development', 'Pro
 
 	Topics.getTopics = function(){
 		var topicsArray = collectTopicProperties();
-		console.log(topicsArray);
-
 		if($stateParams.id === null){
-			console.log($stateParams.id);
 			var topicsToShowBeforeAnIdHasBeenSet = [];
 			for (var i = 0; i < topicsArray.length; i++) {
 				if(topicsArray[i].questions.topic !== undefined){
@@ -1673,8 +1861,8 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
                     return L.circleMarker(latlng, {
                       radius: 10,
                       fillColor: "#"+feature.properties.color,
-                      color: "#"+feature.properties.color,
-                      weight: 1,
+                      color: "#7f8c8d",
+                      weight: 2,
                       opacity: 1,
                       fillOpacity: 0.8
                     });
@@ -1684,8 +1872,8 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
                 return L.circleMarker(latlng, {
                   radius: 10,
                   fillColor: "#"+feature.properties.color,
-                  color: "#"+feature.properties.color,
-                  weight: 1,
+                  color: "#7f8c8d",
+                  weight: 2,
                   opacity: 1,
                   fillOpacity: 0.8
                 });
@@ -1782,19 +1970,16 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
       }
     };
 
-    var addSearchGeoJsonToMap = function(data, style){
+    var addSearchGeoJsonToMap = function(data){
       return L.geoJson(data, {
-        style: function (feature) {
-          if(style){
-            return style;
-          }
-        },
         onEachFeature: function (feature, layer) {
           if(feature.geometry.type === 'Point' && $stateParams.extent !== null && $stateParams.extent !== 'null'){
             var radiusInMeters = $stateParams.extent*0.3048;
             var circle = L.circle([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], radiusInMeters, {
+              'color' : '#3498db',
               'fillOpacity' : 0,
-              'opacity' : 0.3
+              'opacity' : 0.8,
+              'clickable' : false
             });
             circle.addTo(map);
               layer.on('click', function(){
@@ -1802,12 +1987,24 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
               });
           }
           
+        },
+        pointToLayer: function(feature, latlng){
+          return L.circleMarker(latlng, {
+              radius: 4,
+              fillColor: "#3498db",
+              color: "#3498db",
+              weight: 2,
+              opacity: 1,
+              fillOpacity: 0.8,
+              clickable : false
+            });
         }
       });
     };
 
     var addOverlayGeoJsonToMap = function(data, style){
       var overlayLayer =  L.geoJson(data, {
+
         style: function (feature) {
           if(style){
             return style;
@@ -1858,10 +2055,10 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
             $scope.topic = topic;
             $scope.loading = false;
             if(topic.searchGeojson){
-              addSearchGeoJsonToMap(topic.searchGeojson, {'fillOpacity' : 0,'opacity' : 0.3}).addTo(map);
+              addSearchGeoJsonToMap(topic.searchGeojson).addTo(map);
             }
             if(topic.overlays){
-              var overlayLayer = addOverlayGeoJsonToMap(topic.overlays, {'fillOpacity' : 0.1,'opacity' : 0.3});
+              var overlayLayer = addOverlayGeoJsonToMap(topic.overlays, {'fillOpacity' : 1,'opacity' : 1});
             }
             if(topic.features){
               if($stateParams.type !== null || $stateParams.type !== 'null'){
@@ -2105,6 +2302,17 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
           'requiredParams' : ['timeframe', 'extent'],
           'headerTemplate' : 'topics/topic-headers/topic.header.during.within.of.html',
         },
+        'google_places' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : 'last-year',
+            'extent' : 660,
+            'defaultView' : 'summary',
+            'validViews' : ['summary', 'list', 'map']
+          },
+          'requiredParams' : ['timeframe', 'extent'],
+          'headerTemplate' : 'topics/topic-headers/topic.header.during.within.of.html',
+        },
         'street_name' : {
           'params' : {
             'type' : null,
@@ -2257,6 +2465,17 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
       'position' : 3, 
       'searchby' : {
         'address' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : 'last-year',
+            'extent' : 660,
+            'defaultView' : 'summary',
+            'validViews' : ['summary', 'list', 'map']
+          },
+          'requiredParams' : ['timeframe', 'extent'],
+          'headerTemplate' : 'topics/topic-headers/topic.header.during.within.of.html',
+        },
+        'google_places' : {
           'params' : {
             'type' : null,
             'timeframe' : 'last-year',
@@ -2423,6 +2642,425 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
 
 
 
+simplicity.factory('Recycling', ['$q', '$stateParams', 'AddressCache',
+  function($q, $stateParams, AddressCache){   
+
+    var Recycling = {};
+
+    var topicProperties = {
+      'name' : 'recycling',
+      'title' : 'Recycling Collection',
+      'plural' : 'recycling collection',
+      'searchForText' : 'an address',
+      'position' : 5,
+      'searchby' : {
+        'address' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'defaultView' : 'simple',
+            'validViews' : ['simple']
+          },
+          'requiredParams' : [],
+          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+        },
+        'google_places' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'defaultView' : 'simple',
+            'validViews' : ['simple']
+          },
+          'requiredParams' : [],
+          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+        }
+      },
+      'views' : {
+        'simple' : {'label' : 'Simple View', 'template' : 'topics/topic-components/recycling-collection/recycling.collection.simple.view.html'}
+      },
+      'iconClass' : 'flaticon-trash42',
+      'linkTopics' : ['trash', 'property'],
+      'questions' : {
+        'topic' : 'Do you want to know when recycling is collected?',
+        'address' : 'Do you want to know when recycling is collected at this address?'
+      }
+    };
+    
+    var getCurrentRecyclingWeek = function(){
+      var d = new Date(); // current time 
+      var t = d.getTime() - (1000*60*60*24*3); // milliseconds since Jan 4 1970 Sunday
+      var w = Math.floor(t / (1000*60*60*24*7)); // weeks since Jan 4 1970  
+      var o = w % 2; // equals 0 for even (B weeks) numbered weeks, 1 for odd numbered weeks 
+      if(o === 0){
+        return 'B';
+      }else{ // do your odd numbered week stuff 
+        return 'A';
+      }
+    };
+
+    Recycling.build = function(){
+      var q = $q.defer();
+      var addressCache = AddressCache.get();
+      var recyclingArray = addressCache.recycling.split(' ');
+      var currentRecyclingWeek = getCurrentRecyclingWeek();
+      var recycling = {
+        'recyclingDay' : addressCache.recycling,
+        'searchGeojson' : addressCache.searchGeojson
+      };
+      if(recyclingArray[3] === 'A)'){
+        if(getCurrentRecyclingWeek() === 'A'){
+          recycling.recyclingSchedule = {'week' : 'A', 'when' : 'this week'};
+        }else{
+          recycling.recyclingSchedule = {'week' : 'A', 'when' : 'next week'};
+        }
+      }else{
+        if(getCurrentRecyclingWeek() === 'B'){
+          recycling.recyclingSchedule = {'week' : 'B', 'when' : 'this week'};
+        }else{
+          recycling.recyclingSchedule = {'week' : 'B', 'when' : 'next week'};
+        }
+      }
+      q.resolve(recycling);
+      return q.promise;
+    };
+
+    Recycling.getTopicProperties = function(){
+      return topicProperties;
+    };
+
+    //****Return the factory object****//
+    return Recycling; 
+
+    
+}]); //END Recycling factory function
+
+
+
+
+   
+
+
+
+simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', 'simplicityBackend', 'COLORS', 'STREET_MAINTENANCE_CONTACTS', 'STREET_MAINTENANCE_CITIZEN_SERVICE_REQUESTS',
+  function($q, $stateParams, AddressCache, simplicityBackend, COLORS, STREET_MAINTENANCE_CONTACTS, STREET_MAINTENANCE_CITIZEN_SERVICE_REQUESTS){   
+
+    var StreetMaintenance = {};
+
+    var topicProperties = {
+      'name' : 'streetmaintenance',
+      'title' : 'Street Maintenance',
+      'plural' : 'street maintenance responsibility',
+      'searchForText' : 'an address or a street',
+      'position' : 7,
+      'searchby' : {
+        'address' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'defaultView' : 'list',
+            'validViews' : ['list', 'map']
+          },
+          'requiredParams' : [],
+          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+        },
+        'google_places' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'defaultView' : 'list',
+            'validViews' : ['list', 'map']
+          },
+          'requiredParams' : [],
+          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+        },
+        'street_name' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : 82.5,
+            'defaultView' : 'list',
+            'validViews' : ['list', 'map']
+          },
+          'requiredParams' : [],
+          'headerTemplate' : 'topics/topic-headers/topic.header.along.html',
+        }
+      },
+      'views' : {
+        'map' : {'label' : 'Map View', 'template' : null},
+        'list' : {'label' : 'List View', 'template' : 'topics/topic-components/street-maintenance/street.maintenance.list.view.html'},
+      },
+      'defaultView' : 'list',
+      'iconClass' : 'flaticon-location38',
+      'linkTopics' : ['property'],
+      'questions' : {
+        'topic' :  'Do you want to know who is responsible for maintaining a street?',
+        'address' :  'Do you want to know who is responsible for maintaining the street at this address?',
+        'street_name' : 'Do you want to know who is responsible for maintaining this street?'
+      }   
+    };
+
+    var formatStreetMaintenanceData = function(centerlineIdsString){
+      var q = $q.defer();
+      var addressCache = AddressCache.get();
+        simplicityBackend.simplicityQuery('streets', {'centerlineIds' : centerlineIdsString})
+          .then(function(streetResults){
+              var streetFeaturesArray = [];
+              var streetMaintenanceColors = {};
+              for (var i = 0; i < streetResults.features.length; i++) {
+                if(streetResults.features[i].properties.street_responsibility === 'UNKOWN'){
+                  streetResults.features[i].properties.street_responsibility = 'UNKNOWN';
+                }
+
+                if(!streetMaintenanceColors[streetResults.features[i].properties.street_responsibility]){
+                  streetMaintenanceColors[streetResults.features[i].properties.street_responsibility] = COLORS.streetmaintenance[streetResults.features[i].properties.street_responsibility];
+                }
+                streetResults.features[i].properties.street_responsibility_contact = STREET_MAINTENANCE_CONTACTS[streetResults.features[i].properties.street_responsibility];
+                streetResults.features[i].properties.street_responsibility_citizen_service_requests = STREET_MAINTENANCE_CITIZEN_SERVICE_REQUESTS[streetResults.features[i].properties.street_responsibility];
+
+                streetResults.features[i].properties.color = COLORS.streetmaintenance[streetResults.features[i].properties.street_responsibility].color;
+                streetFeaturesArray.push(streetResults.features[i]);
+              }
+              var summary = {
+                'table' : streetMaintenanceColors
+              };
+              var geojson = {
+                'type' : 'FeatureCollection',
+                'summary' : summary,
+                'searchGeojson' : addressCache.searchGeojson,
+                'features' : streetFeaturesArray
+              };
+              q.resolve(geojson);
+          });
+        return q.promise;
+    };
+
+    StreetMaintenance.build = function(){
+      var q = $q.defer();
+      if($stateParams.searchby === "street_name"){
+        q.resolve(formatStreetMaintenanceData($stateParams.id));
+
+      }else if ($stateParams.searchby === "address"){
+
+        simplicityBackend.simplicityQuery('xrefs', {'civicaddressId' : $stateParams.id})
+          .then(function(xrefResults){
+            var centerlineIdArray = [];
+            for (var i = 0; i < xrefResults.features.length; i++) {
+              centerlineIdArray.push(xrefResults.features[i].properties.centerline_id);
+            }
+            q.resolve(formatStreetMaintenanceData(centerlineIdArray.join(',')));
+          });
+      }
+      
+
+      return q.promise;
+    };
+
+    StreetMaintenance.getTopicProperties = function(){
+      return topicProperties;
+    };
+
+    //****Return the factory object****//
+    return StreetMaintenance; 
+
+    
+}]); //END StreetMaintenance factory function
+
+
+
+
+   
+
+
+
+simplicity.factory('Trash', ['$q', '$stateParams', 'AddressCache',
+  function($q, $stateParams, AddressCache){   
+
+    var Trash = {};
+
+    var topicProperties = {
+      'name' : 'trash',
+      'title' : 'Trash Collection',
+      'plural' : 'trash collection',
+      'searchForText' : 'an address',
+      'position' : 4,
+      'searchby' : {
+        'address' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'defaultView' : 'simple',
+            'validViews' : ['simple']
+          },
+          'requiredParams' : [],
+          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+        },
+        'google_places' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'defaultView' : 'simple',
+            'validViews' : ['simple']
+          },
+          'requiredParams' : [],
+          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+        }
+      },
+       'views' : {
+        'simple' : {'label' : 'Simple View', 'template' : 'topics/topic-components/trash-collection/trash.collection.simple.view.html'}
+      },
+      'simpleViewTemplate' : 'topics/topic-components/trash-collection/trash-collection.view.html',
+      'iconClass' : 'flaticon-garbage5',
+      'linkTopics' : ['recycling', 'property'],
+      'questions' : {
+        'topic' : 'Do you want to know when trash is collected?',
+        'address' : 'Do you want to know when trash is collected at this address?'
+      }
+    };
+    
+    Trash.build = function(){
+      var addressCache = AddressCache.get();
+      var q = $q.defer();
+      var trash = {
+        'trash' : addressCache.trash,
+        'searchGeojson' : addressCache.searchGeojson
+      };
+
+      q.resolve(trash);
+      return q.promise;
+    };
+
+    Trash.getTopicProperties = function(){
+      return topicProperties;
+    };
+    
+    //****Return the factory object****//
+    return Trash; 
+
+
+    
+    
+}]); //END Trash factory function
+
+
+
+
+   
+
+
+
+simplicity.factory('Zoning', ['$q', '$stateParams', 'AddressCache', 'simplicityBackend', 'CODELINKS',
+  function($q, $stateParams, AddressCache, simplicityBackend, CODELINKS){   
+
+    var Zoning = {};
+
+    var topicProperties = {
+      'name' : 'zoning',
+      'title' : 'Zoning',
+      'plural' : 'zoning',
+      'searchForText' : 'an address',
+      'position' : 6,
+      'searchby' : {
+        'address' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'defaultView' : 'details',
+            'validViews' : ['details', 'map']
+          },
+          'requiredParams' : [],
+          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+        }
+      },
+      'views' : {
+        'details' : {'label' : 'Details View', 'template' : 'topics/topic-components/zoning/zoning.view.html'},
+        'map' : {'label' : 'Map View', 'template' : null}
+      },
+      'iconClass' : 'flaticon-map104',
+      'linkTopics' : ['property', 'crime', 'development'],
+      'questions' : {
+        'topic' :  'Do you want to know about a zoning?', 
+        'address' :  'Do you want to know about the zoning at this address?'
+      }
+    };
+
+    var formatZoningPropertyForAnAddress = function(){
+      var addressCache = AddressCache.get();
+      var pinnum2civicaddressid = AddressCache.pinnum2civicaddressid();
+      var formattedZoningArray = [];
+      for (var z = 0; z < addressCache.zoning.length; z++) {
+        var zoningDistrict = addressCache.zoning[z];
+        if(CODELINKS[zoningDistrict] === undefined){
+          formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : 'disable'});
+        }else{
+          formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : CODELINKS[zoningDistrict]});
+        }
+      }
+      return formattedZoningArray;
+    };
+
+    Zoning.build = function(){
+      var q = $q.defer();
+      var addressCache = AddressCache.get();
+      var codelink;
+      if(CODELINKS[addressCache.zoning] === undefined){
+        codelink = 'disable';
+      }else{
+        codelink = CODELINKS[addressCache.zoning];
+      }
+      var geojson = {
+        'type' : 'FeatureCollection',
+        'summary' : {},
+        'searchGeojson' : addressCache.searchGeojson,
+        'features' : [{
+            'type' : 'Feature',
+            'properties' : {
+              'zoning' : formatZoningPropertyForAnAddress(),
+              'zoningOverlays' : addressCache.zoningOverlays,
+            },
+            'geometry' : {
+              'type' : 'Point',
+              'coordinates' : [addressCache.searchGeojson.features[0].geometry.coordinates[0], addressCache.searchGeojson.features[0].geometry.coordinates[1]]
+            }
+        }]
+      };
+      if(addressCache.zoningOverlays){
+        var zoningOverlaysSplit = addressCache.zoningOverlays.split('-');
+        simplicityBackend.simplicityQuery('zoningOverlays', {'zoningOverlayName' : zoningOverlaysSplit[0]})
+            .then(function(zoningOverlayLayer){
+              geojson.overlays = zoningOverlayLayer;
+              q.resolve(geojson);
+            });
+      }else{
+        q.resolve(geojson);
+      }
+            
+      return q.promise;
+    };
+
+    Zoning.getTopicProperties = function(){
+      return topicProperties;
+    };
+
+    //****Return the factory object****//
+    return Zoning; 
+
+    
+}]); //END Zoning factory function
+
+
+
+
+   
+
+
+
 simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$stateParams', 'AddressCache', 'simplicityBackend', 'COLORS', 'CODELINKS',
   function($http, $location, $q, $filter, $stateParams, AddressCache, simplicityBackend, COLORS, CODELINKS){   
 
@@ -2437,6 +3075,17 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
       'position' : 1,
       'searchby' : {
         'address' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'centermap' : null,
+            'defaultView' : 'details',
+            'validViews' : ['details', 'map']
+          },
+          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+        },
+        'google_places' : {
           'params' : {
             'type' : null,
             'timeframe' : null,
@@ -2652,393 +3301,6 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
 
 
 
-simplicity.factory('Recycling', ['$q', '$stateParams', 'AddressCache',
-  function($q, $stateParams, AddressCache){   
-
-    var Recycling = {};
-
-    var topicProperties = {
-      'name' : 'recycling',
-      'title' : 'Recycling Collection',
-      'plural' : 'recycling collection',
-      'searchForText' : 'an address',
-      'position' : 5,
-      'searchby' : {
-        'address' : {
-          'params' : {
-            'type' : null,
-            'timeframe' : null,
-            'extent' : null,
-            'defaultView' : 'simple',
-            'validViews' : ['simple']
-          },
-          'requiredParams' : [],
-          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
-        }
-      },
-      'views' : {
-        'simple' : {'label' : 'Simple View', 'template' : 'topics/topic-components/recycling-collection/recycling.collection.simple.view.html'}
-      },
-      'iconClass' : 'flaticon-trash42',
-      'linkTopics' : ['trash', 'property'],
-      'questions' : {
-        'topic' : 'Do you want to know when recycling is collected?',
-        'address' : 'Do you want to know when recycling is collected at this address?'
-      }
-    };
-    
-    var getCurrentRecyclingWeek = function(){
-      var d = new Date(); // current time 
-      var t = d.getTime() - (1000*60*60*24*3); // milliseconds since Jan 4 1970 Sunday
-      var w = Math.floor(t / (1000*60*60*24*7)); // weeks since Jan 4 1970  
-      var o = w % 2; // equals 0 for even (B weeks) numbered weeks, 1 for odd numbered weeks 
-      if(o === 0){
-        return 'B';
-      }else{ // do your odd numbered week stuff 
-        return 'A';
-      }
-    };
-
-    Recycling.build = function(){
-      var q = $q.defer();
-      var addressCache = AddressCache.get();
-      var recyclingArray = addressCache.recycling.split(' ');
-      var currentRecyclingWeek = getCurrentRecyclingWeek();
-      var recycling = {
-        'recyclingDay' : addressCache.recycling,
-        'searchGeojson' : addressCache.searchGeojson
-      };
-      if(recyclingArray[3] === 'A)'){
-        if(getCurrentRecyclingWeek() === 'A'){
-          recycling.recyclingSchedule = {'week' : 'A', 'when' : 'this week'};
-        }else{
-          recycling.recyclingSchedule = {'week' : 'A', 'when' : 'next week'};
-        }
-      }else{
-        if(getCurrentRecyclingWeek() === 'B'){
-          recycling.recyclingSchedule = {'week' : 'B', 'when' : 'this week'};
-        }else{
-          recycling.recyclingSchedule = {'week' : 'B', 'when' : 'next week'};
-        }
-      }
-      q.resolve(recycling);
-      return q.promise;
-    };
-
-    Recycling.getTopicProperties = function(){
-      return topicProperties;
-    };
-
-    //****Return the factory object****//
-    return Recycling; 
-
-    
-}]); //END Recycling factory function
-
-
-
-
-   
-
-
-
-simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', 'simplicityBackend', 'COLORS', 'STREET_MAINTENANCE_CONTACTS', 'STREET_MAINTENANCE_CITIZEN_SERVICE_REQUESTS',
-  function($q, $stateParams, AddressCache, simplicityBackend, COLORS, STREET_MAINTENANCE_CONTACTS, STREET_MAINTENANCE_CITIZEN_SERVICE_REQUESTS){   
-
-    var StreetMaintenance = {};
-
-    var topicProperties = {
-      'name' : 'streetmaintenance',
-      'title' : 'Street Maintenance',
-      'plural' : 'street maintenance responsibility',
-      'searchForText' : 'an address or a street',
-      'position' : 7,
-      'searchby' : {
-        'address' : {
-          'params' : {
-            'type' : null,
-            'timeframe' : null,
-            'extent' : null,
-            'defaultView' : 'list',
-            'validViews' : ['list', 'map']
-          },
-          'requiredParams' : [],
-          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
-        },
-        'street_name' : {
-          'params' : {
-            'type' : null,
-            'timeframe' : null,
-            'extent' : 82.5,
-            'defaultView' : 'list',
-            'validViews' : ['list', 'map']
-          },
-          'requiredParams' : [],
-          'headerTemplate' : 'topics/topic-headers/topic.header.along.html',
-        }
-      },
-      'views' : {
-        'map' : {'label' : 'Map View', 'template' : null},
-        'list' : {'label' : 'List View', 'template' : 'topics/topic-components/street-maintenance/street.maintenance.list.view.html'},
-      },
-      'defaultView' : 'list',
-      'iconClass' : 'flaticon-location38',
-      'linkTopics' : ['property'],
-      'questions' : {
-        'topic' :  'Do you want to know who is responsible for maintaining a street?',
-        'address' :  'Do you want to know who is responsible for maintaining the street at this address?',
-        'street_name' : 'Do you want to know who is responsible for maintaining this street?'
-      }   
-    };
-
-    var formatStreetMaintenanceData = function(centerlineIdsString){
-      var q = $q.defer();
-      var addressCache = AddressCache.get();
-        simplicityBackend.simplicityQuery('streets', {'centerlineIds' : centerlineIdsString})
-          .then(function(streetResults){
-              var streetFeaturesArray = [];
-              var streetMaintenanceColors = {};
-              for (var i = 0; i < streetResults.features.length; i++) {
-                if(streetResults.features[i].properties.street_responsibility === 'UNKOWN'){
-                  streetResults.features[i].properties.street_responsibility = 'UNKNOWN';
-                }
-
-                if(!streetMaintenanceColors[streetResults.features[i].properties.street_responsibility]){
-                  streetMaintenanceColors[streetResults.features[i].properties.street_responsibility] = COLORS.streetmaintenance[streetResults.features[i].properties.street_responsibility];
-                }
-                streetResults.features[i].properties.street_responsibility_contact = STREET_MAINTENANCE_CONTACTS[streetResults.features[i].properties.street_responsibility];
-                streetResults.features[i].properties.street_responsibility_citizen_service_requests = STREET_MAINTENANCE_CITIZEN_SERVICE_REQUESTS[streetResults.features[i].properties.street_responsibility];
-
-                streetResults.features[i].properties.color = COLORS.streetmaintenance[streetResults.features[i].properties.street_responsibility].color;
-                streetFeaturesArray.push(streetResults.features[i]);
-              }
-              var summary = {
-                'table' : streetMaintenanceColors
-              };
-              var geojson = {
-                'type' : 'FeatureCollection',
-                'summary' : summary,
-                'searchGeojson' : addressCache.searchGeojson,
-                'features' : streetFeaturesArray
-              };
-              console.log(geojson);
-              q.resolve(geojson);
-          });
-        return q.promise;
-    };
-
-    StreetMaintenance.build = function(){
-      var q = $q.defer();
-      if($stateParams.searchby === "street_name"){
-        q.resolve(formatStreetMaintenanceData($stateParams.id));
-
-      }else if ($stateParams.searchby === "address"){
-
-        simplicityBackend.simplicityQuery('xrefs', {'civicaddressId' : $stateParams.id})
-          .then(function(xrefResults){
-            var centerlineIdArray = [];
-            for (var i = 0; i < xrefResults.features.length; i++) {
-              centerlineIdArray.push(xrefResults.features[i].properties.centerline_id);
-            }
-            q.resolve(formatStreetMaintenanceData(centerlineIdArray.join(',')));
-          });
-      }
-      
-
-      return q.promise;
-    };
-
-    StreetMaintenance.getTopicProperties = function(){
-      return topicProperties;
-    };
-
-    //****Return the factory object****//
-    return StreetMaintenance; 
-
-    
-}]); //END StreetMaintenance factory function
-
-
-
-
-   
-
-
-
-simplicity.factory('Trash', ['$q', '$stateParams', 'AddressCache',
-  function($q, $stateParams, AddressCache){   
-
-    var Trash = {};
-
-    var topicProperties = {
-      'name' : 'trash',
-      'title' : 'Trash Collection',
-      'plural' : 'trash collection',
-      'searchForText' : 'an address',
-      'position' : 4,
-      'searchby' : {
-        'address' : {
-          'params' : {
-            'type' : null,
-            'timeframe' : null,
-            'extent' : null,
-            'defaultView' : 'simple',
-            'validViews' : ['simple']
-          },
-          'requiredParams' : [],
-          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
-        }
-      },
-       'views' : {
-        'simple' : {'label' : 'Simple View', 'template' : 'topics/topic-components/trash-collection/trash.collection.simple.view.html'}
-      },
-      'simpleViewTemplate' : 'topics/topic-components/trash-collection/trash-collection.view.html',
-      'iconClass' : 'flaticon-garbage5',
-      'linkTopics' : ['recycling', 'property'],
-      'questions' : {
-        'topic' : 'Do you want to know when trash is collected?',
-        'address' : 'Do you want to know when trash is collected at this address?'
-      }
-    };
-    
-    Trash.build = function(){
-      var addressCache = AddressCache.get();
-      var q = $q.defer();
-      var trash = {
-        'trash' : addressCache.trash,
-        'searchGeojson' : addressCache.searchGeojson
-      };
-      console.log(trash);
-      q.resolve(trash);
-      return q.promise;
-    };
-
-    Trash.getTopicProperties = function(){
-      return topicProperties;
-    };
-    
-    //****Return the factory object****//
-    return Trash; 
-
-
-    
-    
-}]); //END Trash factory function
-
-
-
-
-   
-
-
-
-simplicity.factory('Zoning', ['$q', '$stateParams', 'AddressCache', 'simplicityBackend', 'CODELINKS',
-  function($q, $stateParams, AddressCache, simplicityBackend, CODELINKS){   
-
-    var Zoning = {};
-
-    var topicProperties = {
-      'name' : 'zoning',
-      'title' : 'Zoning',
-      'plural' : 'zoning',
-      'searchForText' : 'an address',
-      'position' : 6,
-      'searchby' : {
-        'address' : {
-          'params' : {
-            'type' : null,
-            'timeframe' : null,
-            'extent' : null,
-            'defaultView' : 'details',
-            'validViews' : ['details', 'map']
-          },
-          'requiredParams' : [],
-          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
-        }
-      },
-      'views' : {
-        'details' : {'label' : 'Details View', 'template' : 'topics/topic-components/zoning/zoning.view.html'},
-        'map' : {'label' : 'Map View', 'template' : null}
-      },
-      'iconClass' : 'flaticon-map104',
-      'linkTopics' : ['property', 'crime', 'development'],
-      'questions' : {
-        'topic' :  'Do you want to know about a zoning?', 
-        'address' :  'Do you want to know about the zoning at this address?'
-      }
-    };
-
-    var formatZoningPropertyForAnAddress = function(){
-      var addressCache = AddressCache.get();
-      var pinnum2civicaddressid = AddressCache.pinnum2civicaddressid();
-      var formattedZoningArray = [];
-      for (var z = 0; z < addressCache.zoning.length; z++) {
-        var zoningDistrict = addressCache.zoning[z];
-        if(CODELINKS[zoningDistrict] === undefined){
-          formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : 'disable'});
-        }else{
-          formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : CODELINKS[zoningDistrict]});
-        }
-      }
-      return formattedZoningArray;
-    };
-
-    Zoning.build = function(){
-      var q = $q.defer();
-      var addressCache = AddressCache.get();
-      var codelink;
-      if(CODELINKS[addressCache.zoning] === undefined){
-        codelink = 'disable';
-      }else{
-        codelink = CODELINKS[addressCache.zoning];
-      }
-      var geojson = {
-        'type' : 'FeatureCollection',
-        'summary' : {},
-        'searchGeojson' : addressCache.searchGeojson,
-        'features' : [{
-            'type' : 'Feature',
-            'properties' : {
-              'zoning' : formatZoningPropertyForAnAddress(),
-              'zoningOverlays' : addressCache.zoningOverlays,
-            },
-            'geometry' : {
-              'type' : 'Point',
-              'coordinates' : [addressCache.searchGeojson.features[0].geometry.coordinates[0], addressCache.searchGeojson.features[0].geometry.coordinates[1]]
-            }
-        }]
-      };
-      if(addressCache.zoningOverlays){
-        var zoningOverlaysSplit = addressCache.zoningOverlays.split('-');
-        simplicityBackend.simplicityQuery('zoningOverlays', {'zoningOverlayName' : zoningOverlaysSplit[0]})
-            .then(function(zoningOverlayLayer){
-              geojson.overlays = zoningOverlayLayer;
-              q.resolve(geojson);
-            });
-      }else{
-        q.resolve(geojson);
-      }
-            
-      return q.promise;
-    };
-
-    Zoning.getTopicProperties = function(){
-      return topicProperties;
-    };
-
-    //****Return the factory object****//
-    return Zoning; 
-
-    
-}]); //END Zoning factory function
-
-
-
-
-   
-
-
-
 (function(module) {
 try {
   module = angular.module('simplicity');
@@ -3047,7 +3309,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('main/main.html',
-    '<div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2"><div class="col-xs-12"><div class="col-xs-6"><div class="pull-left" analytics-on="click" analytics-category="Navigation" analytics-event="SimpliCity Logo" ng-click="goHome()" style="cursor : pointer"><h2 style="color : #073F97;" class="text-center">SimpliCity</h2><h5 class="text-center">city data simplified</h5></div></div><div class="col-xs-6" style="margin-top : 10px"><a href="http://www.ashevillenc.gov/" target="_blank" analytics-category="Navigation" analytics-on="click" analytics-event="City Logo"><img class="pull-right" style="height : 80px;" src="http://123graffitifree.com/images/citylogo-flatblue.png"></a></div></div><div ui-view=""></div></div>');
+    '<div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2"><div class="col-xs-12"><div class="col-xs-6"><div class="pull-left" analytics-on="click" analytics-category="Navigation" analytics-event="SimpliCity Logo" ng-click="goHome()" style="cursor : pointer"><h2 style="color : #073F97;" class="text-center">SimpliCity</h2><h5 class="text-center">city data simplified</h5></div></div><div class="col-xs-6" style="margin-top : 10px"><a href="http://www.ashevillenc.gov/" target="_blank" analytics-category="Navigation" analytics-on="click" analytics-event="City Logo"><img class="pull-right" style="height : 80px;" src="http://123graffitifree.com/images/citylogo-flatblue.png"></a></div></div><div><input id="stupid-required-google-input" type="hidden"></div><div ui-view=""></div></div>');
 }]);
 })();
 
@@ -3059,7 +3321,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('search/search.html',
-    '<div ui-view=""></div><div id="searchContent"><div class="col-xs-12" style="margin-top : 20px"><p class="text-muted text-center lead" style="margin-bottom : 0px; margin-top : 20px">Discover city data about <strong>{{discoverText}}</strong> in your community.</p><p class="text-muted text-center lead">Search for {{searchFor}} to get started!</p></div><div class="col-xs-12"><div class="input-group"><input id="inputSearch" groupindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location..." style="z-index: 0" ng-model="searchText" ng-keyup="doSearch(searchText, $event)" autofocus=""> <span class="input-group-btn"><button class="btn btn-primary" type="button" style="box-shadow : none; font-size : 17px"><i class="fa fa-search"></i></button></span></div></div><div class="" ng-show="errorMessage.show || helperMessage.show || searchGroups.length > 0"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-success">{{helperMessage.message}}</p><div ng-repeat="group in searchGroups"><div class="col-xs-12" style="margin-top : 10px; margin-bottom : 10px"><h4 class="row text-muted"><span class="fa-stack fa-lg" ng-click="goBack()"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span> <strong>{{group.label}}</strong> <span class="badge" style="background : #999">{{group.results.length}}</span></h4><div class="list-group" ng-repeat="candidate in group.results | limitTo : group.offset"><a analytics-on="click" analytics-category="Search" analytics-label="{{candidate.type}}" analytics-event="{{candidate.label}}" ng-click="goToTopics(candidate, $event)" ng-keypress="goToTopics(candidate, $event)" class="row list-group-item"><span class="col-xs-2 col-lg-1"><span class="fa-stack fa-lg text-primary"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span></span><p class="col-xs-8 col-lg-9 pull-left text-primary" style="margin-top : 8px">{{candidate.label}}</p><h4 class="col-xs-2 col-lg-2"><i class="fa fa-lg fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="list-group" ng-if="group.results.length > 3"><a ng-click="group.offset = group.offset + 3" class="row list-group-item"><h4 class="col-xs-10 text-primary"><strong>More</strong></h4><h4 class="col-xs-2"><i class="fa fa-lg fa-chevron-down text-primary pull-right"></i></h4></a></div></div></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div><div ng-show="showTopicsLink" class="col-xs-12 col-md-6 col-md-offset-3 text-center well" style="margin-top : 60px; margin-bottom : 40px; background : #fff; border : 2px solid #ecf0f1"><h4 class="text-info">Not sure what you can find with SimpliCity?</h4><a href="#/topics/list"><h2>Click here to view topics</h2></a></div><div style="position : absolute; bottom : 0px; width : 100%"><h4 class="text-primary text-center">Brought to you by the <a href="http://www.ashevillenc.gov/" target="_blank">City of Asheville</a> <i class="fa fa-smile-o"></i></h4></div></div>');
+    '<div ui-view=""></div><div id="searchContent"><div class="col-xs-12" style="margin-top : 20px"><p class="text-muted text-center lead" style="margin-bottom : 0px; margin-top : 20px">Discover city data about <strong>{{discoverText}}</strong> in your community.</p><p class="text-muted text-center lead">Search for {{searchFor}} to get started!</p></div><div class="col-xs-12"><div class="input-group"><input id="inputSearch" groupindex="1" type="text" autocomplete="on" class="form-control" placeholder="Enter a location..." style="z-index: 0" ng-model="searchText" ng-keyup="doSearch(searchText, $event)" autofocus=""> <span class="input-group-btn"><button class="btn btn-primary" type="button" style="box-shadow : none; font-size : 17px"><i class="fa fa-search"></i></button></span></div></div><div class="" ng-show="errorMessage.show || helperMessage.show || searchGroups.length > 0"><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p><p ng-show="helperMessage.show" class="text-success">{{helperMessage.message}}</p><div ng-repeat="group in searchGroups"><div class="col-xs-12" style="margin-top : 10px; margin-bottom : 10px"><h4 class="row text-muted"><span class="fa-stack fa-lg" ng-click="goBack()"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span> <strong>{{group.label}}</strong> <span class="badge" style="background : #999">{{group.results.length}}</span> <span ng-if="group.name === \'google_places\'"><img src="images/powered-by-google-on-white.png" alt="" class="pull-right" style="padding : 20px"></span></h4><div class="list-group" ng-repeat="candidate in group.results | limitTo : group.offset"><a analytics-on="click" analytics-category="Search" analytics-label="{{candidate.type}}" analytics-event="{{candidate.label}}" ng-click="goToTopics(candidate, $event)" ng-keypress="goToTopics(candidate, $event)" class="row list-group-item"><span class="col-xs-2 col-lg-1"><span class="fa-stack fa-lg text-primary"><i class="fa fa-circle fa-stack-2x"></i> <i class="fa fa-stack-1x fa-inverse" ng-class="group.iconClass"></i></span></span><p class="col-xs-8 col-lg-9 pull-left text-primary" style="margin-top : 8px">{{candidate.label}}</p><h4 class="col-xs-2 col-lg-2"><i class="fa fa-lg fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="list-group" ng-if="group.results.length > 3"><a ng-click="group.offset = group.offset + 3" class="row list-group-item"><h4 class="col-xs-10 text-primary"><strong>More</strong></h4><h4 class="col-xs-2"><i class="fa fa-lg fa-chevron-down text-primary pull-right"></i></h4></a></div></div></div><p ng-show="errorMessage.show" class="text-danger">{{errorMessage.message}}</p></div><div ng-show="showTopicsLink" class="col-xs-12 col-md-6 col-md-offset-3 text-center well" style="margin-top : 60px; margin-bottom : 40px; background : #fff; border : 2px solid #ecf0f1"><h4 class="text-info">Not sure what you can find with SimpliCity?</h4><a href="#/topics/list"><h2>Click here to view topics</h2></a></div><div class="col-xs-12" style="margin-top : 50px"><h4 class="text-primary text-center">Brought to you by the <a href="http://www.ashevillenc.gov/" target="_blank">City of Asheville</a> <i class="fa fa-smile-o"></i></h4></div></div>');
 }]);
 })();
 
@@ -3179,7 +3441,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topic-single/topic.single.html',
-    '<div><div class="col-xs-12 btn-group btn-group-justified" style="margin-top : 15px"><a href="#/search/composite" class="btn btn-primary" style="font-size : 18px" analytics-on="click" analytics-category="Navigation" analytics-label="Topics Single Page" analytics-event="To Search"><i class="fa fa-search fa-fw"></i> Search</a> <a ng-click="goToTopics()" class="btn btn-primary" style="font-size : 18px" analytics-on="click" analytics-category="Navigation" analytics-label="Topics Single Page" analytics-event="To Search"><i class="fa fa-bars fa-fw"></i> View Topics</a></div><div class="col-xs-12"><hr></div><div ng-include="headerTemplate"></div><div class="col-xs-12" style="height : 200px; text-align : center; margin-top : 30px" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div class="col-xs-12 list-item-panel" ng-show="!loading"><div ng-if="stateParams.view !== \'simple\'"><div class="hidden-xs col-xs-12"><h2 class="pull-left" style="margin-right : 10px">{{topicProperties.views[stateParams.view].label}}</h2><div class="btn-group pull-right" role="group" aria-label="..." style="margin-top : 15px"><button ng-repeat="view in topicProperties.searchby[stateParams.searchby].params.validViews" ng-class="{\'active\' : stateParams.view === view}" ng-click="onClickChangeView(view)" analytics-on="click" analytics-category="Topic View" analytics-label="{{stateParams.topic}}" analytics-event="{{topicProperties.views[view].label}}" class="btn btn-primary">{{topicProperties.views[view].label}}</button><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div><button ng-click="openDownloadModal()" type="button" class="btn btn-primary" data-toggle="tooltip" title="Download"><i class="fa fa-lg fa-cloud-download"></i> Download</button></div><div ng-if="stateParams.type !== null" class="col-xs-12"><h5 class="text-muted">Filtered by <strong>{{stateParams.type}}</strong></h5></div></div><div class="visible-xs" style="text-align : center; width : 100%"><h2 class="pull-left" style="margin-right : 10px">{{topicProperties.views[stateParams.view].label}} View</h2><div class="btn-group" role="group" aria-label="..." style="margin-top : 15px"><div class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Change View <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li ng-repeat="view in topicProperties.searchby[stateParams.searchby].params.validViews" ng-class="{\'active\' : stateParams.view === view}" ng-click="onClickChangeView(view)" analytics-on="click" analytics-category="Topic View" analytics-label="{{stateParams.topic}}" analytics-event="{{topicProperties.views[view].label}} View" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1">{{topicProperties.views[view].label}}</a></li></ul></div><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div></div><div class="col-xs-12" style="height : 10px"></div></div></div><div ng-if="topicPropteries.viewTemplates.simple !== null" ng-show="stateParams.view === \'simple\'" ng-include="topicProperties.views.simple.template"></div><div ng-if="topicPropteries.viewTemplates.details !== null" ng-show="stateParams.view === \'details\'" ng-include="topicProperties.views.details.template"></div><div ng-if="topicPropteries.viewTemplates.list !== null" ng-show="stateParams.view === \'list\'" ng-include="topicProperties.views.list.template"></div><div ng-if="topicPropteries.viewTemplates.summary !== null" ng-show="stateParams.view === \'summary\'" ng-include="topicProperties.views.summary.template"></div><div><div ng-show="stateParams.view === \'map\'" class="col-xs-12" style="height : 400px; margin-bottom : 20px" id="map"><div ng-if="topic.summary.table !== undefined"><h5 ng-init="showLegend = true" ng-show="showLegend" ng-click="showLegend = !showLegend" class="text-primary" style="position : absolute; top : 50px; right : 10px;z-index : 7; cursor : pointer; background : white; padding : 5px; border-radius : 4px; border : 2px solid #2780E3; box-shadow: 0 1px 5px rgba(0,0,0,0.4)"><strong>Legend</strong> <i class="fa fa-expand"></i></h5><div ng-show="!showLegend" style="position : absolute; top : 50px; right : 10px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7; border : 2px solid #2780E3"><div class="col-xs-12"><h4 class="pull-left">Legend</h4><p ng-click="showLegend = !showLegend" class="text-primary pull-right" style="margin-top : 5px; cursor : pointer"><i class="fa fa-2x fa-times"></i></p></div><table ng-if="topic.features.length !== 0" class="table table-hover"><tbody><tr ng-repeat="(key, value) in topic.summary.table"><td ng-click="getDetails(key)" style="cursor : pointer"><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}</td></tr></tbody></table></div></div></div><div id="detailsModal" class="modal fade"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button ng-click="closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">Location Details</h4></div><div class="modal-body"><div ng-include="topicProperties.views.list.template"></div></div></div></div></div></div></div><div ng-if="linkTopics.length > 0" class="col-xs-12 list-item-panel" style="margin-top : 30px"><h2>Related Links</h2><div class="list-group" style="margin-top : 20px"><a class="row list-group-item list-item-panel" analytics-category="Related Link" analytics-label="{{stateParams.topic}}" analytics-event="{{linkTopic.linkTo}}" href="{{linkTopic.linkTo}}" style="margin-bottom : 5px" ng-repeat="linkTopic in linkTopics"><span class="visible-xs col-xs-8"><p class="text-primary text-center">{{linkTopic.question}}</p></span> <i ng-class="linkTopic.iconClass" class="visible-xs pull-left col-xs-3 text-primary"></i><div ng-class="linkTopic.iconClass" class="hidden-xs col-sm-2 text-primary"></div><h4 class="hidden-xs col-sm-9 text-primary" style="margin-top : 20px">{{linkTopic.question}}</h4><h4 class="col-sm-1 hidden-xs"><i class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="col-xs-12 text-center">List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a> under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.</div></div><div id="downloadModal" class="modal fade" style="z-index : 3000"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">Download</h4></div><div class="modal-body"><div ng-if="stateParams.topic === \'property\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Property Details <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'crime\' || stateParams.topic === \'development\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'summary\', topic)" analytics-on="click" analytics-category="Download" analytics-label="summary" analytics-event="{{stateParams.topic}}">Summary Table <i class="fa fa-cloud-download"></i></button> <button class="btn btn-primary col-xs-12" style="margin-top : 3px" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Detailed records <i class="fa fa-cloud-download"></i></button><p class="text-muted text-center">based on selected filters</p></div><div ng-if="stateParams.topic === \'zoning\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Zoning Data <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'addresslist\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Address List <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'streetmaintenance\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Street Details <i class="fa fa-cloud-download"></i></button></div></div></div></div></div></div>');
+    '<div><div class="col-xs-12 btn-group btn-group-justified" style="margin-top : 15px"><a href="#/search/composite" class="btn btn-primary" style="font-size : 18px" analytics-on="click" analytics-category="Navigation" analytics-label="Topics Single Page" analytics-event="To Search"><i class="fa fa-search fa-fw"></i> Search</a> <a ng-click="goToTopics()" class="btn btn-primary" style="font-size : 18px" analytics-on="click" analytics-category="Navigation" analytics-label="Topics Single Page" analytics-event="To Search"><i class="fa fa-bars fa-fw"></i> View Topics</a></div><div class="col-xs-12"><hr></div><div ng-include="headerTemplate"></div><div class="col-xs-12" style="height : 200px; text-align : center; margin-top : 30px" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div class="col-xs-12 list-item-panel" ng-show="!loading"><div ng-if="stateParams.view !== \'simple\'"><div class="hidden-xs col-xs-12"><h2 class="pull-left" style="margin-right : 10px">{{topicProperties.views[stateParams.view].label}}</h2><div class="btn-group pull-right" role="group" aria-label="..." style="margin-top : 15px"><button ng-repeat="view in topicProperties.searchby[stateParams.searchby].params.validViews" ng-class="{\'active\' : stateParams.view === view}" ng-click="onClickChangeView(view)" analytics-on="click" analytics-category="Topic View" analytics-label="{{stateParams.topic}}" analytics-event="{{topicProperties.views[view].label}}" class="btn btn-primary">{{topicProperties.views[view].label}}</button><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div><button ng-click="openDownloadModal()" type="button" class="btn btn-primary" data-toggle="tooltip" title="Download"><i class="fa fa-lg fa-cloud-download"></i> Download</button></div><div ng-if="stateParams.type !== null" class="col-xs-12"><h5 class="text-muted">Filtered by <strong>{{stateParams.type}}</strong></h5></div></div><div class="visible-xs" style="text-align : center; width : 100%"><h2 class="pull-left" style="margin-right : 10px">{{topicProperties.views[stateParams.view].label}} View</h2><div class="btn-group" role="group" aria-label="..." style="margin-top : 15px"><div class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Change View <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li ng-repeat="view in topicProperties.searchby[stateParams.searchby].params.validViews" ng-class="{\'active\' : stateParams.view === view}" ng-click="onClickChangeView(view)" analytics-on="click" analytics-category="Topic View" analytics-label="{{stateParams.topic}}" analytics-event="{{topicProperties.views[view].label}} View" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1">{{topicProperties.views[view].label}}</a></li></ul></div><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div></div><div class="col-xs-12" style="height : 10px"></div></div></div><div ng-if="topicPropteries.viewTemplates.simple !== null" ng-show="stateParams.view === \'simple\'" ng-include="topicProperties.views.simple.template"></div><div ng-if="topicPropteries.viewTemplates.details !== null" ng-show="stateParams.view === \'details\'" ng-include="topicProperties.views.details.template"></div><div ng-if="topicPropteries.viewTemplates.list !== null" ng-show="stateParams.view === \'list\'" ng-include="topicProperties.views.list.template"></div><div ng-if="topicPropteries.viewTemplates.summary !== null" ng-show="stateParams.view === \'summary\'" ng-include="topicProperties.views.summary.template"></div><div><div ng-show="stateParams.view === \'map\'" class="col-xs-12" style="height : 400px; margin-bottom : 20px;"><div id="map" style="height : 100%; width : 100%;margin : 0px; padding : 0px"><div ng-if="topic.summary.table !== undefined"><h5 ng-init="showLegend = true" ng-show="showLegend" ng-click="showLegend = !showLegend" class="text-primary" style="position : absolute; top : 50px; right : 10px;z-index : 7; cursor : pointer; background : white; padding : 5px; border-radius : 4px; border : 2px solid #2780E3; box-shadow: 0 1px 5px rgba(0,0,0,0.4)"><strong>Legend</strong> <i class="fa fa-expand"></i></h5><div ng-show="!showLegend" style="position : absolute; top : 50px; right : 10px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7; border : 2px solid #2780E3"><div class="col-xs-12"><h4 class="pull-left">Legend</h4><p ng-click="showLegend = !showLegend" class="text-primary pull-right" style="margin-top : 5px; cursor : pointer"><i class="fa fa-2x fa-times"></i></p></div><table ng-if="topic.features.length !== 0" class="table table-hover"><tbody><tr ng-repeat="(key, value) in topic.summary.table"><td ng-click="getDetails(key)" style="cursor : pointer"><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}</td></tr></tbody></table></div></div></div></div><div id="detailsModal" class="modal fade"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button ng-click="closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">Location Details</h4></div><div class="modal-body"><div ng-include="topicProperties.views.list.template"></div></div></div></div></div></div></div><div ng-if="linkTopics.length > 0" class="col-xs-12 list-item-panel" style="margin-top : 30px"><h2>Related Links</h2><div class="list-group" style="margin-top : 20px"><a class="row list-group-item list-item-panel" analytics-category="Related Link" analytics-label="{{stateParams.topic}}" analytics-event="{{linkTopic.linkTo}}" href="{{linkTopic.linkTo}}" style="margin-bottom : 5px" ng-repeat="linkTopic in linkTopics"><span class="visible-xs col-xs-8"><p class="text-primary text-center">{{linkTopic.question}}</p></span> <i ng-class="linkTopic.iconClass" class="visible-xs pull-left col-xs-3 text-primary"></i><div ng-class="linkTopic.iconClass" class="hidden-xs col-sm-2 text-primary"></div><h4 class="hidden-xs col-sm-9 text-primary" style="margin-top : 20px">{{linkTopic.question}}</h4><h4 class="col-sm-1 hidden-xs"><i class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="col-xs-12 text-center">List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a> under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.</div></div><div id="downloadModal" class="modal fade" style="z-index : 3000"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">Download</h4></div><div class="modal-body"><div ng-if="stateParams.topic === \'property\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Property Details <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'crime\' || stateParams.topic === \'development\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'summary\', topic)" analytics-on="click" analytics-category="Download" analytics-label="summary" analytics-event="{{stateParams.topic}}">Summary Table <i class="fa fa-cloud-download"></i></button> <button class="btn btn-primary col-xs-12" style="margin-top : 3px" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Detailed records <i class="fa fa-cloud-download"></i></button><p class="text-muted text-center">based on selected filters</p></div><div ng-if="stateParams.topic === \'zoning\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Zoning Data <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'addresslist\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Address List <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'streetmaintenance\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Street Details <i class="fa fa-cloud-download"></i></button></div></div></div></div></div></div>');
 }]);
 })();
 
