@@ -40,7 +40,7 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
         $scope.discoverText = topicProperties.plural;
         $scope.searchFor = topicProperties.searchForText;
     }
-
+    
 
 
     //Geocodes the search results     
@@ -62,10 +62,11 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
             }, 2000);
         }
 
+
+
         //Search usign searchText
         simplicityBackend.simplicitySearch(searchText)
             .then(function(searchResults){
-                console.log(searchResults);
                 if(searchText === ""){
                     $scope.searchGroups = [];
                 }else{
@@ -74,7 +75,6 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
                             for (var i = searchResults.length - 1; i >= 0; i--) {
 
                                 if(topicProperties.searchby[searchResults[i].name] === undefined){
-                                    console.log(searchResults[i].name);
                                     searchResults.splice(i, 1);
                                 }
                             };
@@ -115,9 +115,27 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
             candidate.type = "address";
         }
         if($stateParams.topic !== null){
-            $state.go('main.topics.topic', {'topic' : $stateParams.topic, 'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});
+            if(candidate.googleResult === true){
+                simplicityBackend.simplicityFindGoogleAddress(candidate)
+                    .then(function(addressResults){
+                        $state.go('main.topics.topic', {'topic' : $stateParams.topic, 'searchtext' : addressResults.label, 'searchby' : addressResults.type, 'id' : addressResults.id});
+                    })
+            }else{
+                $state.go('main.topics.topic', {'topic' : $stateParams.topic, 'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});
+            }
+           
+
+
         }else{
-          $state.go('main.topics.list', {'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});  
+            if(candidate.googleResult === true){
+                simplicityBackend.simplicityFindGoogleAddress(candidate)
+                    .then(function(addressResults){
+                        $state.go('main.topics.list', {'searchtext' : addressResults.label, 'searchby' : addressResults.type, 'id' : addressResults.id});
+                    })
+
+            }else{
+                $state.go('main.topics.list', {'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});  
+            }
         }
         
     };

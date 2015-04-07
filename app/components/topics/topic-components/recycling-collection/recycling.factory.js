@@ -20,6 +20,17 @@ simplicity.factory('Recycling', ['$q', '$stateParams', 'AddressCache',
           },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+        },
+        'google_places' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'defaultView' : 'simple',
+            'validViews' : ['simple']
+          },
+          'requiredParams' : [],
+          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         }
       },
       'views' : {

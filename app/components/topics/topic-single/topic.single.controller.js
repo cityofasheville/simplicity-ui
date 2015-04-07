@@ -194,8 +194,8 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
                     return L.circleMarker(latlng, {
                       radius: 10,
                       fillColor: "#"+feature.properties.color,
-                      color: "#"+feature.properties.color,
-                      weight: 1,
+                      color: "#7f8c8d",
+                      weight: 2,
                       opacity: 1,
                       fillOpacity: 0.8
                     });
@@ -205,8 +205,8 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
                 return L.circleMarker(latlng, {
                   radius: 10,
                   fillColor: "#"+feature.properties.color,
-                  color: "#"+feature.properties.color,
-                  weight: 1,
+                  color: "#7f8c8d",
+                  weight: 2,
                   opacity: 1,
                   fillOpacity: 0.8
                 });
@@ -303,19 +303,16 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
       }
     };
 
-    var addSearchGeoJsonToMap = function(data, style){
+    var addSearchGeoJsonToMap = function(data){
       return L.geoJson(data, {
-        style: function (feature) {
-          if(style){
-            return style;
-          }
-        },
         onEachFeature: function (feature, layer) {
           if(feature.geometry.type === 'Point' && $stateParams.extent !== null && $stateParams.extent !== 'null'){
             var radiusInMeters = $stateParams.extent*0.3048;
             var circle = L.circle([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], radiusInMeters, {
+              'color' : '#3498db',
               'fillOpacity' : 0,
-              'opacity' : 0.3
+              'opacity' : 0.8,
+              'clickable' : false
             });
             circle.addTo(map);
               layer.on('click', function(){
@@ -323,12 +320,24 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
               });
           }
           
+        },
+        pointToLayer: function(feature, latlng){
+          return L.circleMarker(latlng, {
+              radius: 4,
+              fillColor: "#3498db",
+              color: "#3498db",
+              weight: 2,
+              opacity: 1,
+              fillOpacity: 0.8,
+              clickable : false
+            });
         }
       });
     };
 
     var addOverlayGeoJsonToMap = function(data, style){
       var overlayLayer =  L.geoJson(data, {
+
         style: function (feature) {
           if(style){
             return style;
@@ -379,10 +388,10 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
             $scope.topic = topic;
             $scope.loading = false;
             if(topic.searchGeojson){
-              addSearchGeoJsonToMap(topic.searchGeojson, {'fillOpacity' : 0,'opacity' : 0.3}).addTo(map);
+              addSearchGeoJsonToMap(topic.searchGeojson).addTo(map);
             }
             if(topic.overlays){
-              var overlayLayer = addOverlayGeoJsonToMap(topic.overlays, {'fillOpacity' : 0.1,'opacity' : 0.3});
+              var overlayLayer = addOverlayGeoJsonToMap(topic.overlays, {'fillOpacity' : 1,'opacity' : 1});
             }
             if(topic.features){
               if($stateParams.type !== null || $stateParams.type !== 'null'){
