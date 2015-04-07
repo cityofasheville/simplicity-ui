@@ -22,6 +22,17 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
           },
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         },
+        'google_places' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'centermap' : null,
+            'defaultView' : 'details',
+            'validViews' : ['details', 'map']
+          },
+          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+        },
         'street_name' : {
           'params' : {
             'type' : null,

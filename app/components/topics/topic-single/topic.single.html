@@ -167,8 +167,8 @@
       <div 
         ng-show = "stateParams.view === 'map'"
         class = "col-xs-12" 
-        style = "height : 400px; margin-bottom : 20px" 
-        id="map">
+        style = "height : 400px; margin-bottom : 20px;">
+        <div id="map" style = "height : 100%; width : 100%;margin : 0px; padding : 0px ">
         <div ng-if = "topic.summary.table !== undefined">
           <h5 ng-init = "showLegend = true" ng-show = "showLegend" ng-click = "showLegend = !showLegend"  class = "text-primary" style = "position : absolute; top : 50px; right : 10px;z-index : 7; cursor : pointer; background : white; padding : 5px; border-radius : 4px; border : 2px solid #2780E3; box-shadow: 0 1px 5px rgba(0,0,0,0.4)"><strong>Legend</strong> <i  class="fa fa-expand " ></i>
           </h5>
@@ -189,6 +189,7 @@
             </table>
 
           </div>
+        </div>
         </div>
       </div>
       <!-- DETAILS MODAL -->

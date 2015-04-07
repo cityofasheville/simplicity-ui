@@ -20,6 +20,17 @@ simplicity.factory('Trash', ['$q', '$stateParams', 'AddressCache',
           },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+        },
+        'google_places' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'defaultView' : 'simple',
+            'validViews' : ['simple']
+          },
+          'requiredParams' : [],
+          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         }
       },
        'views' : {
@@ -41,7 +52,7 @@ simplicity.factory('Trash', ['$q', '$stateParams', 'AddressCache',
         'trash' : addressCache.trash,
         'searchGeojson' : addressCache.searchGeojson
       };
-      console.log(trash);
+
       q.resolve(trash);
       return q.promise;
     };

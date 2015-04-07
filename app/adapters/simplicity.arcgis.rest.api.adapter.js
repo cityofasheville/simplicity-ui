@@ -382,7 +382,7 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
           'id' :  compositeGeocoderResults.candidates[i].attributes.User_fld,
           'label' : compositeGeocoderResults.candidates[i].attributes.Match_addr,
           'type' : compositeGeocoderResults.candidates[i].attributes.Loc_name,
-          'linkTo' : '#/topics/list?searchby=' + compositeGeocoderResults.candidates[i].attributes.Loc_name + '&id=' + compositeGeocoderResults.candidates[i].attributes.User_fld
+          'googleResult' : false
         };
         if(groupsObj[result.type] === undefined){
           var tempObj = {
@@ -489,6 +489,7 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
 
     };
 
+
     simplicityArcGisRestApiAdapter.formatHttpResults = function(data){
 
       var featuresArray = [];
@@ -528,7 +529,11 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
     
 }]); //END simplicityArcGisRestApiAdapter factory function
 
+82.5507929450601
+82.55079294249586
 
+35.59279067919887
+35.5927906715647
 
 
    

@@ -21,6 +21,17 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
           'requiredParams' : ['timeframe', 'extent'],
           'headerTemplate' : 'topics/topic-headers/topic.header.during.within.of.html',
         },
+        'google_places' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : 'last-year',
+            'extent' : 660,
+            'defaultView' : 'summary',
+            'validViews' : ['summary', 'list', 'map']
+          },
+          'requiredParams' : ['timeframe', 'extent'],
+          'headerTemplate' : 'topics/topic-headers/topic.header.during.within.of.html',
+        },
         'street_name' : {
           'params' : {
             'type' : null,

@@ -21,6 +21,17 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         },
+        'google_places' : {
+          'params' : {
+            'type' : null,
+            'timeframe' : null,
+            'extent' : null,
+            'defaultView' : 'list',
+            'validViews' : ['list', 'map']
+          },
+          'requiredParams' : [],
+          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+        },
         'street_name' : {
           'params' : {
             'type' : null,
@@ -77,7 +88,6 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
                 'searchGeojson' : addressCache.searchGeojson,
                 'features' : streetFeaturesArray
               };
-              console.log(geojson);
               q.resolve(geojson);
           });
         return q.promise;

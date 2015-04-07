@@ -34,10 +34,7 @@ simplicity.factory('Topics', ['$q', '$stateParams', 'Crime', 'Development', 'Pro
 
 	Topics.getTopics = function(){
 		var topicsArray = collectTopicProperties();
-		console.log(topicsArray);
-
 		if($stateParams.id === null){
-			console.log($stateParams.id);
 			var topicsToShowBeforeAnIdHasBeenSet = [];
 			for (var i = 0; i < topicsArray.length; i++) {
 				if(topicsArray[i].questions.topic !== undefined){

@@ -1,4 +1,4 @@
-angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter', 'simplicity.http'])
+angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter', 'simplicity.google.place.api.adapter', 'simplicity.http'])
   .constant('TABLES', {
     'crimes' : {
       'url' : 'http://arcgis-arcgisserver1-1222684815.us-east-1.elb.amazonaws.com/arcgis/rest/services/opendata/FeatureServer/0/query',
@@ -42,8 +42,8 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
     'returnFields' : ['Match_addr', 'User_fld', 'Loc_name'],
     'searchEngine' : 'ArcGisRestApiGeocoder'
   })
-  .factory('simplicityBackend', ['$http', '$location', '$q', '$filter', '$stateParams', 'simplicityHttp', 'simplicityArcGisRestApiAdapter', 'SIMPLICITY_ARCGIS_QUERIES', 'TABLES', 'SEARCH_CONFIG',
-    function($http, $location, $q, $filter, $stateParams, simplicityHttp, simplicityAdapter, QUERIES, TABLES, SEARCH_CONFIG){
+  .factory('simplicityBackend', ['$http', '$location', '$q', '$filter', '$stateParams', 'simplicityHttp', 'simplicityArcGisRestApiAdapter', 'simplicityGooglePlacesApiAdapter', 'SIMPLICITY_ARCGIS_QUERIES', 'TABLES', 'SEARCH_CONFIG',
+    function($http, $location, $q, $filter, $stateParams, simplicityHttp, simplicityAdapter, googlePlacesApiAdapter, QUERIES, TABLES, SEARCH_CONFIG){
       
       //The factory object (this is what will be returned from the factory)
       var simplicityBackend = {};
@@ -52,15 +52,24 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
       simplicityBackend.simplicitySearch = function(searchText){
         var q = $q.defer();
 
+        var searchResultsArray = [];
 
         //should I check the dataApi property here? or only allow one dataApi for all tables
         //if I allow multiple dataApis, I won't be able to inject adapters as a generic simplicityAdapter
         simplicityAdapter.search(SEARCH_CONFIG.searchUrl, searchText)
           .then(function(searchResults){
-            q.resolve(searchResults);
+            searchResultsArray = searchResults;
+            googlePlacesApiAdapter.search(searchText)
+              .then(function(googleResults){
+                if(googleResults === 'no google results'){
+                  q.resolve(searchResultsArray);
+                }else{
+                  searchResultsArray.push(googleResults);
+                  q.resolve(searchResultsArray);
+                }
+              });
+
           });
-
-
         return q.promise;
       };
 
@@ -79,6 +88,54 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
 
         return q.promise;
       };
+
+      simplicityBackend.simplicityFindGoogleAddress = function(candidate){
+        var q = $q.defer();
+
+        googlePlacesApiAdapter.getDetails(candidate.id)
+          .then(function(details){
+            var searchText;
+            var vicinity = candidate.label.split("|");
+            var streetAddressOnly = vicinity[1].split(",");
+            if(details.address_components.length === 6){
+              searchText = streetAddressOnly[0] + ", " + details.address_components[5].short_name
+            }else{
+              searchText = streetAddressOnly[0]
+            }
+
+
+            simplicityAdapter.search(SEARCH_CONFIG.searchUrl, searchText)
+              .then(function(searchResults){
+                var completed = false;
+                for (var i = 0; i < searchResults.length; i++) {
+                  if (searchResults[i].name === 'address') {
+                    if(searchResults[i].results.length > 0){
+                      for (var x = 0; x < searchResults[i].results.length; x++) {
+                          var splitSearchText = searchText.split(" ");
+                          var splitLabel = searchResults[i].results[x].label.split(" ");
+                          if(splitLabel.length === splitSearchText.length){
+                            completed = true;
+                            q.resolve(searchResults[i].results[x])
+                          }
+                      };
+                      
+                  }else{
+                      q.resolve('could not find address');
+                    }
+                  }
+                };
+                if(!completed){
+                  q.resolve('could not find address');
+                }
+
+
+              });
+          })
+        
+
+        return q.promise;
+      };
+
 
       simplicityBackend.formatTimeForQuery = function(jsDate){
         return simplicityAdapter.formatTimeForQuery(jsDate);

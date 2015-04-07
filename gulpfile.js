@@ -168,12 +168,14 @@ gulp.task('js', function () {
 	    .pipe(concat('templateCache.js'));
 	//Collect application JavaScript into a stream
 	var applicationJavaScript = gulp.src([
+    'app/adapters/simplicity.google.places.api.adapter.js',
     'app/adapters/simplicity.arcgis.rest.api.adapter.js', 
     'app/simplicity.http.js',
     'app/simplicity.frontend.config.js', 
     'app/simplicity.backend.config.js', 
     'app/simplicity.js',
-    'app/**/*.js']);
+    'app/**/*.js',
+    '!app/assets/**/*.js']);
 	//Merges to two streams of JavaScript files
 	return es.merge(applicationJavaScript, htmlTemplateCacheJavaScript)
 	    .pipe(concat('app.js'))
@@ -190,6 +192,20 @@ gulp.task('js', function () {
 	    .pipe(size());
 
 });
+
+gulp.task('js-assets', function () {
+  return gulp.src('app/assets/js/*.js')
+      .pipe(concat('assets.js'))
+      .pipe(rev())
+      .pipe(gulp.dest('dev'))
+      .pipe(rename('assets.min.js'))
+      .pipe(rev())
+      .pipe(uglify())
+      .pipe(gulp.dest('dist'))
+      .pipe(size());
+
+});
+
 
 //Copies fonts while flattening directory stucture
 gulp.task('fonts', ['clean:dev', 'clean:dist'], function () {
@@ -219,7 +235,7 @@ gulp.task('favicon', ['clean:dev', 'clean:dist'],function () {
 });
 
 //Injects dev CSS and JS depenencies into index.html as script and link tags
-gulp.task('inject:dev', ['fonts', 'favicon', 'images', 'copy-indexes', 'styles', 'js'], function(){
+gulp.task('inject:dev', ['fonts', 'favicon', 'images', 'copy-indexes', 'styles', 'js', 'js-assets'], function(){
 	var sources = gulp.src(['dev/*.js', 'dev/*.css'], {read: false});
 	return gulp.src('dev/index.html')
 		.pipe(inject(sources, {relative: true}))
@@ -227,7 +243,7 @@ gulp.task('inject:dev', ['fonts', 'favicon', 'images', 'copy-indexes', 'styles',
 });
 
 //Injects dist CSS and JS depenencies into index.html as script and link tags
-gulp.task('inject:dist', [ 'fonts', 'favicon', 'images','copy-indexes', 'styles', 'js'], function(){
+gulp.task('inject:dist', [ 'fonts', 'favicon', 'images','copy-indexes', 'styles', 'js', 'js-assets'], function(){
 	var sources = gulp.src(['dist/*.js', 'dist/*.css'], {read: false});
 	return gulp.src('dist/index.html')
 		.pipe(inject(sources, {relative: true}))
