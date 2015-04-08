@@ -20,6 +20,9 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'defaultView' : 'details',
             'validViews' : ['details', 'map']
           },
+          'prepositions' : {
+            'searchby' : 'at',
+          },
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         },
         'google_places' : {
@@ -30,6 +33,9 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'centermap' : null,
             'defaultView' : 'details',
             'validViews' : ['details', 'map']
+          },
+          'prepositions' : {
+            'searchby' : 'at',
           },
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         },
@@ -42,6 +48,9 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'defaultView' : 'list',
             'validViews' : ['list', 'map']
           },
+          'prepositions' : {
+            'searchby' : 'along',
+          },
           'headerTemplate' : 'topics/topic-headers/topic.header.along.html',
         },
         'pinnum' : {
@@ -53,6 +62,9 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'defaultView' : 'details',
             'validViews' : ['details', 'map']
           },
+          'prepositions' : {
+            'searchby' : 'at',
+          },
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         },
         'owner_name' : {
@@ -63,6 +75,9 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'centermap' : null,
             'defaultView' : 'list',
             'validViews' : ['list', 'map']
+          },
+          'prepositions' : {
+            'searchby' : 'owned by',
           },
           'headerTemplate' : 'topics/topic-headers/topic.header.ownedby.html',
         }

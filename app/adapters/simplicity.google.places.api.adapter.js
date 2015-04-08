@@ -22,7 +22,7 @@ angular.module('simplicity.google.place.api.adapter', [])
       
 
       var googleCallback = function(results, status){
-        if (status == google.maps.places.PlacesServiceStatus.OK) {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
             var formattedResults = [];
             for (var i = 0; i < results.length; i++) {
               var resultObj = {
@@ -30,9 +30,9 @@ angular.module('simplicity.google.place.api.adapter', [])
                 'label' : results[i].name + ' | ' + results[i].vicinity,
                 'type' : 'google-place',
                 'googleResult' : true
-              }
+              };
               formattedResults.push(resultObj);
-            };
+            }
             var googleResults = {
               'groupOrder' : 0,
               'iconClass' : 'fa-google',
@@ -40,12 +40,12 @@ angular.module('simplicity.google.place.api.adapter', [])
               'name' : 'google_places',
               'offset' : 3,
               'results' : formattedResults
-            }
+            };
             q.resolve(googleResults);
         }else{
           q.resolve('no google results');
         }
-    }
+      };
 
       var locationCenter = new google.maps.LatLng(35.5951125,-82.5511088);
 
@@ -54,11 +54,9 @@ angular.module('simplicity.google.place.api.adapter', [])
           'location' : locationCenter,
           'radius' : 30000,
           'types' : ['establishment']
-      }
+      };
 
       service.nearbySearch(googleRequest, googleCallback);
-
-
 
       //return the promise using q
       return q.promise;
@@ -72,18 +70,18 @@ angular.module('simplicity.google.place.api.adapter', [])
       
 
       var googleCallback = function(results, status){
-        if (status == google.maps.places.PlacesServiceStatus.OK) {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
             q.resolve(results);
         }else{
           q.resolve('no google results');
         }
-    }
+      };
 
       var locationCenter = new google.maps.LatLng(35.5951125,-82.5511088);
 
       var googleRequest = {
           'placeId' : place_id,
-      }
+      };
 
       service.getDetails(googleRequest, googleCallback);
 

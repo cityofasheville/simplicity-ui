@@ -68,8 +68,15 @@
               </ul>
             </div>
             <!-- DOWNLOAD BUTTON -->
-            <button ng-click = "openDownloadModal()" type="button" class="btn btn-primary" data-toggle = "tooltip" title = "Download"><i class="fa fa-lg fa-cloud-download" ></i> Download</button>
+           <!--  <button ng-click = "openDownloadModal()" type="button" class="btn btn-primary" data-toggle = "tooltip" title = "Download"><i class="fa fa-lg fa-download" ></i> Download</button> -->
           </div>
+          <!-- <div class="col-xs-12">
+  
+              <a class = "pull-right" href="mailto:?subject=Property at 22 Linden Ave, 28801&body=City of Asheville's SimpliCity Results%0D%0A%0D%0AClick the link below to view information about Property at 22 Linden Ave, 28801%0D%0A%0D%0A<http://localhost:3000/#/topics/property?searchtext=22%20LINDEN%20AVE,%2028801%26searchby=address%26id=24207%26view=details>"><i class="fa fa-send-o"></i></a>
+      
+              <a class = "pull-right" ng-click = "openDownloadModal()"><i class="fa fa-download"></i></a>
+            
+          </div> -->
           <div ng-if = "stateParams.type !== null" class="col-xs-12">
             <h5 class = "text-muted">Filtered by <strong >{{stateParams.type}}</strong></h5>
           </div>
@@ -239,8 +246,8 @@
           <h4 class="modal-title">Download</h4>
         </div>
         <div class="modal-body">
-          <div ng-if= "stateParams.topic === 'property'">
-            <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Property Details <i class="fa fa-cloud-download"></i></button>
+          <div ng-if= "stateParams.topic === 'property' || stateParams.topic === 'owner'">
+            <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">{{topicProperties.title}} Details <i class="fa fa-cloud-download"></i></button>
           </div>
           <div ng-if = "stateParams.topic === 'crime' || stateParams.topic === 'development'">
             <button class="btn btn-primary col-xs-12" ng-click = "download('summary', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="summary" analytics-event="{{stateParams.topic}}">Summary Table <i class="fa fa-cloud-download"></i></button>

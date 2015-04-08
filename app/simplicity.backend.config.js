@@ -20,6 +20,10 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
       'url' : 'http://arcgis-arcgisserver1-1222684815.us-east-1.elb.amazonaws.com/arcgis/rest/services/opendata/FeatureServer/6/query',
       'dataApi' : 'ArcGisRestApi'
     },
+    'owners' : {
+      'url' : 'http://arcgis-arcgisserver1-1222684815.us-east-1.elb.amazonaws.com/arcgis/rest/services/opendata/FeatureServer/6/query',
+      'dataApi' : 'ArcGisRestApi'
+    },
     'zoningOverlays' : {
       'url' : 'http://arcgis-arcgisserver1-1222684815.us-east-1.elb.amazonaws.com/arcgis/rest/services/opendata/FeatureServer/8/query',
       'dataApi' : 'ArcGisRestApi'
@@ -97,40 +101,55 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
             var searchText;
             var vicinity = candidate.label.split("|");
             var streetAddressOnly = vicinity[1].split(",");
-            if(details.address_components.length === 6){
-              searchText = streetAddressOnly[0] + ", " + details.address_components[5].short_name
-            }else{
-              searchText = streetAddressOnly[0]
+            
+            var postal_code = "";
+            console.log(details.address_components);
+            for (var ac = 0; ac < details.address_components.length; ac++) {
+              for (var typ = 0; typ < details.address_components[ac].types.length; typ++) {
+                if(details.address_components[ac].types[typ] === "postal_code"){
+                  postal_code = details.address_components[ac].long_name;
+                }
+              }
             }
+            if (postal_code !== '') {
+              searchText = streetAddressOnly[0] + ", " + postal_code;
+            }else{
+              searchText = streetAddressOnly[0];
+            }
+
+            console.log(searchText);
 
 
             simplicityAdapter.search(SEARCH_CONFIG.searchUrl, searchText)
               .then(function(searchResults){
+
                 var completed = false;
                 for (var i = 0; i < searchResults.length; i++) {
                   if (searchResults[i].name === 'address') {
                     if(searchResults[i].results.length > 0){
                       for (var x = 0; x < searchResults[i].results.length; x++) {
                           var splitSearchText = searchText.split(" ");
+                          splitSearchText.splice(0, 1);
                           var splitLabel = searchResults[i].results[x].label.split(" ");
                           if(splitLabel.length === splitSearchText.length){
                             completed = true;
-                            q.resolve(searchResults[i].results[x])
+                            q.resolve(searchResults[i].results[x]);
                           }
-                      };
-                      
-                  }else{
-                      q.resolve('could not find address');
+                      }              
+                    }else{
+                        q.resolve('could not find address');
+                      }
                     }
-                  }
-                };
+                }
+
                 if(!completed){
+
                   q.resolve('could not find address');
                 }
 
 
               });
-          })
+          });
         
 
         return q.promise;

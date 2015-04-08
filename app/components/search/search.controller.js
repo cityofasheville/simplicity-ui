@@ -77,7 +77,7 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
                                 if(topicProperties.searchby[searchResults[i].name] === undefined){
                                     searchResults.splice(i, 1);
                                 }
-                            };
+                            }
                             $scope.searchGroups = searchResults; 
                         }else{
                            $scope.searchGroups = searchResults; 
@@ -119,19 +119,17 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
                 simplicityBackend.simplicityFindGoogleAddress(candidate)
                     .then(function(addressResults){
                         $state.go('main.topics.topic', {'topic' : $stateParams.topic, 'searchtext' : addressResults.label, 'searchby' : addressResults.type, 'id' : addressResults.id});
-                    })
+                    });
             }else{
                 $state.go('main.topics.topic', {'topic' : $stateParams.topic, 'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});
             }
-           
-
-
         }else{
             if(candidate.googleResult === true){
                 simplicityBackend.simplicityFindGoogleAddress(candidate)
                     .then(function(addressResults){
+                        console.log(addressResults);
                         $state.go('main.topics.list', {'searchtext' : addressResults.label, 'searchby' : addressResults.type, 'id' : addressResults.id});
-                    })
+                    });
 
             }else{
                 $state.go('main.topics.list', {'searchtext' : label, 'searchby' : candidate.type, 'id' : candidate.id});  

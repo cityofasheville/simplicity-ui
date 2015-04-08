@@ -18,6 +18,9 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
             'defaultView' : 'list',
             'validViews' : ['list', 'map']
           },
+          'prepositions' : {
+            'searchby' : 'at',
+          },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         },
@@ -29,6 +32,9 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
             'defaultView' : 'list',
             'validViews' : ['list', 'map']
           },
+          'prepositions' : {
+            'searchby' : 'at',
+          },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         },
@@ -39,6 +45,9 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
             'extent' : 82.5,
             'defaultView' : 'list',
             'validViews' : ['list', 'map']
+          },
+          'prepositions' : {
+            'searchby' : 'along',
           },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.along.html',

@@ -1,5 +1,5 @@
-simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$filter', 'Topics', 'AddressCache', 'SELECT_OPTIONS',
- function ($scope, $stateParams, $state, $filter, Topics, AddressCache, SELECT_OPTIONS) {
+simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$filter', '$location', 'Topics', 'AddressCache', 'SELECT_OPTIONS',
+ function ($scope, $stateParams, $state, $filter, $location, Topics, AddressCache, SELECT_OPTIONS) {
 
     //****Private variables and methods*****//
 
@@ -27,6 +27,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
         }
       }
     }
+   
 
     //Assign stateParams to scope
     $scope.stateParams = $stateParams;
@@ -49,14 +50,14 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
 
     //check if view is valid
     var viewIsValid = function(){
-      var validity = false
+      var validity = false;
       for (var i = 0; i < $scope.topicProperties.searchby[$stateParams.searchby].params.validViews.length; i++) {
         if($scope.topicProperties.searchby[$stateParams.searchby].params.validViews[i] === $stateParams.view){
           validity = true;
         }
       }
       return validity;
-    }
+    };
     //if view is not defined or if view is not allowed, use default
     if($stateParams.view === null){
       updateStateParamsAndReloadState('view', $scope.topicProperties.searchby[$stateParams.searchby].params.defaultView);
@@ -173,21 +174,23 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
     var returnToFullscreen = false;
 
     var addGeoJsonToMap = function(data, style){
+      var mapcenter;
+      var centerArray;
       if(data.length > 0){
         var leafletGeoJsonLayer = L.geoJson(data, {
           pointToLayer: function(feature, latlng){
             if(feature.geometry.type === "Point"){
               if($stateParams.mapcenter !== null){
-                var mapcenter = $stateParams.mapcenter;
-                var centerArray = mapcenter.split(',');
+                mapcenter = $stateParams.mapcenter;
+                centerArray = mapcenter.split(',');
                 if(feature.properties[centerArray[0]]){
                   if(feature.properties[centerArray[0]] == centerArray[1] && feature.properties[centerArray[2]] == centerArray[3]){
                     return L.circleMarker(latlng, {
-                      radius: 10,
+                      radius: 8,
                       fillColor: "white",
+                      color: "#7f8c8d",
                       weight: 2,
                       opacity: 1,
-                      stroke : true,
                       fillOpacity: 0.8
                     });
                   }else{
@@ -221,15 +224,15 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
               return style;
             }else if(feature.geometry.type === "LineString"){
               if($stateParams.mapcenter !== null){
-                var mapcenter = $stateParams.mapcenter;
-                var centerArray = mapcenter.split(',');
+                mapcenter = $stateParams.mapcenter;
+                centerArray = mapcenter.split(',');
                 if(feature.properties[centerArray[0]]){
                   if(feature.properties[centerArray[0]] == centerArray[1] && feature.properties[centerArray[2]] == centerArray[3]){
                     return {
                       color:  "#"+feature.properties.color,
                       weight: 15,
                       opacity: 0.4,
-                    }
+                    };
                   }else{
                     return {
                       color: "#"+feature.properties.color,
@@ -246,15 +249,15 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
                 };
               }
             }else if($stateParams.mapcenter !== null){
-              var mapcenter = $stateParams.mapcenter;
-              var centerArray = mapcenter.split(',');
+              mapcenter = $stateParams.mapcenter;
+              centerArray = mapcenter.split(',');
               if(feature.properties[centerArray[0]]){
                 if(feature.properties[centerArray[0]] == centerArray[1] && feature.properties[centerArray[2]] == centerArray[3]){
                   return {
                     color:  "#"+feature.properties.color,
                     weight: 10,
                     opacity: 1,
-                  }
+                  };
                 }
               }
             }
@@ -291,11 +294,11 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
         }
         setTimeout(function() {
           if($stateParams.mapcenter !== null){
-          var mapcenter = $stateParams.mapcenter;
-          var centerArray = mapcenter.split(',');
-          map.panTo(L.latLng(Number(centerArray[3]), Number(centerArray[1])));
-          map.setZoom(18);
-        };
+            var mapcenter = $stateParams.mapcenter;
+            var centerArray = mapcenter.split(',');
+            map.panTo(L.latLng(Number(centerArray[3]), Number(centerArray[1])));
+            map.setZoom(18);
+          }
 
         }, 2000);
         
@@ -372,7 +375,8 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
     $scope.loading = true;
     //!!! Check if dataCache is already defined
 
-
+    $scope.emailSubject = "";
+    $scope.emailBodyText = "";
 
     //  _   _                _   _     _           _             _                                   _   _     _             
     // | | | | ___ _   _    | |_| |__ (_)___   ___| |_ __ _ _ __| |_ ___    _____   _____ _ __ _   _| |_| |__ (_)_ __   __ _ 
@@ -401,9 +405,46 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
                 addGeoJsonToMap(topic);
               }             
             }
+
+
+            var emailTopic = "";
+
+            if($scope.topic.features !== undefined){
+              if($scope.topic.features.length > 1){
+                emailTopic = $scope.topicProperties.plural;
+              }else{
+                emailTopic = "the " + $scope.topicProperties.title;
+              }
+            }else{
+              emailTopic = $scope.topicProperties.title;
+            }
+            
+
+            $scope.emailSearchBy = "";
+
+            if($scope.topicProperties.searchby[$stateParams.searchby].prepositions.timeframe){
+              $scope.emailSearchBy = $scope.emailSearchBy + " " + $scope.topicProperties.searchby[$stateParams.searchby].prepositions.timeframe + " " + $scope.timeframeOptions[$scope.timeframeOptionIndex].label;
+            }
+
+            if($scope.topicProperties.searchby[$stateParams.searchby].prepositions.extent){
+              $scope.emailSearchBy = $scope.emailSearchBy + " " + $scope.topicProperties.searchby[$stateParams.searchby].prepositions.extent + " " + $scope.extentOptions[$scope.extentOptionIndex].label;
+            }
+
+            if($scope.topicProperties.searchby[$stateParams.searchby].prepositions.searchby){
+              $scope.emailSearchBy = $scope.emailSearchBy + " " + $scope.topicProperties.searchby[$stateParams.searchby].prepositions.searchby + " " + $stateParams.searchtext;
+            }
+
+
+
+            $scope.emailSubject = "SimpliCity data for " + emailTopic + $scope.emailSearchBy;
+
+            $scope.emailBodyText ="City of Asheville's SimpliCity: city data simplified%0D%0A%0D%0AClick the link below to view your data.%0D%0A%0D%0A<" + escape($location.url()) + ">";
                     
           });
       });
+
+    
+
 
 
 
