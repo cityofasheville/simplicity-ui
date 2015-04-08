@@ -18,6 +18,9 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
             'defaultView' : 'list',
             'validViews' : ['list', 'map']
           },
+          'prepositions' : {
+            'searchby' : 'along',
+          },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.along.html',
         },
@@ -28,6 +31,9 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
             'extent' : null,
             'defaultView' : 'list',
             'validViews' : ['list', 'map']
+          },
+          'prepositions' : {
+            'searchby' : 'in',
           },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.in.html',

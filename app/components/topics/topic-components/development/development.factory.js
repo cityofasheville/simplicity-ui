@@ -18,6 +18,11 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
             'defaultView' : 'summary',
             'validViews' : ['summary', 'list', 'map']
           },
+          'prepositions' : {
+            'timeframe' : 'during',
+            'extent' : 'within',
+            'searchby' : 'of'
+          },
           'requiredParams' : ['timeframe', 'extent'],
           'headerTemplate' : 'topics/topic-headers/topic.header.during.within.of.html',
         },
@@ -28,6 +33,11 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
             'extent' : 660,
             'defaultView' : 'summary',
             'validViews' : ['summary', 'list', 'map']
+          },
+          'prepositions' : {
+            'timeframe' : 'during',
+            'extent' : 'within',
+            'searchby' : 'of'
           },
           'requiredParams' : ['timeframe', 'extent'],
           'headerTemplate' : 'topics/topic-headers/topic.header.during.within.of.html',
@@ -40,6 +50,10 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
             'defaultView' : 'summary',
             'validViews' : ['summary', 'list', 'map']
           },
+          'prepositions' : {
+            'timeframe' : 'during',
+            'searchby' : 'along'
+          },
           'requiredParams' : ['timeframe'],
           'headerTemplate' : 'topics/topic-headers/topic.header.during.along.html',
         },
@@ -50,6 +64,10 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
             'extent' : null,
             'defaultView' : 'summary',
             'validViews' : ['summary', 'list', 'map']
+          },
+          'prepositions' : {
+            'timeframe' : 'during',
+            'searchby' : 'in'
           },
           'requiredParams' : ['timeframe'],
           'headerTemplate' : 'topics/topic-headers/topic.header.during.in.html',

@@ -18,6 +18,9 @@ simplicity.factory('Trash', ['$q', '$stateParams', 'AddressCache',
             'defaultView' : 'simple',
             'validViews' : ['simple']
           },
+          'prepositions' : {
+            'searchby' : 'at',
+          },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         },
@@ -28,6 +31,9 @@ simplicity.factory('Trash', ['$q', '$stateParams', 'AddressCache',
             'extent' : null,
             'defaultView' : 'simple',
             'validViews' : ['simple']
+          },
+          'prepositions' : {
+            'searchby' : 'at',
           },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',

@@ -169,6 +169,48 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
           'outFields' : '*' 
         }
       },
+    },                         
+     //   _____      ___ __   ___ _ __ 
+     //  / _ \ \ /\ / / '_ \ / _ \ '__|
+     // | (_) \ V  V /| | | |  __/ |   
+     //  \___/ \_/\_/ |_| |_|\___|_|                                                              
+    'owners' : {
+      'address' : {
+        'sqlArray' : ["pinnum='", "pinnum", "'"],
+        'sqlParamName' : 'where',
+        'queryParams' : {
+          'where' : '',
+          'f' : 'json',
+          'outFields' : 'objectid, owner, owner_address, owner_citystatezip' 
+        }
+      },
+      'street_name' : {
+        'sqlArray' : ["pinnum in (", "pinnums", ")"],
+        'sqlParamName' : 'where',
+        'queryParams' : {
+          'where' : '',
+          'f' : 'json',
+          'outFields' : 'objectid, owner, owner_address, owner_citystatezip' 
+        }
+      },
+      'owner_name' : {
+        'sqlArray' : ["pinnum in (", "pinnums", ")"],
+        'sqlParamName' : 'where',
+        'queryParams' : {
+          'where' : '',
+          'f' : 'json',
+          'outFields' : 'objectid, owner, owner_address, owner_citystatezip' 
+        }
+      },
+      'pinnum' : {
+        'sqlArray' : ["pinnum in (", "pinnums", ")"],
+        'sqlParamName' : 'where',
+        'queryParams' : {
+          'where' : '',
+          'f' : 'json',
+          'outFields' : 'objectid, owner, owner_address, owner_citystatezip'  
+        }
+      },
     },
      //                 _                                   _                 
      //  _______  _ __ (_)_ __   __ _    _____   _____ _ __| | __ _ _   _ ___ 
@@ -529,11 +571,6 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
     
 }]); //END simplicityArcGisRestApiAdapter factory function
 
-82.5507929450601
-82.55079294249586
-
-35.59279067919887
-35.5927906715647
 
 
    

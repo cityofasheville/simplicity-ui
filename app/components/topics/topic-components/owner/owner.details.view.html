@@ -1,0 +1,15 @@
+<div>
+  <div class = "col-xs-12" ng-if = "topic.features.length === 0">
+    <div class="col-xs-12"><hr></div>
+    <h3 class = "text-muted text-center"><strong>We couldn't find any results.</strong></h3>
+  </div>
+  <div ng-repeat = "feature in topic.features | filter:filterText" class = "col-xs-12 list-item-panel" style = "margin-bottom : 30px">
+
+      <h4>Owner</h4>
+      <strong class = "text-muted">{{feature.properties.owner}}</strong>
+      <address>{{feature.properties.owner_address}}<br>
+      {{feature.properties.owner_citystatezip}}</address>
+
+  </div>
+</div>
+

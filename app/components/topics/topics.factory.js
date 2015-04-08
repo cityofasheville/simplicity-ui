@@ -1,5 +1,5 @@
-simplicity.factory('Topics', ['$q', '$stateParams', 'Crime', 'Development', 'Property', 'Trash', 'Recycling', 'Zoning', 'StreetMaintenance', 'AddressList',
-	function($q, $stateParams, Crime, Development, Property, Trash, Recycling, Zoning, StreetMaintenance, AddressList){
+simplicity.factory('Topics', ['$q', '$stateParams', 'Crime', 'Development', 'Property', 'Trash', 'Recycling', 'Zoning', 'StreetMaintenance', 'AddressList', 'Owner',
+	function($q, $stateParams, Crime, Development, Property, Trash, Recycling, Zoning, StreetMaintenance, AddressList, Owner){
 
 	//****Create the factory object****//
 	var Topics = {};
@@ -15,7 +15,8 @@ simplicity.factory('Topics', ['$q', '$stateParams', 'Crime', 'Development', 'Pro
 		'recycling' : Recycling,
 		'zoning' : Zoning,
 		'streetmaintenance' : StreetMaintenance,
-		'addresslist' : AddressList
+		'addresslist' : AddressList,
+		'owner' : Owner
 	};
 
 
@@ -33,6 +34,7 @@ simplicity.factory('Topics', ['$q', '$stateParams', 'Crime', 'Development', 'Pro
 	//****Public API*****//
 
 	Topics.getTopics = function(){
+		var linkTo;
 		var topicsArray = collectTopicProperties();
 		if($stateParams.id === null){
 			var topicsToShowBeforeAnIdHasBeenSet = [];
@@ -40,7 +42,7 @@ simplicity.factory('Topics', ['$q', '$stateParams', 'Crime', 'Development', 'Pro
 				if(topicsArray[i].questions.topic !== undefined){
 				   topicsArray[i].question = topicsArray[i].questions.topic; 
 				}
-				var linkTo = '#/search?topic=' + topicsArray[i].name;            
+				linkTo = '#/search?topic=' + topicsArray[i].name;            
 				topicsArray[i].linkTo = linkTo;
 				topicsToShowBeforeAnIdHasBeenSet.push(topicsArray[i]);
 			}
@@ -53,7 +55,7 @@ simplicity.factory('Topics', ['$q', '$stateParams', 'Crime', 'Development', 'Pro
 						if(topicsArray[j].questions[$stateParams.searchby] !== undefined){
 						   topicsArray[j].question = topicsArray[j].questions[$stateParams.searchby]; 
 						}
-						var linkTo = '#/topics/' + topicsArray[j].name + '?searchtext=' + $stateParams.searchtext + '&searchby=' + $stateParams.searchby + '&id=' + $stateParams.id;
+						linkTo = '#/topics/' + topicsArray[j].name + '?searchtext=' + $stateParams.searchtext + '&searchby=' + $stateParams.searchby + '&id=' + $stateParams.id;
 						var params = topicsArray[j].searchby[$stateParams.searchby].params;
 						for(var key in params){
 							if(params[key] !== null){

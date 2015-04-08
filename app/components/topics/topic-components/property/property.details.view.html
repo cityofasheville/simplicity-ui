@@ -129,7 +129,7 @@
   <div class="col-xs-12 list-item-panel" style = "margin-bottom : 20px" >
     <br>
     <a class="col-xs-12 col-sm-4 text-center btn btn-primary" style = "margin-bottom : 10px" target = "_blank" href = "{{feature.properties.deed_url}}" analytics-on ="click"  analytics-category="Topic Link" analytics-label="{{feature.properties.deed_url}}" analytics-event="{{stateParams.topic}} deed"><i class="fa fa-2x fa-file-text-o"></i><br>Deed</a>
-    <a class="col-xs-12 col-sm-4 text-center btn btn-primary" style = "margin-bottom : 10px" target = "_blank" href = "{{feature.properties.plat_url}}" analytics-on ="click"  analytics-category="Topic Link" analytics-label="{{feature.properties.plat_url}}" analytics-event="{{stateParams.topic}} plat"><i class="fa fa-2x fa-file-text-o"></i><br>Plat</a>
+    <a class="col-xs-12 col-sm-4 text-center btn btn-primary" ng-class = "{'disabled' : feature.properties.platbook === '0000' && feature.properties.platpage === '0000'}" style = "margin-bottom : 10px" target = "_blank" href = "{{feature.properties.plat_url}}" analytics-on ="click"  analytics-category="Topic Link" analytics-label="{{feature.properties.plat_url}}" analytics-event="{{stateParams.topic}} plat"><i class="fa fa-2x fa-file-text-o"></i><br>Plat</a>
     <a class="col-xs-12 col-sm-4 text-center btn btn-primary" style = "margin-bottom : 10px" target = "_blank" href = "{{feature.properties.propcard_url}}" analytics-on ="click"  analytics-category="Topic Link" analytics-label="{{feature.properties.propcard_url}} " analytics-event="{{stateParams.topic}} property card"><i class="fa fa-2x fa-file-text-o"></i><br>Property Card</a>
     <br>
   </div>
