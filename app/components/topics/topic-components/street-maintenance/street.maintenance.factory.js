@@ -16,7 +16,7 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'defaultView' : 'list',
+            'view' : 'list',
             'validViews' : ['list', 'map']
           },
           'prepositions' : {
@@ -30,7 +30,7 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'defaultView' : 'list',
+            'view' : 'list',
             'validViews' : ['list', 'map']
           },
           'prepositions' : {
@@ -44,7 +44,7 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
             'type' : null,
             'timeframe' : null,
             'extent' : 82.5,
-            'defaultView' : 'list',
+            'view' : 'list',
             'validViews' : ['list', 'map']
           },
           'prepositions' : {

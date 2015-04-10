@@ -18,7 +18,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'timeframe' : null,
             'extent' : null,
             'centermap' : null,
-            'defaultView' : 'details',
+            'view' : 'details',
             'validViews' : ['details', 'map']
           },
           'prepositions' : {
@@ -32,7 +32,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'timeframe' : null,
             'extent' : null,
             'centermap' : null,
-            'defaultView' : 'details',
+            'view' : 'details',
             'validViews' : ['details', 'map']
           },
           'prepositions' : {
@@ -46,7 +46,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'timeframe' : null,
             'extent' : null,
             'centermap' : null,
-            'defaultView' : 'list',
+            'view' : 'list',
             'validViews' : ['list', 'map']
           },
           'prepositions' : {
@@ -60,7 +60,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'timeframe' : null,
             'extent' : null,
             'centermap' : null,
-            'defaultView' : 'details',
+            'view' : 'details',
             'validViews' : ['details', 'map']
           },
           'prepositions' : {
@@ -74,7 +74,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
             'timeframe' : null,
             'extent' : null,
             'centermap' : null,
-            'defaultView' : 'list',
+            'view' : 'list',
             'validViews' : ['list', 'map']
           },
           'prepositions' : {

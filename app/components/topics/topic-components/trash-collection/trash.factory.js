@@ -16,7 +16,7 @@ simplicity.factory('Trash', ['$q', '$stateParams', 'AddressCache',
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'defaultView' : 'simple',
+            'view' : 'simple',
             'validViews' : ['simple']
           },
           'prepositions' : {
@@ -30,7 +30,7 @@ simplicity.factory('Trash', ['$q', '$stateParams', 'AddressCache',
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'defaultView' : 'simple',
+            'view' : 'simple',
             'validViews' : ['simple']
           },
           'prepositions' : {

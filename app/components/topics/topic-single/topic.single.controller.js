@@ -60,10 +60,10 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
     };
     //if view is not defined or if view is not allowed, use default
     if($stateParams.view === null){
-      updateStateParamsAndReloadState('view', $scope.topicProperties.searchby[$stateParams.searchby].params.defaultView);
+      updateStateParamsAndReloadState('view', $scope.topicProperties.searchby[$stateParams.searchby].params.view);
     }else{
       if(!viewIsValid()){
-        updateStateParamsAndReloadState('view', $scope.topicProperties.searchby[$stateParams.searchby].params.defaultView);
+        updateStateParamsAndReloadState('view', $scope.topicProperties.searchby[$stateParams.searchby].params.view);
       }else if($stateParams.view === 'summary' && $stateParams.type !== null){
         updateStateParamsAndReloadState('type', null);
       }else if($stateParams.view !== 'map' && $stateParams.mapcenter !== null){
@@ -207,7 +207,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
         mapExpanded = !mapExpanded;
       }
       map.invalidateSize();
-    }
+    };
 
    var ExpandMap = L.Control.extend({
         options: {
@@ -239,31 +239,6 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
         var leafletGeoJsonLayer = L.geoJson(data, {
           pointToLayer: function(feature, latlng){
             if(feature.geometry.type === "Point"){
-              if($stateParams.mapcenter !== null){
-                mapcenter = $stateParams.mapcenter;
-                centerArray = mapcenter.split(',');
-                if(feature.properties[centerArray[0]]){
-                  if(feature.properties[centerArray[0]] == centerArray[1] && feature.properties[centerArray[2]] == centerArray[3]){
-                    return L.circleMarker(latlng, {
-                      radius: 8,
-                      fillColor: "white",
-                      color: "#7f8c8d",
-                      weight: 2,
-                      opacity: 1,
-                      fillOpacity: 0.8
-                    });
-                  }else{
-                    return L.circleMarker(latlng, {
-                      radius: 10,
-                      fillColor: "#"+feature.properties.color,
-                      color: "#7f8c8d",
-                      weight: 2,
-                      opacity: 1,
-                      fillOpacity: 0.8
-                    });
-                  }
-                }
-              }else{
                 return L.circleMarker(latlng, {
                   radius: 10,
                   fillColor: "#"+feature.properties.color,
@@ -272,8 +247,6 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
                   opacity: 1,
                   fillOpacity: 0.8
                 });
-              }
-               
             }else{
               return false;
             }
@@ -282,43 +255,11 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
             if(style){
               return style;
             }else if(feature.geometry.type === "LineString"){
-              if($stateParams.mapcenter !== null){
-                mapcenter = $stateParams.mapcenter;
-                centerArray = mapcenter.split(',');
-                if(feature.properties[centerArray[0]]){
-                  if(feature.properties[centerArray[0]] == centerArray[1] && feature.properties[centerArray[2]] == centerArray[3]){
-                    return {
-                      color:  "#"+feature.properties.color,
-                      weight: 15,
-                      opacity: 0.4,
-                    };
-                  }else{
-                    return {
-                      color: "#"+feature.properties.color,
-                      weight: 8,
-                      opacity: 0.7,
-                    };
-                  }
-                }
-              }else{
                 return {
                   color: "#"+feature.properties.color,
                   weight: 8,
                   opacity: 0.7,
                 };
-              }
-            }else if($stateParams.mapcenter !== null){
-              mapcenter = $stateParams.mapcenter;
-              centerArray = mapcenter.split(',');
-              if(feature.properties[centerArray[0]]){
-                if(feature.properties[centerArray[0]] == centerArray[1] && feature.properties[centerArray[2]] == centerArray[3]){
-                  return {
-                    color:  "#"+feature.properties.color,
-                    weight: 10,
-                    opacity: 1,
-                  };
-                }
-              }
             }
           },
           onEachFeature: function (feature, layer) {
@@ -411,6 +352,13 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
       stateParams.view = 'map';
       $state.transitionTo('main.topics.topic', stateParams, {'reload' : true});
     };
+
+    if($stateParams.mapcenter && $stateParams.mapcenter !== null){
+      console.log('not null');
+      var mapCenterArray = $stateParams.mapcenter.split(',');
+      console.log(mapCenterArray);
+      L.marker([Number(mapCenterArray[3]), Number(mapCenterArray[1])]).addTo(map);
+    }
 
     $scope.loading = true;
     $scope.emailSubject = "";
