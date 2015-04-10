@@ -4350,6 +4350,32 @@ a {
   max-height: 500px;
   overflow-y: auto; }
 
+.leaflet-control-expand-map-interior {
+  width: 26px;
+  height: 26px;
+  display: block;
+  padding: 2px;
+  border-radius: 4px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  box-shadow: 0 1px 7px rgba(0, 0, 0, 0.65);
+  cursor: pointer;
+  text-align: center;
+  background-color: #FFFFFF; }
+
+.leaflet-control-expand:before {
+  font-family: "fontawesome";
+  content: "\f0b2";
+  font-size: 17px; }
+
+.leaflet-control-collapse:before {
+  font-family: "fontawesome";
+  content: "\f066";
+  font-size: 17px; }
+
+.leaflet-control-command-interior:hover {
+  background-color: #F4F4F4; }
+
 /*
 Author: L. Voogdt
 License: MIT

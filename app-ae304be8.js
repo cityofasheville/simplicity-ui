@@ -320,6 +320,15 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
           'outFields' : 'objectid, owner, owner_address, owner_citystatezip'  
         }
       },
+      'neighborhood' : {
+        'sqlArray' : ["neighborhood='", "neighborhoodName", "'"],
+        'sqlParamName' : 'where',
+        'queryParams' : {
+          'where' : '',
+          'f' : 'json',
+          'outFields' : 'objectid, owner, owner_address, owner_citystatezip'  
+        }
+      }
     },
      //                 _                                   _                 
      //  _______  _ __ (_)_ __   __ _    _____   _____ _ __| | __ _ _   _ ___ 
@@ -1022,7 +1031,7 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
             var streetAddressOnly = vicinity[1].split(",");
             
             var postal_code = "";
-            console.log(details.address_components);
+  
             for (var ac = 0; ac < details.address_components.length; ac++) {
               for (var typ = 0; typ < details.address_components[ac].types.length; typ++) {
                 if(details.address_components[ac].types[typ] === "postal_code"){
@@ -1035,8 +1044,6 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
             }else{
               searchText = streetAddressOnly[0];
             }
-
-            console.log(searchText);
 
 
             simplicityAdapter.search(SEARCH_CONFIG.searchUrl, searchText)
@@ -1562,7 +1569,6 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
             if(candidate.googleResult === true){
                 simplicityBackend.simplicityFindGoogleAddress(candidate)
                     .then(function(addressResults){
-                        console.log(addressResults);
                         $state.go('main.topics.list', {'searchtext' : addressResults.label, 'searchby' : addressResults.type, 'id' : addressResults.id});
                     });
 
@@ -1878,7 +1884,6 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
         center: [35.5951125,-82.5511088], 
         zoom : 13,
         maxZoom : 22,
-        fullscreenControl: true,
         layers : [openstreetmap]
     });
 
@@ -1890,9 +1895,69 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
       $scope.filterText = $stateParams.type;
     }
 
+    var mapExpanded = false;
+    var expandMap = function(){
+      if(!mapExpanded){
+        $('body').css({
+          'padding' : 0,
+          'margin' : 0,
+          'height' : '100%',
+          'width' : '100%',
+          'overflow' : 'hidden'
+        });
+        $('html').css({
+          'height' : '100%',
+          'width' : '100%',
+        });
+        $('#map').css({
+          'height' : $(window).height(),
+          'width' : $(window).width(),
+          'position' : 'fixed',
+          'top' : '0px',
+          'left' : '0px',
+          'zIndex' : 999
+        });
+        $('.leaflet-control-expand-map-interior').removeClass('leaflet-control-expand');
+        $('.leaflet-control-expand-map-interior').addClass('leaflet-control-collapse');
+        mapExpanded = !mapExpanded;
+      }else{
+        $('body').css({
+          'overflow' : 'auto'
+        });
+        $('#map').css({
+          'height' : '400px',
+          'width' : '100%',
+          'position' : 'relative',
+        });
+         $('.leaflet-control-expand-map-interior').removeClass('leaflet-control-collapse');
+        $('.leaflet-control-expand-map-interior').addClass('leaflet-control-expand');
+        mapExpanded = !mapExpanded;
+      }
+      map.invalidateSize();
+    }
 
-    
-    var returnToFullscreen = false;
+   var ExpandMap = L.Control.extend({
+        options: {
+            position: 'topleft',
+        },
+
+        onAdd: function (map) {
+            var controlDiv = L.DomUtil.create('div', 'leaflet-control-command');
+            L.DomEvent
+              .addListener(controlDiv, 'click', L.DomEvent.stopPropagation)
+              .addListener(controlDiv, 'click', L.DomEvent.preventDefault)
+              .addListener(controlDiv, 'click', function () { expandMap(); });
+
+            var controlUI = L.DomUtil.create('div', 'leaflet-control-expand-map-interior', controlDiv);
+            controlUI.title = 'Expand map to the fullpage';
+            return controlDiv;
+        }
+    });
+
+    map.addControl(new ExpandMap());
+
+    $('.leaflet-control-expand-map-interior').addClass('leaflet-control-expand');
+
 
     var addGeoJsonToMap = function(data, style){
       var mapcenter;
@@ -1987,24 +2052,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
             layer.on('click', function(){
                   $scope.filterText = feature.properties.objectid;
                   $scope.$apply();
-                  $('#detailsModal').modal({'backdrop' : 'static'});
-                  if (
-                      document.fullscreenElement ||
-                      document.webkitFullscreenElement ||
-                      document.mozFullScreenElement ||
-                      document.msFullscreenElement
-                  ) {
-                    returnToFullscreen = true;
-                  }
-                  if (document.exitFullscreen) {
-                      document.exitFullscreen();
-                  } else if (document.webkitExitFullscreen) {
-                      document.webkitExitFullscreen();
-                  } else if (document.mozCancelFullScreen) {
-                      document.mozCancelFullScreen();
-                  } else if (document.msExitFullscreen) {
-                      document.msExitFullscreen();
-                  }   
+                  $('#detailsModal').modal({'backdrop' : 'static'}); 
             });
           }
         });
@@ -2091,11 +2139,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
       $state.transitionTo('main.topics.topic', stateParams, {'reload' : true});
     };
 
-
-
     $scope.loading = true;
-    //!!! Check if dataCache is already defined
-
     $scope.emailSubject = "";
     $scope.emailBodyText = "";
 
@@ -2128,6 +2172,8 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
             }
 
 
+            //EMAIL FORMATTING
+
             var emailTopic = "";
 
             if($scope.topic.features !== undefined){
@@ -2159,14 +2205,10 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
 
             $scope.emailSubject = "SimpliCity data for " + emailTopic + $scope.emailSearchBy;
 
-            $scope.emailBodyText ="City of Asheville's SimpliCity: city data simplified%0D%0A%0D%0AClick the link below to view your data.%0D%0A%0D%0A<" + escape($location.url()) + ">";
+            $scope.emailBodyText ="City of Asheville's SimpliCity: city data simplified%0D%0A%0D%0AClick the link below to view your data.%0D%0A%0D%0A<" + escape(window.location) + ">";
                     
           });
       });
-
-    
-
-
 
 
     $scope.goToTopics = function(){
@@ -2187,31 +2229,20 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
     };
 
 
-    $scope.closeModal = function(){
-      if(returnToFullscreen === true){
-        var m = document.getElementById("map");
- 
-        // go full-screen
-        if (m.requestFullscreen) {
-            m.requestFullscreen();
-        } else if (m.webkitRequestFullscreen) {
-            m.webkitRequestFullscreen();
-        } else if (m.mozRequestFullScreen) {
-            m.mozRequestFullScreen();
-        } else if (m.msRequestFullscreen) {
-            m.msRequestFullscreen();
-        }
-        returnToFullscreen = false;
-      }
-    };
-
-
     $scope.openDownloadModal = function(){
       $('#downloadModal').modal({'backdrop' : false});
     };
 
+    $scope.downloadGeoJson = function(downloadType, topic){
+      var jsonString =  'data:text/json;charset=utf-8,';
+      var json = JSON.stringify(topic);
+      jsonString = jsonString + json;
+      var encodedUri = encodeURI(jsonString);
+      window.open(encodedUri);
+    };
 
-    $scope.download = function(downloadType, topic){
+    $scope.downloadCsv = function(downloadType, topic){
+
       var csvString =  'data:text/csv;charset=utf-8,';
       if(downloadType === 'summary'){
         csvString += 'Type, Count' + '\n';
@@ -2225,32 +2256,76 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
         for(var attributeKey in topic.features[0].properties){
           headerArray.push(attributeKey);
         }
-        for(var geometryKey in topic.features[0].geometry){
-          headerArray.push(geometryKey);
+
+        var subHeadings = [];
+        for (var j = 0; j < topic.features.length; j++) {    
+          for (var z = 0; z < headerArray.length; z++) {
+            
+            if(topic.features[j].properties[headerArray[z]]){
+              
+              if (topic.features[j].properties[headerArray[z]].constructor === Array){
+                
+                for(var subHeading in topic.features[j].properties[headerArray[z]][0]){
+                  
+                  subHeadings.push(subHeading);
+                }
+              }
+            }
+          }
         }
+
+        for (var s = 0; s < subHeadings.length; s++) {
+          headerArray.push(subHeadings[s]);
+        }
+
         csvString += headerArray.join(',') + '\n';
         for (var i = 0; i < topic.features.length; i++) {
           var rowArray = [];
+          var subPropertyObj = {};
           for (var x = 0; x < headerArray.length; x++) {
             if(topic.features[i].properties[headerArray[x]]){
-              // if(topic.features[i].properties[headerArray[x]].constructor === Array){
-              //   rowArray.push(JSON.stringify(topic.features[i].properties[headerArray[x]]));
-              // }else{
-              //   rowArray.push(topic.features[i].properties[headerArray[x]]);
-              // }
-              rowArray.push(topic.features[i].properties[headerArray[x]]);
-            }else if(topic.features[i].geometry[headerArray[x]]){
-              rowArray.push(topic.features[i].geometry[headerArray[x]]);
+              if(typeof topic.features[i].properties[headerArray[x]] === 'string'){
+                var containsAComma = false;
+                for (var y = 0; y < topic.features[i].properties[headerArray[x]].length; y++) {
+                  if(topic.features[i].properties[headerArray[x]].charAt(y) === ','){
+                    containsAComma = true;
+                  }
+                }
+                if(containsAComma === true){
+                  rowArray.push('"' + topic.features[i].properties[headerArray[x]] + '"');
+                }else{
+                  rowArray.push(topic.features[i].properties[headerArray[x]]);
+                }
+                
+              }else if (typeof topic.features[i].properties[headerArray[x]] === 'number'){
+                rowArray.push(topic.features[i].properties[headerArray[x]]);
+              }else if (topic.features[i].properties[headerArray[x]].constructor === Array){
+                for (var a = 0; a < topic.features[i].properties[headerArray[x]].length; a++) {
+                  for(var subProp in topic.features[i].properties[headerArray[x]][a]){
+                    if(subPropertyObj[subProp] === undefined ){
+                      subPropertyObj[subProp] = topic.features[i].properties[headerArray[x]][a][subProp];
+                    }else{
+                      subPropertyObj[subProp] = subPropertyObj[subProp] + ", " + topic.features[i].properties[headerArray[x]][a][subProp];
+                    }
+                  }
+                }
+                rowArray.push('NULL');
+              }
             }else{
-              rowArray.push('NULL');
+              if(subPropertyObj[headerArray[x]]){
+                rowArray.push(subPropertyObj[headerArray[x]]);
+              }else{
+                rowArray.push('NULL');
+              }
             }
-          }
-          csvString += rowArray.join(',') + '\n';
-        }
+        
+      }
+      csvString += rowArray.join(',') + '\n';
       }
       var encodedUri = encodeURI(csvString);
       window.open(encodedUri);
-    };
+    }
+  };
 
 
 }]);
@@ -2391,6 +2466,7 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
       'plural' : 'crimes',
       'searchForText' : 'an address, street, or neighborhood',
       'position' : 2,
+      'downloadable' : true,
       'searchby' : {
         'address' : {
           'params' : {
@@ -2458,7 +2534,7 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
       'views' : {
         'map' : {'label' : 'Map View', 'template' : null},
         'summary' : {'label' : 'Summary', 'template' : 'topics/topic-components/crime/crime.summary.view.html'},
-        'list' : {'label' : 'List View', 'template' : 'topics/topic-components/crime/crime.list.view.html'},
+        'list' : {'label' : 'Details View', 'template' : 'topics/topic-components/crime/crime.list.view.html'},
       },
       'iconClass' : 'flaticon-police19',
       'linkTopics' : ['property', 'trash', 'recycling', 'development'],
@@ -2512,7 +2588,6 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
     
     Crime.build = function(){
       var q = $q.defer();
-      console.log($stateParams.timeframe);
 
       var time = new Date(TimeFrame.get($stateParams.timeframe));
       var timeExpression = simplicityBackend.formatTimeForQuery(time);
@@ -2583,6 +2658,7 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
       'plural' : 'development',
       'searchForText' : 'an address, street, or neighborhood',
       'position' : 3, 
+      'downloadable' : true,
       'searchby' : {
         'address' : {
           'params' : {
@@ -2650,7 +2726,7 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
       'views' : {
         'map' : {'label' : 'Map View', 'template' : null},
         'summary' : {'label' : 'Summary', 'template' : 'topics/topic-components/development/development.summary.view.html'},
-        'list' : {'label' : 'List View', 'template' : 'topics/topic-components/development/development.list.view.html'},
+        'list' : {'label' : 'Details View', 'template' : 'topics/topic-components/development/development.list.view.html'},
       },
       'iconClass' : 'flaticon-building33',
       'linkTopics' : ['property', 'trash', 'recycling', 'crime'],
@@ -2792,6 +2868,7 @@ simplicity.factory('Owner', ['$http', '$location', '$q', '$filter', '$stateParam
       'title' : 'Owner',
       'searchForText' : 'an address, street, owner, or PIN',
       'position' : 9,
+      'downloadable' : true,
       'searchby' : {
         'address' : {
           'params' : {
@@ -2835,7 +2912,7 @@ simplicity.factory('Owner', ['$http', '$location', '$q', '$filter', '$stateParam
           },
           'headerTemplate' : 'topics/topic-headers/topic.header.along.html',
         },
-        'pinnum' : {
+        'neighborhood' : {
           'params' : {
             'type' : null,
             'timeframe' : null,
@@ -2845,9 +2922,9 @@ simplicity.factory('Owner', ['$http', '$location', '$q', '$filter', '$stateParam
             'validViews' : ['details', 'map']
           },
           'prepositions' : {
-            'searchby' : 'at',
+            'searchby' : 'in',
           },
-          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+          'headerTemplate' : 'topics/topic-headers/topic.header.in.html',
         }
       },
       'views' : {
@@ -2861,7 +2938,8 @@ simplicity.factory('Owner', ['$http', '$location', '$q', '$filter', '$stateParam
         'topic' : "Do you want to know a property owner's addresses?",
         'address' : "Do you want to know the property owner's address at this address?",
         'street_name' : "Do you want to know the property owners' addresses along this street?",
-        'pinnum' : "Do you want to know the property owner's address for this PIN?"
+        'pinnum' : "Do you want to know the property owner's address for this PIN?",
+        'neighborhood' : "Do you want to know the property owner's addresses in this neighborhood?"
       }
     };
 
@@ -2921,6 +2999,12 @@ simplicity.factory('Owner', ['$http', '$location', '$q', '$filter', '$stateParam
           .then(function(owner){
             q.resolve(owner);
           });
+      }else if ($stateParams.searchby === 'neighborhood'){
+   
+          simplicityBackend.simplicityQuery('owners', {'neighborhoodName' : $stateParams.id})
+            .then(function(owner){
+                q.resolve(owner);
+            });
       }
       return q.promise;
     };//END owner function
@@ -2955,6 +3039,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
       'title' : 'Property',
       'searchForText' : 'an address, street, owner, or PIN',
       'position' : 1,
+      'downloadable' : true,
       'searchby' : {
         'address' : {
           'params' : {
@@ -3209,6 +3294,7 @@ simplicity.factory('Recycling', ['$q', '$stateParams', 'AddressCache',
       'plural' : 'recycling collection',
       'searchForText' : 'an address',
       'position' : 5,
+      'downloadable' : false,
       'searchby' : {
         'address' : {
           'params' : {
@@ -3316,6 +3402,7 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
       'plural' : 'street maintenance responsibility',
       'searchForText' : 'an address or a street',
       'position' : 7,
+      'downloadable' : true,
       'searchby' : {
         'address' : {
           'params' : {
@@ -3362,7 +3449,7 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
       },
       'views' : {
         'map' : {'label' : 'Map View', 'template' : null},
-        'list' : {'label' : 'List View', 'template' : 'topics/topic-components/street-maintenance/street.maintenance.list.view.html'},
+        'list' : {'label' : 'Details View', 'template' : 'topics/topic-components/street-maintenance/street.maintenance.list.view.html'},
       },
       'defaultView' : 'list',
       'iconClass' : 'flaticon-location38',
@@ -3458,6 +3545,7 @@ simplicity.factory('Trash', ['$q', '$stateParams', 'AddressCache',
       'plural' : 'trash collection',
       'searchForText' : 'an address',
       'position' : 4,
+      'downloadable' : false,
       'searchby' : {
         'address' : {
           'params' : {
@@ -3542,22 +3630,22 @@ simplicity.factory('Zoning', ['$q', '$stateParams', 'AddressCache', 'simplicityB
       'plural' : 'zoning',
       'searchForText' : 'an address',
       'position' : 6,
+      'downloadable' : false,
       'searchby' : {
         'address' : {
           'params' : {
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'defaultView' : 'details',
-            'validViews' : ['details', 'map']
+            'defaultView' : 'simple',
+            'validViews' : ['simple']
           },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         }
       },
       'views' : {
-        'details' : {'label' : 'Details View', 'template' : 'topics/topic-components/zoning/zoning.view.html'},
-        'map' : {'label' : 'Map View', 'template' : null}
+        'simple' : {'label' : 'Simple View', 'template' : 'topics/topic-components/zoning/zoning.view.html'}
       },
       'iconClass' : 'flaticon-map104',
       'linkTopics' : ['property', 'crime', 'development'],
@@ -3682,7 +3770,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topic-headers/topic.header.along.html',
-    '<div class="list-item-panel col-xs-12"><h1 class="col-xs-6">{{topicProperties.title}}</h1><div class="col-xs-6"><a style="padding : 10px" class="pull-right text-center" ng-click="openDownloadModal()"><i class="fa fa-download"></i><br>Download</a> <a style="padding : 10px" class="pull-right text-center" title="Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a></div><form class="form-horizontal col-xs-12"><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">along</strong></h3></label><div class="col-sm-10"><h3 class="form-control-static" style="margin : 0px">{{stateParams.searchtext}}.</h3></div></div></form></div>');
+    '<div class="list-item-panel col-xs-12"><h1 class="col-xs-6">{{topicProperties.title}}</h1><div class="col-xs-6"><a style="padding : 10px" class="pull-right text-center" ng-if="topicProperties.downloadable" ng-click="openDownloadModal()"><i class="fa fa-download"></i><br>Download</a> <a style="padding : 10px" class="pull-right text-center" title="Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a></div><form class="form-horizontal col-xs-12"><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">along</strong></h3></label><div class="col-sm-10"><h3 class="form-control-static" style="margin : 0px">{{stateParams.searchtext}}.</h3></div></div></form></div>');
 }]);
 })();
 
@@ -3694,7 +3782,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topic-headers/topic.header.at.html',
-    '<div class="list-item-panel col-xs-12"><h1 class="col-xs-6">{{topicProperties.title}}</h1><div class="col-xs-6"><a style="padding : 10px" class="pull-right text-center" ng-click="openDownloadModal()"><i class="fa fa-download"></i><br>Download</a> <a style="padding : 10px" class="pull-right text-center" title="Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a></div><form class="form-horizontal col-xs-12"><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">at</strong></h3></label><div class="col-sm-10"><h3 class="form-control-static" style="margin : 0px">{{stateParams.searchtext}}.</h3></div></div></form></div>');
+    '<div class="list-item-panel col-xs-12"><h1 class="col-xs-6">{{topicProperties.title}}</h1><div class="col-xs-6"><a style="padding : 10px" class="pull-right text-center" ng-if="topicProperties.downloadable" ng-click="openDownloadModal()"><i class="fa fa-download"></i><br>Download</a> <a style="padding : 10px" class="pull-right text-center" title="Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a></div><form class="form-horizontal col-xs-12"><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">at</strong></h3></label><div class="col-sm-10"><h3 class="form-control-static" style="margin : 0px">{{stateParams.searchtext}}.</h3></div></div></form></div>');
 }]);
 })();
 
@@ -3706,7 +3794,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topic-headers/topic.header.during.along.html',
-    '<div class="list-item-panel col-xs-12"><h1 class="col-xs-6">{{topicProperties.title}}</h1><div class="col-xs-6"><a style="padding : 10px" class="pull-right text-center" ng-click="openDownloadModal()"><i class="fa fa-download"></i><br>Download</a> <a style="padding : 10px" class="pull-right text-center" title="Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a></div><form class="form-horizontal col-xs-12"><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">during</strong></h3></label><div class="col-sm-10"><select class="form-control" id="time" ng-init="timeframeValue = timeframeOptions[timeframeOptionIndex]" ng-model="timeframeValue" ng-options="item.label for item in timeframeOptions" ng-change="onChangeTimeframeValue(timeframeValue)" style="font-size : 22px; color : #2780e3; height : 50px" analytics-on="change" analytics-category="Timeframe Change" analytics-label="{{stateParams.topic}}" analytics-event="{{timeframeValue.label}}"></select></div></div><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">along</strong></h3></label><div class="col-sm-10"><h3 class="form-control-static" style="margin : 0px">{{stateParams.searchtext}}.</h3></div></div></form></div>');
+    '<div class="list-item-panel col-xs-12"><h1 class="col-xs-6">{{topicProperties.title}}</h1><div class="col-xs-6"><a style="padding : 10px" class="pull-right text-center" ng-if="topicProperties.downloadable" ng-click="openDownloadModal()"><i class="fa fa-download"></i><br>Download</a> <a style="padding : 10px" class="pull-right text-center" title="Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a></div><form class="form-horizontal col-xs-12"><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">during</strong></h3></label><div class="col-sm-10"><select class="form-control" id="time" ng-init="timeframeValue = timeframeOptions[timeframeOptionIndex]" ng-model="timeframeValue" ng-options="item.label for item in timeframeOptions" ng-change="onChangeTimeframeValue(timeframeValue)" style="font-size : 22px; color : #2780e3; height : 50px" analytics-on="change" analytics-category="Timeframe Change" analytics-label="{{stateParams.topic}}" analytics-event="{{timeframeValue.label}}"></select></div></div><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">along</strong></h3></label><div class="col-sm-10"><h3 class="form-control-static" style="margin : 0px">{{stateParams.searchtext}}.</h3></div></div></form></div>');
 }]);
 })();
 
@@ -3718,7 +3806,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topic-headers/topic.header.during.in.html',
-    '<div class="list-item-panel col-xs-12"><h1 class="col-xs-6">{{topicProperties.title}}</h1><div class="col-xs-6"><a style="padding : 10px" class="pull-right text-center" ng-click="openDownloadModal()"><i class="fa fa-download"></i><br>Download</a> <a style="padding : 10px" class="pull-right text-center" title="Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a></div><form class="form-horizontal col-xs-12"><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">during</strong></h3></label><div class="col-sm-10"><select class="form-control" id="time" ng-init="timeframeValue = timeframeOptions[timeframeOptionIndex]" ng-model="timeframeValue" ng-options="item.label for item in timeframeOptions" ng-change="onChangeTimeframeValue(timeframeValue)" style="font-size : 22px; color : #2780e3; height : 50px" analytics-on="change" analytics-category="Timeframe Change" analytics-label="{{stateParams.topic}}" analytics-event="{{timeframeValue.label}}"></select></div></div><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">in</strong></h3></label><div class="col-sm-10"><h3 class="form-control-static" style="margin : 0px">{{stateParams.searchtext}} Neighborhood</h3></div></div></form></div>');
+    '<div class="list-item-panel col-xs-12"><h1 class="col-xs-6">{{topicProperties.title}}</h1><div class="col-xs-6"><a style="padding : 10px" class="pull-right text-center" ng-if="topicProperties.downloadable" ng-click="openDownloadModal()"><i class="fa fa-download"></i><br>Download</a> <a style="padding : 10px" class="pull-right text-center" title="Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a></div><form class="form-horizontal col-xs-12"><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">during</strong></h3></label><div class="col-sm-10"><select class="form-control" id="time" ng-init="timeframeValue = timeframeOptions[timeframeOptionIndex]" ng-model="timeframeValue" ng-options="item.label for item in timeframeOptions" ng-change="onChangeTimeframeValue(timeframeValue)" style="font-size : 22px; color : #2780e3; height : 50px" analytics-on="change" analytics-category="Timeframe Change" analytics-label="{{stateParams.topic}}" analytics-event="{{timeframeValue.label}}"></select></div></div><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">in</strong></h3></label><div class="col-sm-10"><h3 class="form-control-static" style="margin : 0px">{{stateParams.searchtext}} Neighborhood</h3></div></div></form></div>');
 }]);
 })();
 
@@ -3730,7 +3818,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topic-headers/topic.header.during.within.of.html',
-    '<div class="list-item-panel col-xs-12"><h1 class="col-xs-6">{{topicProperties.title}}</h1><div class="col-xs-6"><a style="padding : 10px" class="pull-right text-center" ng-click="openDownloadModal()"><i class="fa fa-download"></i><br>Download</a> <a style="padding : 10px" class="pull-right text-center" title="Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a></div><form class="form-horizontal col-xs-12"><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">during</strong></h3></label><div class="col-sm-10"><select class="form-control" id="time" ng-init="timeframeValue = timeframeOptions[timeframeOptionIndex]" ng-model="timeframeValue" ng-options="item.label for item in timeframeOptions" ng-change="onChangeTimeframeValue(timeframeValue)" analytics-on="change" analytics-category="Timeframe Change" analytics-label="{{stateParams.topic}}" analytics-event="{{timeframeValue.label}}" style="font-size : 22px; color : #2780e3; height : 50px"></select></div></div><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">within</strong></h3></label><div class="col-sm-10"><select class="form-control" id="extent" ng-init="extentValue = extentOptions[extentOptionIndex]" ng-model="extentValue" ng-options="item.label for item in extentOptions" ng-change="onChangeExtentValue(extentValue)" analytics-on="change" analytics-category="Extent Change" analytics-label="{{stateParams.topic}}" analytics-event="{{extentValue.label}}" style="font-size : 22px; color : #2780e3; height : 50px"></select></div></div><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">of</strong></h3></label><div class="col-sm-10"><h3 class="form-control-static" style="margin : 0px">{{stateParams.searchtext}}.</h3></div></div></form></div>');
+    '<div class="list-item-panel col-xs-12"><h1 class="col-xs-6">{{topicProperties.title}}</h1><div class="col-xs-6"><a style="padding : 10px" class="pull-right text-center" ng-if="topicProperties.downloadable" ng-click="openDownloadModal()"><i class="fa fa-download"></i><br>Download</a> <a style="padding : 10px" class="pull-right text-center" title="Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a></div><form class="form-horizontal col-xs-12"><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">during</strong></h3></label><div class="col-sm-10"><select class="form-control" id="time" ng-init="timeframeValue = timeframeOptions[timeframeOptionIndex]" ng-model="timeframeValue" ng-options="item.label for item in timeframeOptions" ng-change="onChangeTimeframeValue(timeframeValue)" analytics-on="change" analytics-category="Timeframe Change" analytics-label="{{stateParams.topic}}" analytics-event="{{timeframeValue.label}}" style="font-size : 22px; color : #2780e3; height : 50px"></select></div></div><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">within</strong></h3></label><div class="col-sm-10"><select class="form-control" id="extent" ng-init="extentValue = extentOptions[extentOptionIndex]" ng-model="extentValue" ng-options="item.label for item in extentOptions" ng-change="onChangeExtentValue(extentValue)" analytics-on="change" analytics-category="Extent Change" analytics-label="{{stateParams.topic}}" analytics-event="{{extentValue.label}}" style="font-size : 22px; color : #2780e3; height : 50px"></select></div></div><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">of</strong></h3></label><div class="col-sm-10"><h3 class="form-control-static" style="margin : 0px">{{stateParams.searchtext}}.</h3></div></div></form></div>');
 }]);
 })();
 
@@ -3742,7 +3830,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topic-headers/topic.header.in.html',
-    '<div class="list-item-panel col-xs-12"><h1 class="col-xs-6">{{topicProperties.title}}</h1><div class="col-xs-6"><a style="padding : 10px" class="pull-right text-center" ng-click="openDownloadModal()"><i class="fa fa-download"></i><br>Download</a> <a style="padding : 10px" class="pull-right text-center" title="Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a></div><form class="form-horizontal col-xs-12"><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">in</strong></h3></label><div class="col-sm-10"><h3 class="form-control-static" style="margin : 0px">{{stateParams.searchtext}} Neighborhood</h3></div></div></form></div>');
+    '<div class="list-item-panel col-xs-12"><h1 class="col-xs-6">{{topicProperties.title}}</h1><div class="col-xs-6"><a style="padding : 10px" class="pull-right text-center" ng-if="topicProperties.downloadable" ng-click="openDownloadModal()"><i class="fa fa-download"></i><br>Download</a> <a style="padding : 10px" class="pull-right text-center" title="Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a></div><form class="form-horizontal col-xs-12"><div class="form-group"><label class="col-sm-2 control-label"><h3 style="margin : 0px"><strong class="text-muted">in</strong></h3></label><div class="col-sm-10"><h3 class="form-control-static" style="margin : 0px">{{stateParams.searchtext}} Neighborhood</h3></div></div></form></div>');
 }]);
 })();
 
@@ -3754,7 +3842,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topic-headers/topic.header.ownedby.html',
-    '<div class="list-item-panel col-xs-12"><h1 class="col-xs-6">{{topicProperties.title}}</h1><div class="col-xs-6"><a style="padding : 10px" class="pull-right text-center" ng-click="openDownloadModal()"><i class="fa fa-download"></i><br>Download</a> <a style="padding : 10px" class="pull-right text-center" title="Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a></div><form class="form-horizontal col-xs-12"><div class="form-group"><label class="col-sm-3 control-label"><h3 style="margin : 0px"><strong class="text-muted">owned by</strong></h3></label><div class="col-sm-9"><h3 class="form-control-static" style="margin : 0px">{{stateParams.searchtext}}.</h3></div></div></form></div>');
+    '<div class="list-item-panel col-xs-12"><h1 class="col-xs-6">{{topicProperties.title}}</h1><div class="col-xs-6"><a style="padding : 10px" class="pull-right text-center" ng-if="topicProperties.downloadable" ng-click="openDownloadModal()"><i class="fa fa-download"></i><br>Download</a> <a style="padding : 10px" class="pull-right text-center" title="Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a></div><form class="form-horizontal col-xs-12"><div class="form-group"><label class="col-sm-3 control-label"><h3 style="margin : 0px"><strong class="text-muted">owned by</strong></h3></label><div class="col-sm-9"><h3 class="form-control-static" style="margin : 0px">{{stateParams.searchtext}}.</h3></div></div></form></div>');
 }]);
 })();
 
@@ -3778,7 +3866,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topic-single/topic.single.html',
-    '<div><div class="col-xs-12 btn-group btn-group-justified" style="margin-top : 15px"><a href="#/search/composite" class="btn btn-primary" style="font-size : 18px" analytics-on="click" analytics-category="Navigation" analytics-label="Topics Single Page" analytics-event="To Search"><i class="fa fa-search fa-fw"></i> Search</a> <a ng-click="goToTopics()" class="btn btn-primary" style="font-size : 18px" analytics-on="click" analytics-category="Navigation" analytics-label="Topics Single Page" analytics-event="To Search"><i class="fa fa-bars fa-fw"></i> View Topics</a></div><div class="col-xs-12"><hr></div><div ng-include="headerTemplate"></div><div class="col-xs-12" style="height : 200px; text-align : center; margin-top : 30px" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div class="col-xs-12 list-item-panel" ng-show="!loading"><div ng-if="stateParams.view !== \'simple\'"><div class="hidden-xs col-xs-12"><h2 class="pull-left" style="margin-right : 10px">{{topicProperties.views[stateParams.view].label}}</h2><div class="btn-group pull-right" role="group" aria-label="..." style="margin-top : 15px"><button ng-repeat="view in topicProperties.searchby[stateParams.searchby].params.validViews" ng-class="{\'active\' : stateParams.view === view}" ng-click="onClickChangeView(view)" analytics-on="click" analytics-category="Topic View" analytics-label="{{stateParams.topic}}" analytics-event="{{topicProperties.views[view].label}}" class="btn btn-primary">{{topicProperties.views[view].label}}</button><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div></div><div ng-if="stateParams.type !== null" class="col-xs-12"><h5 class="text-muted">Filtered by <strong>{{stateParams.type}}</strong></h5></div></div><div class="visible-xs" style="text-align : center; width : 100%"><h2 class="pull-left" style="margin-right : 10px">{{topicProperties.views[stateParams.view].label}} View</h2><div class="btn-group" role="group" aria-label="..." style="margin-top : 15px"><div class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Change View <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li ng-repeat="view in topicProperties.searchby[stateParams.searchby].params.validViews" ng-class="{\'active\' : stateParams.view === view}" ng-click="onClickChangeView(view)" analytics-on="click" analytics-category="Topic View" analytics-label="{{stateParams.topic}}" analytics-event="{{topicProperties.views[view].label}} View" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1">{{topicProperties.views[view].label}}</a></li></ul></div><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div></div><div class="col-xs-12" style="height : 10px"></div></div></div><div ng-if="topicPropteries.viewTemplates.simple !== null" ng-show="stateParams.view === \'simple\'" ng-include="topicProperties.views.simple.template"></div><div ng-if="topicPropteries.viewTemplates.details !== null" ng-show="stateParams.view === \'details\'" ng-include="topicProperties.views.details.template"></div><div ng-if="topicPropteries.viewTemplates.list !== null" ng-show="stateParams.view === \'list\'" ng-include="topicProperties.views.list.template"></div><div ng-if="topicPropteries.viewTemplates.summary !== null" ng-show="stateParams.view === \'summary\'" ng-include="topicProperties.views.summary.template"></div><div><div ng-show="stateParams.view === \'map\'" class="col-xs-12" style="height : 400px; margin-bottom : 20px;"><div id="map" style="height : 100%; width : 100%;margin : 0px; padding : 0px"><div ng-if="topic.summary.table !== undefined"><h5 ng-init="showLegend = true" ng-show="showLegend" ng-click="showLegend = !showLegend" class="text-primary" style="position : absolute; top : 50px; right : 10px;z-index : 7; cursor : pointer; background : white; padding : 5px; border-radius : 4px; border : 2px solid #2780E3; box-shadow: 0 1px 5px rgba(0,0,0,0.4)"><strong>Legend</strong> <i class="fa fa-expand"></i></h5><div ng-show="!showLegend" style="position : absolute; top : 50px; right : 10px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7; border : 2px solid #2780E3"><div class="col-xs-12"><h4 class="pull-left">Legend</h4><p ng-click="showLegend = !showLegend" class="text-primary pull-right" style="margin-top : 5px; cursor : pointer"><i class="fa fa-2x fa-times"></i></p></div><table ng-if="topic.features.length !== 0" class="table table-hover"><tbody><tr ng-repeat="(key, value) in topic.summary.table"><td ng-click="getDetails(key)" style="cursor : pointer"><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}</td></tr></tbody></table></div></div></div></div><div id="detailsModal" class="modal fade"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button ng-click="closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">Location Details</h4></div><div class="modal-body"><div ng-include="topicProperties.views.list.template"></div></div></div></div></div></div></div><div ng-if="linkTopics.length > 0" class="col-xs-12 list-item-panel" style="margin-top : 30px"><h2>Related Links</h2><div class="list-group" style="margin-top : 20px"><a class="row list-group-item list-item-panel" analytics-category="Related Link" analytics-label="{{stateParams.topic}}" analytics-event="{{linkTopic.linkTo}}" href="{{linkTopic.linkTo}}" style="margin-bottom : 5px" ng-repeat="linkTopic in linkTopics"><span class="visible-xs col-xs-8"><p class="text-primary text-center">{{linkTopic.question}}</p></span> <i ng-class="linkTopic.iconClass" class="visible-xs pull-left col-xs-3 text-primary"></i><div ng-class="linkTopic.iconClass" class="hidden-xs col-sm-2 text-primary"></div><h4 class="hidden-xs col-sm-9 text-primary" style="margin-top : 20px">{{linkTopic.question}}</h4><h4 class="col-sm-1 hidden-xs"><i class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="col-xs-12 text-center">List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a> under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.</div></div><div id="downloadModal" class="modal fade" style="z-index : 3000"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">Download</h4></div><div class="modal-body"><div ng-if="stateParams.topic === \'property\' || stateParams.topic === \'owner\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">{{topicProperties.title}} Details <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'crime\' || stateParams.topic === \'development\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'summary\', topic)" analytics-on="click" analytics-category="Download" analytics-label="summary" analytics-event="{{stateParams.topic}}">Summary Table <i class="fa fa-cloud-download"></i></button> <button class="btn btn-primary col-xs-12" style="margin-top : 3px" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Detailed records <i class="fa fa-cloud-download"></i></button><p class="text-muted text-center">based on selected filters</p></div><div ng-if="stateParams.topic === \'zoning\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Zoning Data <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'addresslist\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Address List <i class="fa fa-cloud-download"></i></button></div><div ng-if="stateParams.topic === \'streetmaintenance\'"><button class="btn btn-primary col-xs-12" ng-click="download(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Street Details <i class="fa fa-cloud-download"></i></button></div></div></div></div></div></div>');
+    '<div><div class="col-xs-12 btn-group btn-group-justified" style="margin-top : 15px"><a href="#/search/composite" class="btn btn-primary" style="font-size : 18px" analytics-on="click" analytics-category="Navigation" analytics-label="Topics Single Page" analytics-event="To Search"><i class="fa fa-search fa-fw"></i> Search</a> <a ng-click="goToTopics()" class="btn btn-primary" style="font-size : 18px" analytics-on="click" analytics-category="Navigation" analytics-label="Topics Single Page" analytics-event="To Search"><i class="fa fa-bars fa-fw"></i> View Topics</a></div><div class="col-xs-12"><hr></div><div ng-include="headerTemplate"></div><div class="col-xs-12" style="height : 200px; text-align : center; margin-top : 30px" ng-show="loading"><i class="fa fa-5x fa-spinner fa-spin"></i></div><div class="col-xs-12 list-item-panel" ng-show="!loading"><div ng-if="stateParams.view !== \'simple\'"><div class="hidden-xs col-xs-12"><h2 class="pull-left" style="margin-right : 10px">{{topicProperties.views[stateParams.view].label}}</h2><div class="btn-group pull-right" role="group" aria-label="..." style="margin-top : 15px"><button ng-repeat="view in topicProperties.searchby[stateParams.searchby].params.validViews" ng-class="{\'active\' : stateParams.view === view}" ng-click="onClickChangeView(view)" analytics-on="click" analytics-category="Topic View" analytics-label="{{stateParams.topic}}" analytics-event="{{topicProperties.views[view].label}}" class="btn btn-primary">{{topicProperties.views[view].label}}</button><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" style="z-index : 1001" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div></div><div ng-if="stateParams.type !== null" class="col-xs-12"><h5 class="text-muted">Filtered by <strong>{{stateParams.type}}</strong></h5></div></div><div class="visible-xs" style="text-align : center; width : 100%"><h2 class="pull-left" style="margin-right : 10px">{{topicProperties.views[stateParams.view].label}} View</h2><div class="btn-group" role="group" aria-label="..." style="margin-top : 15px"><div class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Change View <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li ng-repeat="view in topicProperties.searchby[stateParams.searchby].params.validViews" ng-class="{\'active\' : stateParams.view === view}" ng-click="onClickChangeView(view)" analytics-on="click" analytics-category="Topic View" analytics-label="{{stateParams.topic}}" analytics-event="{{topicProperties.views[view].label}} View" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1">{{topicProperties.views[view].label}}</a></li></ul></div><div ng-if="topicParams.view === \'list\' || (topicParams.view === \'map\' || topic.summary !== undefined)" class="btn-group" role="group"><button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">Filter <span class="caret"></span></button><ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1"><li class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(null)">Show All</a></li><li ng-repeat="(key, value) in topic.summary.table" class="text-primary" role="presentation"><a role="menuitem" tabindex="-1" ng-click="filterBy(key)">{{key}}</a></li></ul></div></div><div class="col-xs-12" style="height : 10px"></div></div></div><div ng-if="topicPropteries.viewTemplates.simple !== null" ng-show="stateParams.view === \'simple\'" ng-include="topicProperties.views.simple.template"></div><div ng-if="topicPropteries.viewTemplates.details !== null" ng-show="stateParams.view === \'details\'" ng-include="topicProperties.views.details.template"></div><div ng-if="topicPropteries.viewTemplates.list !== null" ng-show="stateParams.view === \'list\'" ng-include="topicProperties.views.list.template"></div><div ng-if="topicPropteries.viewTemplates.summary !== null" ng-show="stateParams.view === \'summary\'" ng-include="topicProperties.views.summary.template"></div><div><div ng-show="stateParams.view === \'map\'" class="col-xs-12" style="height : 400px; margin-bottom : 20px;"><div id="map" style="height : 100%; width : 100%;margin : 0px; padding : 0px"><div ng-if="topic.summary.table !== undefined"><h5 ng-init="showLegend = true" ng-show="showLegend" ng-click="showLegend = !showLegend" class="text-primary" style="position : absolute; top : 50px; right : 10px;z-index : 7; cursor : pointer; background : white; padding : 5px; border-radius : 4px; border : 2px solid #2780E3; box-shadow: 0 1px 5px rgba(0,0,0,0.4)"><strong>Legend</strong> <i class="fa fa-expand"></i></h5><div ng-show="!showLegend" style="position : absolute; top : 50px; right : 10px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);background: #fff;border-radius: 5px; z-index : 7; border : 2px solid #2780E3"><div class="col-xs-12"><h4 class="pull-left">Legend</h4><p ng-click="showLegend = !showLegend" class="text-primary pull-right" style="margin-top : 5px; cursor : pointer"><i class="fa fa-2x fa-times"></i></p></div><table ng-if="topic.features.length !== 0" class="table table-hover"><tbody><tr ng-repeat="(key, value) in topic.summary.table"><td ng-click="getDetails(key)" style="cursor : pointer"><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}</td></tr></tbody></table></div></div></div></div><div id="detailsModal" class="modal fade"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">Location Details</h4></div><div class="modal-body"><div ng-include="topicProperties.views.list.template"></div></div></div></div></div></div></div><div ng-if="linkTopics.length > 0" class="col-xs-12 list-item-panel" style="margin-top : 30px"><h2>Related Links</h2><div class="list-group" style="margin-top : 20px"><a class="row list-group-item list-item-panel" analytics-category="Related Link" analytics-label="{{stateParams.topic}}" analytics-event="{{linkTopic.linkTo}}" href="{{linkTopic.linkTo}}" style="margin-bottom : 5px" ng-repeat="linkTopic in linkTopics"><span class="visible-xs col-xs-8"><p class="text-primary text-center">{{linkTopic.question}}</p></span> <i ng-class="linkTopic.iconClass" class="visible-xs pull-left col-xs-3 text-primary"></i><div ng-class="linkTopic.iconClass" class="hidden-xs col-sm-2 text-primary"></div><h4 class="hidden-xs col-sm-9 text-primary" style="margin-top : 20px">{{linkTopic.question}}</h4><h4 class="col-sm-1 hidden-xs"><i class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4></a></div><div class="col-xs-12 text-center">List icon font generated by <a href="http://www.flaticon.com">flaticon.com</a> under <a href="http://creativecommons.org/licenses/by/3.0/">CC</a> by <a href="http://www.zurb.com">Zurb</a>, <a href="http://www.freepik.com">Freepik</a>, <a href="http://www.unocha.org">OCHA</a>.</div></div><div id="downloadModal" class="modal fade" style="z-index : 3000"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button><h4 class="modal-title">Download</h4></div><div class="modal-body"><div ng-if="stateParams.topic === \'property\' || stateParams.topic === \'owner\' || stateParams.topic === \'zoning\' || stateParams.topic === \'addresslist\' || stateParams.topic === \'streetmaintenance\'"><button class="btn btn-primary col-xs-12" ng-click="downloadCsv(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">{{topicProperties.title}} Details CSV <i class="fa fa-download"></i></button> <button class="btn btn-primary col-xs-12" style="margin-top : 5px" ng-click="downloadGeoJson(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">{{topicProperties.title}} Details GeoJson <i class="fa fa-download"></i></button></div><div ng-if="stateParams.topic === \'crime\' || stateParams.topic === \'development\'"><button class="btn btn-primary col-xs-12" ng-click="downloadCsv(\'summary\', topic)" analytics-on="click" analytics-category="Download" analytics-label="summary" analytics-event="{{stateParams.topic}}">Summary Table <i class="fa fa-download"></i></button> <button class="btn btn-primary col-xs-12" style="margin-top : 3px" ng-click="downloadCsv(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Detailed records <i class="fa fa-download"></i></button> <button class="btn btn-primary col-xs-12" style="margin-top : 3px" ng-click="downloadGeoJson(\'complete\', topic)" analytics-on="click" analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">{{topicProperties.title}} Details GeoJson <i class="fa fa-download"></i></button><p class="text-muted text-center">based on selected filters</p></div></div></div></div></div></div>');
 }]);
 })();
 
@@ -3837,6 +3925,30 @@ try {
   module = angular.module('simplicity', []);
 }
 module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('topics/topic-components/development/development.list.view.html',
+    '<div><div class="col-xs-12" ng-if="topic.features.length === 0"><div class="col-xs-12"><hr></div><h3 class="text-muted text-center"><strong>We couldn\'t find any results.</strong></h3><h4 class="text-muted text-center"><strong>Try expanding the time frame or extent of your search.</strong></h4></div><div ng-repeat="feature in topic.features | orderBy:\'-properties.thedate\' | filter:filterText" class="col-xs-12 list-item-panel" style="margin-bottom : 20px"><h3 class="text-center text-muted"><strong>{{feature.properties.record_type}}</strong></h3><h3 class="text-center">{{feature.properties.address}}</h3><a ng-if="stateParams.view !== \'map\'" ng-click="onChangeMapCenter(feature.properties, feature.properties.longitude, feature.properties.latitude)"><p class="text-center">Zoom to this development on the map</p></a><p class="text-muted text-center">{{feature.properties.description}}</p><div class="col-xs-12"><h4 class="col-xs-12 col-sm-4 text-center"><strong class="text-muted">Opened</strong><p>{{feature.properties.date_opened|date}}</p></h4><h4 class="col-xs-12 col-sm-4 text-center"><strong class="text-muted">Updated</strong><p>{{feature.properties.date_statused|date}}</p></h4><h4 class="col-xs-12 col-sm-4 text-center"><strong class="text-muted">Status</strong><p>{{feature.properties.record_status}}</p></h4></div><div class="col-xs-12 list-item-panel" ng-init="showMore = false" ng-show="showMore"><div class="col-xs-12"><h4 class="col-sm-6 text-center"><strong class="text-muted">Record Id</strong><p>{{feature.properties.record_id}}</p></h4><h4 class="col-sm-6 text-center"><strong class="text-muted">License Number</strong><p>{{feature.properties.license_number}}</p></h4></div><div class="col-xs-12"><h4 class="col-sm-6 text-center"><strong class="text-muted">Record Name</strong><p>{{feature.properties.record_name}}</p></h4><h4 class="col-sm-6 text-center"><strong class="text-muted">Business Name</strong><p>{{feature.properties.business_name}}</p></h4></div><div class="col-xs-12" ng-init="showComments = false" ng-show="showComments"><h4><strong class="text-muted">Comments</strong></h4><ul class="list-group" style="overflow : scroll; margin-bottom : 20px"><li class="list-group-item list-item-panel" style="margin : 5px" ng-repeat="comment in feature.properties.commentsArray">{{comment}}</li></ul></div><div class="col-xs-12"><a ng-click="showComments = !showComments"><h4 class="text-center" ng-if="!showComments">Show Comments</h4><h4 class="text-center" ng-if="showComments">Hide Comments</h4></a></div></div><a ng-click="showMore = !showMore"><h4 class="text-center" ng-if="!showMore">Show More</h4><h4 class="text-center" ng-if="showMore">Show Less</h4></a></div></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('topics/topic-components/development/development.summary.view.html',
+    '<div><div class="col-xs-12" ng-if="topic.features.length === 0"><div class="col-xs-12"><hr></div><h3 class="text-muted text-center"><strong>We couldn\'t find any results.</strong></h3><h4 class="text-muted text-center"><strong>Try expanding the time frame or extent of your search.</strong></h4></div><table ng-if="topic.features.length !== 0" class="table table-hover col-xs-12"><thead><tr><th>Type</th><th class="text-center">Count</th></tr></thead><tbody><tr ng-repeat="(key, value) in topic.summary.table"><td ng-click="filterBy(key)" style="cursor : pointer"><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}<br><p class="text-muted">{{value.description}}</p></td><td class="text-center">{{value.count}}</td></tr></tbody></table></div>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('simplicity');
+} catch (e) {
+  module = angular.module('simplicity', []);
+}
+module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topic-components/owner/owner.details.view.html',
     '<div><div class="col-xs-12" ng-if="topic.features.length === 0"><div class="col-xs-12"><hr></div><h3 class="text-muted text-center"><strong>We couldn\'t find any results.</strong></h3></div><div ng-repeat="feature in topic.features | filter:filterText" class="col-xs-12 list-item-panel" style="margin-bottom : 30px"><h4>Owner</h4><strong class="text-muted">{{feature.properties.owner}}</strong><address>{{feature.properties.owner_address}}<br>{{feature.properties.owner_citystatezip}}</address></div></div>');
 }]);
@@ -3863,30 +3975,6 @@ try {
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topic-components/owner/owner.view.html',
     '<div class="col-xs-12 list-item-panel"><h4>Owner</h4><strong class="text-muted">{{feature.properties.owner}}</strong><address>{{feature.properties.owner_address}}<br>{{feature.properties.owner_citystatezip}}</address></div>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('topics/topic-components/development/development.list.view.html',
-    '<div><div class="col-xs-12" ng-if="topic.features.length === 0"><div class="col-xs-12"><hr></div><h3 class="text-muted text-center"><strong>We couldn\'t find any results.</strong></h3><h4 class="text-muted text-center"><strong>Try expanding the time frame or extent of your search.</strong></h4></div><div ng-repeat="feature in topic.features | orderBy:\'-properties.thedate\' | filter:filterText" class="col-xs-12 list-item-panel" style="margin-bottom : 20px"><h3 class="text-center text-muted"><strong>{{feature.properties.record_type}}</strong></h3><h3 class="text-center">{{feature.properties.address}}</h3><a ng-if="stateParams.view !== \'map\'" ng-click="onChangeMapCenter(feature.properties, feature.properties.longitude, feature.properties.latitude)"><p class="text-center">Zoom to this development on the map</p></a><p class="text-muted text-center">{{feature.properties.description}}</p><div class="col-xs-12"><h4 class="col-xs-12 col-sm-4 text-center"><strong class="text-muted">Opened</strong><p>{{feature.properties.date_opened|date}}</p></h4><h4 class="col-xs-12 col-sm-4 text-center"><strong class="text-muted">Updated</strong><p>{{feature.properties.date_statused|date}}</p></h4><h4 class="col-xs-12 col-sm-4 text-center"><strong class="text-muted">Status</strong><p>{{feature.properties.record_status}}</p></h4></div><div class="col-xs-12 list-item-panel" ng-init="showMore = false" ng-show="showMore"><div class="col-xs-12"><h4 class="col-sm-6 text-center"><strong class="text-muted">Record Id</strong><p>{{feature.properties.record_id}}</p></h4><h4 class="col-sm-6 text-center"><strong class="text-muted">License Number</strong><p>{{feature.properties.license_number}}</p></h4></div><div class="col-xs-12"><h4 class="col-sm-6 text-center"><strong class="text-muted">Record Name</strong><p>{{feature.properties.record_name}}</p></h4><h4 class="col-sm-6 text-center"><strong class="text-muted">Business Name</strong><p>{{feature.properties.business_name}}</p></h4></div><div class="col-xs-12" ng-init="showComments = false" ng-show="showComments"><h4><strong class="text-muted">Comments</strong></h4><ul class="list-group" style="overflow : scroll; margin-bottom : 20px"><li class="list-group-item list-item-panel" style="margin : 5px" ng-repeat="comment in feature.properties.commentsArray">{{comment}}</li></ul></div><div class="col-xs-12"><a ng-click="showComments = !showComments"><h4 class="text-center" ng-if="!showComments">Show Comments</h4><h4 class="text-center" ng-if="showComments">Hide Comments</h4></a></div></div><a ng-click="showMore = !showMore"><h4 class="text-center" ng-if="!showMore">Show More</h4><h4 class="text-center" ng-if="showMore">Show Less</h4></a></div></div>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('simplicity');
-} catch (e) {
-  module = angular.module('simplicity', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('topics/topic-components/development/development.summary.view.html',
-    '<div><div class="col-xs-12" ng-if="topic.features.length === 0"><div class="col-xs-12"><hr></div><h3 class="text-muted text-center"><strong>We couldn\'t find any results.</strong></h3><h4 class="text-muted text-center"><strong>Try expanding the time frame or extent of your search.</strong></h4></div><table ng-if="topic.features.length !== 0" class="table table-hover col-xs-12"><thead><tr><th>Type</th><th class="text-center">Count</th></tr></thead><tbody><tr ng-repeat="(key, value) in topic.summary.table"><td ng-click="filterBy(key)" style="cursor : pointer"><i class="fa fa-circle" style="color: #{{value.color}}"></i> {{key}}<br><p class="text-muted">{{value.description}}</p></td><td class="text-center">{{value.count}}</td></tr></tbody></table></div>');
 }]);
 })();
 
@@ -3934,7 +4022,7 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topic-components/street-maintenance/street.maintenance.list.view.html',
-    '<div ng-repeat="feature in topic.features | filter:filterText" class="col-xs-12 list-item-panel" style="margin-bottom : 20px"><div ng-if="stateParams.view !== \'map\'" class="col-xs-12 text-center"><a clas="pull-right" ng-click="onChangeMapCenter(feature.properties, feature.properties.center_x, feature.properties.center_y)">Zoom to this centerline on the map</a></div><div class="col-sm-6 col-xs-12"><h5 class="text-center">Name</h5><h4 class="text-muted text-center" style="margin-top : 20px; margin-botton : 20px"><strong>{{feature.properties.full_street_name}}</strong></h4></div><div class="col-sm-6 col-xs-12"><h5 class="text-center">Centerline ID</h5><h4 class="text-muted text-center" style="margin-top : 20px; margin-botton : 20px"><strong>{{feature.properties.centerline_id}}</strong></h4></div><div class="col-xs-12"><h5 class="col-xs-12 text-center">Responsibility</h5><h2 ng-if="feature.properties.street_responsibility_contact === null" class="text-muted text-center" style="margin-top : 20px; margin-botton : 20px"><strong>{{feature.properties.street_responsibility}}</strong></h2><a ng-if="feature.properties.street_responsibility_contact !== null" target="_blank" href="{{feature.properties.street_responsibility_contact}}"><h2 class="text-center" style="margin-top : 20px;"><strong>{{feature.properties.street_responsibility}}</strong></h2></a> <a ng-if="feature.properties.street_responsibility_contact !== null" target="_blank" href="{{feature.properties.street_responsibility_contact}}"><h4 class="text-center" style="margin-botton : 20px">Click here to contact the maintanace authority</h4></a> <a ng-if="feature.properties.street_responsibility_citizen_service_requests.brand !== null" target="_blank" href="{{feature.properties.street_responsibility_citizen_service_requests.url}}"><h4 class="text-center" style="margin-botton : 20px">Or click here to make citizen service request using the {{feature.properties.street_responsibility_citizen_service_requests.brand}}</h4></a></div></div>');
+    '<div ng-repeat="feature in topic.features | filter:filterText" class="col-xs-12 list-item-panel" style="margin-bottom : 20px"><div ng-if="stateParams.view !== \'map\'" class="col-xs-12 text-center"><a clas="pull-right" ng-click="onChangeMapCenter(feature.properties, feature.properties.center_x, feature.properties.center_y)">Zoom to this centerline on the map</a></div><div class="col-sm-6 col-xs-12"><h5 class="text-center">Name</h5><h4 class="text-muted text-center" style="margin-top : 20px; margin-botton : 20px"><strong>{{feature.properties.full_street_name}}</strong></h4></div><div class="col-sm-6 col-xs-12"><h5 class="text-center">Centerline ID</h5><h4 class="text-muted text-center" style="margin-top : 20px; margin-botton : 20px"><strong>{{feature.properties.centerline_id}}</strong></h4></div><div class="col-xs-12"><h5 class="col-xs-12 text-center">Responsibility</h5><h2 ng-if="feature.properties.street_responsibility_contact === null" class="text-muted text-center" style="margin-top : 20px; margin-botton : 20px"><strong>{{feature.properties.street_responsibility}}</strong></h2><a ng-if="feature.properties.street_responsibility_contact !== null" target="_blank" href="{{feature.properties.street_responsibility_contact}}"><h2 class="text-center" style="margin-top : 20px;"><strong>{{feature.properties.street_responsibility}}</strong></h2></a> <a ng-if="feature.properties.street_responsibility_contact !== null" target="_blank" href="{{feature.properties.street_responsibility_contact}}"><h4 class="text-center" style="margin-botton : 20px">Click here to contact the maintenance authority</h4></a> <a ng-if="feature.properties.street_responsibility_citizen_service_requests.brand !== null" target="_blank" href="{{feature.properties.street_responsibility_citizen_service_requests.url}}"><h4 class="text-center" style="margin-botton : 20px">Or click here to make citizen service request using the {{feature.properties.street_responsibility_citizen_service_requests.brand}}</h4></a></div></div>');
 }]);
 })();
 
@@ -3958,6 +4046,6 @@ try {
 }
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('topics/topic-components/zoning/zoning.view.html',
-    '<div ng-repeat="feature in topic.features"><div class="col-xs-12 list-item-panel" style="margin-bottom : 20px"><h4>Zoning</h4><h5 class="text-muted"><strong>District</strong> : <span ng-if="feature.properties.zoning.length > 0" ng-repeat="zoning in feature.properties.zoning"><span ng-if="zoning.codelink === \'disable\'">{{zoning.zoningDistrict}}</span> <a target="_blank" href="{{zoning.codelink}}" analytics-on="click" analytics-category="Topic Link" analytics-label="{{zoning.zoningDistrict}}" analytics-event="{{stateParams.topic}} zoning"><strong>{{zoning.zoningDistrict}}<span ng-if="$index !== feature.properties.zoning.length - 1 && feature.properties.zoning.length !== 1">,</span></strong></a></span> <span ng-if="feature.properties.zoning.length === 0 || feature.properties.zoning === undefined">No City of Asheville Zoning</span></h5><h5 ng-if="feature.properties.zoningOverlays !== undefined"><strong>Zoning Overlay</strong> : <span>{{feature.properties.zoningOverlays}}</span></h5></div></div>');
+    '<div ng-repeat="feature in topic.features"><div class="col-xs-12 list-item-panel" style="margin-bottom : 20px; margin-top : 20px;"><h4>Zoning</h4><h5 class="text-muted"><strong>District</strong> : <span ng-if="feature.properties.zoning.length > 0" ng-repeat="zoning in feature.properties.zoning"><span ng-if="zoning.codelink === \'disable\'">{{zoning.zoningDistrict}}</span> <a target="_blank" href="{{zoning.codelink}}" analytics-on="click" analytics-category="Topic Link" analytics-label="{{zoning.zoningDistrict}}" analytics-event="{{stateParams.topic}} zoning"><strong>{{zoning.zoningDistrict}}<span ng-if="$index !== feature.properties.zoning.length - 1 && feature.properties.zoning.length !== 1">,</span></strong></a></span> <span ng-if="feature.properties.zoning.length === 0 || feature.properties.zoning === undefined">No City of Asheville Zoning</span></h5><h5 ng-if="feature.properties.zoningOverlays !== undefined"><strong>Zoning Overlay</strong> : <span>{{feature.properties.zoningOverlays}}</span></h5></div></div>');
 }]);
 })();
