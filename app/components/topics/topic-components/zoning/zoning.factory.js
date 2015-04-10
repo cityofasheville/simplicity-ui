@@ -9,22 +9,22 @@ simplicity.factory('Zoning', ['$q', '$stateParams', 'AddressCache', 'simplicityB
       'plural' : 'zoning',
       'searchForText' : 'an address',
       'position' : 6,
+      'downloadable' : false,
       'searchby' : {
         'address' : {
           'params' : {
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'defaultView' : 'details',
-            'validViews' : ['details', 'map']
+            'defaultView' : 'simple',
+            'validViews' : ['simple']
           },
           'requiredParams' : [],
           'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
         }
       },
       'views' : {
-        'details' : {'label' : 'Details View', 'template' : 'topics/topic-components/zoning/zoning.view.html'},
-        'map' : {'label' : 'Map View', 'template' : null}
+        'simple' : {'label' : 'Simple View', 'template' : 'topics/topic-components/zoning/zoning.view.html'}
       },
       'iconClass' : 'flaticon-map104',
       'linkTopics' : ['property', 'crime', 'development'],

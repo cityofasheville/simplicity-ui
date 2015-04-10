@@ -157,7 +157,6 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
         center: [35.5951125,-82.5511088], 
         zoom : 13,
         maxZoom : 22,
-        fullscreenControl: true,
         layers : [openstreetmap]
     });
 
@@ -169,9 +168,69 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
       $scope.filterText = $stateParams.type;
     }
 
+    var mapExpanded = false;
+    var expandMap = function(){
+      if(!mapExpanded){
+        $('body').css({
+          'padding' : 0,
+          'margin' : 0,
+          'height' : '100%',
+          'width' : '100%',
+          'overflow' : 'hidden'
+        });
+        $('html').css({
+          'height' : '100%',
+          'width' : '100%',
+        });
+        $('#map').css({
+          'height' : $(window).height(),
+          'width' : $(window).width(),
+          'position' : 'fixed',
+          'top' : '0px',
+          'left' : '0px',
+          'zIndex' : 999
+        });
+        $('.leaflet-control-expand-map-interior').removeClass('leaflet-control-expand');
+        $('.leaflet-control-expand-map-interior').addClass('leaflet-control-collapse');
+        mapExpanded = !mapExpanded;
+      }else{
+        $('body').css({
+          'overflow' : 'auto'
+        });
+        $('#map').css({
+          'height' : '400px',
+          'width' : '100%',
+          'position' : 'relative',
+        });
+         $('.leaflet-control-expand-map-interior').removeClass('leaflet-control-collapse');
+        $('.leaflet-control-expand-map-interior').addClass('leaflet-control-expand');
+        mapExpanded = !mapExpanded;
+      }
+      map.invalidateSize();
+    }
 
-    
-    var returnToFullscreen = false;
+   var ExpandMap = L.Control.extend({
+        options: {
+            position: 'topleft',
+        },
+
+        onAdd: function (map) {
+            var controlDiv = L.DomUtil.create('div', 'leaflet-control-command');
+            L.DomEvent
+              .addListener(controlDiv, 'click', L.DomEvent.stopPropagation)
+              .addListener(controlDiv, 'click', L.DomEvent.preventDefault)
+              .addListener(controlDiv, 'click', function () { expandMap(); });
+
+            var controlUI = L.DomUtil.create('div', 'leaflet-control-expand-map-interior', controlDiv);
+            controlUI.title = 'Expand map to the fullpage';
+            return controlDiv;
+        }
+    });
+
+    map.addControl(new ExpandMap());
+
+    $('.leaflet-control-expand-map-interior').addClass('leaflet-control-expand');
+
 
     var addGeoJsonToMap = function(data, style){
       var mapcenter;
@@ -266,24 +325,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
             layer.on('click', function(){
                   $scope.filterText = feature.properties.objectid;
                   $scope.$apply();
-                  $('#detailsModal').modal({'backdrop' : 'static'});
-                  if (
-                      document.fullscreenElement ||
-                      document.webkitFullscreenElement ||
-                      document.mozFullScreenElement ||
-                      document.msFullscreenElement
-                  ) {
-                    returnToFullscreen = true;
-                  }
-                  if (document.exitFullscreen) {
-                      document.exitFullscreen();
-                  } else if (document.webkitExitFullscreen) {
-                      document.webkitExitFullscreen();
-                  } else if (document.mozCancelFullScreen) {
-                      document.mozCancelFullScreen();
-                  } else if (document.msExitFullscreen) {
-                      document.msExitFullscreen();
-                  }   
+                  $('#detailsModal').modal({'backdrop' : 'static'}); 
             });
           }
         });
@@ -370,11 +412,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
       $state.transitionTo('main.topics.topic', stateParams, {'reload' : true});
     };
 
-
-
     $scope.loading = true;
-    //!!! Check if dataCache is already defined
-
     $scope.emailSubject = "";
     $scope.emailBodyText = "";
 
@@ -407,6 +445,8 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
             }
 
 
+            //EMAIL FORMATTING
+
             var emailTopic = "";
 
             if($scope.topic.features !== undefined){
@@ -438,14 +478,10 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
 
             $scope.emailSubject = "SimpliCity data for " + emailTopic + $scope.emailSearchBy;
 
-            $scope.emailBodyText ="City of Asheville's SimpliCity: city data simplified%0D%0A%0D%0AClick the link below to view your data.%0D%0A%0D%0A<" + escape($location.url()) + ">";
+            $scope.emailBodyText ="City of Asheville's SimpliCity: city data simplified%0D%0A%0D%0AClick the link below to view your data.%0D%0A%0D%0A<" + escape(window.location) + ">";
                     
           });
       });
-
-    
-
-
 
 
     $scope.goToTopics = function(){
@@ -466,31 +502,20 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
     };
 
 
-    $scope.closeModal = function(){
-      if(returnToFullscreen === true){
-        var m = document.getElementById("map");
- 
-        // go full-screen
-        if (m.requestFullscreen) {
-            m.requestFullscreen();
-        } else if (m.webkitRequestFullscreen) {
-            m.webkitRequestFullscreen();
-        } else if (m.mozRequestFullScreen) {
-            m.mozRequestFullScreen();
-        } else if (m.msRequestFullscreen) {
-            m.msRequestFullscreen();
-        }
-        returnToFullscreen = false;
-      }
-    };
-
-
     $scope.openDownloadModal = function(){
       $('#downloadModal').modal({'backdrop' : false});
     };
 
+    $scope.downloadGeoJson = function(downloadType, topic){
+      var jsonString =  'data:text/json;charset=utf-8,';
+      var json = JSON.stringify(topic);
+      jsonString = jsonString + json;
+      var encodedUri = encodeURI(jsonString);
+      window.open(encodedUri);
+    };
 
-    $scope.download = function(downloadType, topic){
+    $scope.downloadCsv = function(downloadType, topic){
+
       var csvString =  'data:text/csv;charset=utf-8,';
       if(downloadType === 'summary'){
         csvString += 'Type, Count' + '\n';
@@ -504,32 +529,76 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
         for(var attributeKey in topic.features[0].properties){
           headerArray.push(attributeKey);
         }
-        for(var geometryKey in topic.features[0].geometry){
-          headerArray.push(geometryKey);
+
+        var subHeadings = [];
+        for (var j = 0; j < topic.features.length; j++) {    
+          for (var z = 0; z < headerArray.length; z++) {
+            
+            if(topic.features[j].properties[headerArray[z]]){
+              
+              if (topic.features[j].properties[headerArray[z]].constructor === Array){
+                
+                for(var subHeading in topic.features[j].properties[headerArray[z]][0]){
+                  
+                  subHeadings.push(subHeading);
+                }
+              }
+            }
+          }
         }
+
+        for (var s = 0; s < subHeadings.length; s++) {
+          headerArray.push(subHeadings[s]);
+        }
+
         csvString += headerArray.join(',') + '\n';
         for (var i = 0; i < topic.features.length; i++) {
           var rowArray = [];
+          var subPropertyObj = {};
           for (var x = 0; x < headerArray.length; x++) {
             if(topic.features[i].properties[headerArray[x]]){
-              // if(topic.features[i].properties[headerArray[x]].constructor === Array){
-              //   rowArray.push(JSON.stringify(topic.features[i].properties[headerArray[x]]));
-              // }else{
-              //   rowArray.push(topic.features[i].properties[headerArray[x]]);
-              // }
-              rowArray.push(topic.features[i].properties[headerArray[x]]);
-            }else if(topic.features[i].geometry[headerArray[x]]){
-              rowArray.push(topic.features[i].geometry[headerArray[x]]);
+              if(typeof topic.features[i].properties[headerArray[x]] === 'string'){
+                var containsAComma = false;
+                for (var y = 0; y < topic.features[i].properties[headerArray[x]].length; y++) {
+                  if(topic.features[i].properties[headerArray[x]].charAt(y) === ','){
+                    containsAComma = true;
+                  }
+                }
+                if(containsAComma === true){
+                  rowArray.push('"' + topic.features[i].properties[headerArray[x]] + '"');
+                }else{
+                  rowArray.push(topic.features[i].properties[headerArray[x]]);
+                }
+                
+              }else if (typeof topic.features[i].properties[headerArray[x]] === 'number'){
+                rowArray.push(topic.features[i].properties[headerArray[x]]);
+              }else if (topic.features[i].properties[headerArray[x]].constructor === Array){
+                for (var a = 0; a < topic.features[i].properties[headerArray[x]].length; a++) {
+                  for(var subProp in topic.features[i].properties[headerArray[x]][a]){
+                    if(subPropertyObj[subProp] === undefined ){
+                      subPropertyObj[subProp] = topic.features[i].properties[headerArray[x]][a][subProp];
+                    }else{
+                      subPropertyObj[subProp] = subPropertyObj[subProp] + ", " + topic.features[i].properties[headerArray[x]][a][subProp];
+                    }
+                  }
+                }
+                rowArray.push('NULL');
+              }
             }else{
-              rowArray.push('NULL');
+              if(subPropertyObj[headerArray[x]]){
+                rowArray.push(subPropertyObj[headerArray[x]]);
+              }else{
+                rowArray.push('NULL');
+              }
             }
-          }
-          csvString += rowArray.join(',') + '\n';
-        }
+        
+      }
+      csvString += rowArray.join(',') + '\n';
       }
       var encodedUri = encodeURI(csvString);
       window.open(encodedUri);
-    };
+    }
+  };
 
 
 }]);

@@ -211,6 +211,15 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
           'outFields' : 'objectid, owner, owner_address, owner_citystatezip'  
         }
       },
+      'neighborhood' : {
+        'sqlArray' : ["neighborhood='", "neighborhoodName", "'"],
+        'sqlParamName' : 'where',
+        'queryParams' : {
+          'where' : '',
+          'f' : 'json',
+          'outFields' : 'objectid, owner, owner_address, owner_citystatezip'  
+        }
+      }
     },
      //                 _                                   _                 
      //  _______  _ __ (_)_ __   __ _    _____   _____ _ __| | __ _ _   _ ___ 

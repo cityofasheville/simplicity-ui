@@ -103,7 +103,7 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
             var streetAddressOnly = vicinity[1].split(",");
             
             var postal_code = "";
-            console.log(details.address_components);
+  
             for (var ac = 0; ac < details.address_components.length; ac++) {
               for (var typ = 0; typ < details.address_components[ac].types.length; typ++) {
                 if(details.address_components[ac].types[typ] === "postal_code"){
@@ -116,8 +116,6 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
             }else{
               searchText = streetAddressOnly[0];
             }
-
-            console.log(searchText);
 
 
             simplicityAdapter.search(SEARCH_CONFIG.searchUrl, searchText)
