@@ -15,7 +15,7 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
             'type' : null,
             'timeframe' : null,
             'extent' : 82.5,
-            'defaultView' : 'list',
+            'view' : 'list',
             'validViews' : ['list', 'map']
           },
           'prepositions' : {
@@ -29,7 +29,7 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'defaultView' : 'list',
+            'view' : 'list',
             'validViews' : ['list', 'map']
           },
           'prepositions' : {

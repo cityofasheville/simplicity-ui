@@ -16,7 +16,7 @@ simplicity.factory('Zoning', ['$q', '$stateParams', 'AddressCache', 'simplicityB
             'type' : null,
             'timeframe' : null,
             'extent' : null,
-            'defaultView' : 'simple',
+            'view' : 'simple',
             'validViews' : ['simple']
           },
           'requiredParams' : [],
@@ -38,14 +38,16 @@ simplicity.factory('Zoning', ['$q', '$stateParams', 'AddressCache', 'simplicityB
       var addressCache = AddressCache.get();
       var pinnum2civicaddressid = AddressCache.pinnum2civicaddressid();
       var formattedZoningArray = [];
-      for (var z = 0; z < addressCache.zoning.length; z++) {
-        var zoningDistrict = addressCache.zoning[z];
-        if(CODELINKS[zoningDistrict] === undefined){
-          formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : 'disable'});
-        }else{
-          formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : CODELINKS[zoningDistrict]});
+      if(addressCache.zoning){
+        for (var z = 0; z < addressCache.zoning.length; z++) {
+          var zoningDistrict = addressCache.zoning[z];
+          if(CODELINKS[zoningDistrict] === undefined){
+            formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : 'disable'});
+          }else{
+            formattedZoningArray.push({'zoningDistrict' : zoningDistrict, 'codelink' : CODELINKS[zoningDistrict]});
+          }
         }
-      }
+      } 
       return formattedZoningArray;
     };
 

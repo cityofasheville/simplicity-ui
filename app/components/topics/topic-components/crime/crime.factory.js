@@ -16,7 +16,7 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
             'type' : null,
             'timeframe' : 'last-year',
             'extent' : 660,
-            'defaultView' : 'summary',
+            'view' : 'summary',
             'validViews' : ['summary', 'list', 'map']
           },
           'prepositions' : {
@@ -32,7 +32,7 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
             'type' : null,
             'timeframe' : 'last-year',
             'extent' : 660,
-            'defaultView' : 'summary',
+            'view' : 'summary',
             'validViews' : ['summary', 'list', 'map']
           },
           'prepositions' : {
@@ -48,7 +48,7 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
             'type' : null,
             'timeframe' : 'last-year',
             'extent' : 82.5,
-            'defaultView' : 'summary',
+            'view' : 'summary',
             'validViews' : ['summary', 'list', 'map']
           },
           'prepositions' : {
