@@ -49,7 +49,7 @@
                   Filter
                   <span class="caret"></span>
               </button>
-              <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+              <ul class="dropdown-menu" style = "z-index : 1001" role="menu" aria-labelledby="dropdownMenu1">
                   <li 
                     class = "text-primary" 
                     role="presentation">
@@ -67,16 +67,7 @@
                   </li>
               </ul>
             </div>
-            <!-- DOWNLOAD BUTTON -->
-           <!--  <button ng-click = "openDownloadModal()" type="button" class="btn btn-primary" data-toggle = "tooltip" title = "Download"><i class="fa fa-lg fa-download" ></i> Download</button> -->
           </div>
-          <!-- <div class="col-xs-12">
-  
-              <a class = "pull-right" href="mailto:?subject=Property at 22 Linden Ave, 28801&body=City of Asheville's SimpliCity Results%0D%0A%0D%0AClick the link below to view information about Property at 22 Linden Ave, 28801%0D%0A%0D%0A<http://localhost:3000/#/topics/property?searchtext=22%20LINDEN%20AVE,%2028801%26searchby=address%26id=24207%26view=details>"><i class="fa fa-send-o"></i></a>
-      
-              <a class = "pull-right" ng-click = "openDownloadModal()"><i class="fa fa-download"></i></a>
-            
-          </div> -->
           <div ng-if = "stateParams.type !== null" class="col-xs-12">
             <h5 class = "text-muted">Filtered by <strong >{{stateParams.type}}</strong></h5>
           </div>
@@ -204,7 +195,7 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <button ng-click = "closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
               <h4 class="modal-title">Location Details</h4>
             </div>
             <div class="modal-body" >
@@ -239,29 +230,22 @@
 
   <!-- DOWNLOAD MODAL -->
   <div id = "downloadModal" class="modal fade" style = "z-index : 3000">
-    <div class="modal-dialog modal-sm">
+    <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
           <h4 class="modal-title">Download</h4>
         </div>
         <div class="modal-body">
-          <div ng-if= "stateParams.topic === 'property' || stateParams.topic === 'owner'">
-            <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">{{topicProperties.title}} Details <i class="fa fa-cloud-download"></i></button>
+          <div ng-if= "stateParams.topic === 'property' || stateParams.topic === 'owner' || stateParams.topic === 'zoning' || stateParams.topic === 'addresslist' || stateParams.topic === 'streetmaintenance'">
+            <button class="btn btn-primary col-xs-12" ng-click = "downloadCsv('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">{{topicProperties.title}} Details CSV <i class="fa fa-download"></i></button>
+            <button class="btn btn-primary col-xs-12" style = "margin-top : 5px" ng-click = "downloadGeoJson('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">{{topicProperties.title}} Details GeoJson <i class="fa fa-download"></i></button>
           </div>
           <div ng-if = "stateParams.topic === 'crime' || stateParams.topic === 'development'">
-            <button class="btn btn-primary col-xs-12" ng-click = "download('summary', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="summary" analytics-event="{{stateParams.topic}}">Summary Table <i class="fa fa-cloud-download"></i></button>
-            <button class="btn btn-primary col-xs-12" style = "margin-top : 3px" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Detailed records <i class="fa fa-cloud-download"></i></button>
+            <button class="btn btn-primary col-xs-12" ng-click = "downloadCsv('summary', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="summary" analytics-event="{{stateParams.topic}}">Summary Table <i class="fa fa-download"></i></button>
+            <button class="btn btn-primary col-xs-12" style = "margin-top : 3px" ng-click = "downloadCsv('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Detailed records <i class="fa fa-download"></i></button>
+            <button class="btn btn-primary col-xs-12" style = "margin-top : 3px" ng-click = "downloadGeoJson('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">{{topicProperties.title}} Details GeoJson <i class="fa fa-download"></i></button>
             <p class = "text-muted text-center">based on selected filters</p>
-          </div>
-          <div ng-if= "stateParams.topic === 'zoning'">
-            <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Zoning Data <i class="fa fa-cloud-download"></i></button>
-          </div>
-          <div ng-if= "stateParams.topic === 'addresslist'">
-            <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Address List <i class="fa fa-cloud-download"></i></button>
-          </div>
-          <div ng-if= "stateParams.topic === 'streetmaintenance'">
-            <button class="btn btn-primary col-xs-12" ng-click = "download('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Street Details <i class="fa fa-cloud-download"></i></button>
           </div>
         </div>
       </div><!-- /download modal-content -->

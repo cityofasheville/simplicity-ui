@@ -9,6 +9,7 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
       'plural' : 'development',
       'searchForText' : 'an address, street, or neighborhood',
       'position' : 3, 
+      'downloadable' : true,
       'searchby' : {
         'address' : {
           'params' : {
@@ -76,7 +77,7 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
       'views' : {
         'map' : {'label' : 'Map View', 'template' : null},
         'summary' : {'label' : 'Summary', 'template' : 'topics/topic-components/development/development.summary.view.html'},
-        'list' : {'label' : 'List View', 'template' : 'topics/topic-components/development/development.list.view.html'},
+        'list' : {'label' : 'Details View', 'template' : 'topics/topic-components/development/development.list.view.html'},
       },
       'iconClass' : 'flaticon-building33',
       'linkTopics' : ['property', 'trash', 'recycling', 'crime'],

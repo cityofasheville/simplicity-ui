@@ -10,6 +10,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
       'title' : 'Property',
       'searchForText' : 'an address, street, owner, or PIN',
       'position' : 1,
+      'downloadable' : true,
       'searchby' : {
         'address' : {
           'params' : {

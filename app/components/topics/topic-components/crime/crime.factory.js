@@ -9,6 +9,7 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
       'plural' : 'crimes',
       'searchForText' : 'an address, street, or neighborhood',
       'position' : 2,
+      'downloadable' : true,
       'searchby' : {
         'address' : {
           'params' : {
@@ -76,7 +77,7 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
       'views' : {
         'map' : {'label' : 'Map View', 'template' : null},
         'summary' : {'label' : 'Summary', 'template' : 'topics/topic-components/crime/crime.summary.view.html'},
-        'list' : {'label' : 'List View', 'template' : 'topics/topic-components/crime/crime.list.view.html'},
+        'list' : {'label' : 'Details View', 'template' : 'topics/topic-components/crime/crime.list.view.html'},
       },
       'iconClass' : 'flaticon-police19',
       'linkTopics' : ['property', 'trash', 'recycling', 'development'],
@@ -130,7 +131,6 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
     
     Crime.build = function(){
       var q = $q.defer();
-      console.log($stateParams.timeframe);
 
       var time = new Date(TimeFrame.get($stateParams.timeframe));
       var timeExpression = simplicityBackend.formatTimeForQuery(time);

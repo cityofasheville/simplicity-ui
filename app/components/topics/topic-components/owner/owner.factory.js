@@ -10,6 +10,7 @@ simplicity.factory('Owner', ['$http', '$location', '$q', '$filter', '$stateParam
       'title' : 'Owner',
       'searchForText' : 'an address, street, owner, or PIN',
       'position' : 9,
+      'downloadable' : true,
       'searchby' : {
         'address' : {
           'params' : {
@@ -53,7 +54,7 @@ simplicity.factory('Owner', ['$http', '$location', '$q', '$filter', '$stateParam
           },
           'headerTemplate' : 'topics/topic-headers/topic.header.along.html',
         },
-        'pinnum' : {
+        'neighborhood' : {
           'params' : {
             'type' : null,
             'timeframe' : null,
@@ -63,9 +64,9 @@ simplicity.factory('Owner', ['$http', '$location', '$q', '$filter', '$stateParam
             'validViews' : ['details', 'map']
           },
           'prepositions' : {
-            'searchby' : 'at',
+            'searchby' : 'in',
           },
-          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
+          'headerTemplate' : 'topics/topic-headers/topic.header.in.html',
         }
       },
       'views' : {
@@ -79,7 +80,8 @@ simplicity.factory('Owner', ['$http', '$location', '$q', '$filter', '$stateParam
         'topic' : "Do you want to know a property owner's addresses?",
         'address' : "Do you want to know the property owner's address at this address?",
         'street_name' : "Do you want to know the property owners' addresses along this street?",
-        'pinnum' : "Do you want to know the property owner's address for this PIN?"
+        'pinnum' : "Do you want to know the property owner's address for this PIN?",
+        'neighborhood' : "Do you want to know the property owner's addresses in this neighborhood?"
       }
     };
 
@@ -139,6 +141,12 @@ simplicity.factory('Owner', ['$http', '$location', '$q', '$filter', '$stateParam
           .then(function(owner){
             q.resolve(owner);
           });
+      }else if ($stateParams.searchby === 'neighborhood'){
+   
+          simplicityBackend.simplicityQuery('owners', {'neighborhoodName' : $stateParams.id})
+            .then(function(owner){
+                q.resolve(owner);
+            });
       }
       return q.promise;
     };//END owner function

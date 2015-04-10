@@ -9,6 +9,7 @@ simplicity.factory('Trash', ['$q', '$stateParams', 'AddressCache',
       'plural' : 'trash collection',
       'searchForText' : 'an address',
       'position' : 4,
+      'downloadable' : false,
       'searchby' : {
         'address' : {
           'params' : {

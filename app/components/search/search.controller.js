@@ -127,7 +127,6 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
             if(candidate.googleResult === true){
                 simplicityBackend.simplicityFindGoogleAddress(candidate)
                     .then(function(addressResults){
-                        console.log(addressResults);
                         $state.go('main.topics.list', {'searchtext' : addressResults.label, 'searchby' : addressResults.type, 'id' : addressResults.id});
                     });
 

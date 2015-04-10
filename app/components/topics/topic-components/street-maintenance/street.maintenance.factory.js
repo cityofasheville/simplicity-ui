@@ -9,6 +9,7 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
       'plural' : 'street maintenance responsibility',
       'searchForText' : 'an address or a street',
       'position' : 7,
+      'downloadable' : true,
       'searchby' : {
         'address' : {
           'params' : {
@@ -55,7 +56,7 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
       },
       'views' : {
         'map' : {'label' : 'Map View', 'template' : null},
-        'list' : {'label' : 'List View', 'template' : 'topics/topic-components/street-maintenance/street.maintenance.list.view.html'},
+        'list' : {'label' : 'Details View', 'template' : 'topics/topic-components/street-maintenance/street.maintenance.list.view.html'},
       },
       'defaultView' : 'list',
       'iconClass' : 'flaticon-location38',
