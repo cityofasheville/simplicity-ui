@@ -88,7 +88,7 @@ simplicity.factory('Property', ['$http', '$location', '$q', '$filter', '$statePa
         'details' : {'label' : 'Details View', 'template' : 'topics/topic-components/property/property.details.view.html'},
         'list' : {'label' : 'List View', 'template' : 'topics/topic-components/property/property.list.view.html'},
       },
-      'iconClass' : 'flaticon-real10',
+      'iconClass' : 'flaticon-house112',
       'linkTopics' : ['crime', 'trash', 'recycling'],
       'questions' : {
         'topic' : 'Do you want to know about a property?',

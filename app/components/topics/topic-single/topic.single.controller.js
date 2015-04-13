@@ -354,7 +354,6 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
     };
 
     if($stateParams.mapcenter && $stateParams.mapcenter !== null){
-      console.log('not null');
       var mapCenterArray = $stateParams.mapcenter.split(',');
       console.log(mapCenterArray);
       L.marker([Number(mapCenterArray[3]), Number(mapCenterArray[1])]).addTo(map);

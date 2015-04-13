@@ -237,7 +237,7 @@
           <h4 class="modal-title">Download</h4>
         </div>
         <div class="modal-body">
-          <div ng-if= "stateParams.topic === 'property' || stateParams.topic === 'owner' || stateParams.topic === 'zoning' || stateParams.topic === 'addresslist' || stateParams.topic === 'streetmaintenance'">
+          <div ng-if= "stateParams.topic === 'property' || stateParams.topic === 'owner' || stateParams.topic === 'ownermailinglist' || stateParams.topic === 'zoning' || stateParams.topic === 'addresslist' || stateParams.topic === 'addressmailinglist' || stateParams.topic === 'streetmaintenance'">
             <button class="btn btn-primary col-xs-12" ng-click = "downloadCsv('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">{{topicProperties.title}} Details CSV <i class="fa fa-download"></i></button>
             <button class="btn btn-primary col-xs-12" style = "margin-top : 5px" ng-click = "downloadGeoJson('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">{{topicProperties.title}} Details GeoJson <i class="fa fa-download"></i></button>
           </div>

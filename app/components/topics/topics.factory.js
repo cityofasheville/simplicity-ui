@@ -1,5 +1,5 @@
-simplicity.factory('Topics', ['$q', '$stateParams', 'Crime', 'Development', 'Property', 'Trash', 'Recycling', 'Zoning', 'StreetMaintenance', 'AddressList', 'Owner',
-	function($q, $stateParams, Crime, Development, Property, Trash, Recycling, Zoning, StreetMaintenance, AddressList, Owner){
+simplicity.factory('Topics', ['$q', '$stateParams', 'Crime', 'Development', 'Property', 'Trash', 'Recycling', 'Zoning', 'StreetMaintenance', 'AddressList', 'Owner', 'OwnerMailingList', 'AddressMailingList',
+	function($q, $stateParams, Crime, Development, Property, Trash, Recycling, Zoning, StreetMaintenance, AddressList, Owner, OwnerMailingList, AddressMailingList){
 
 	//****Create the factory object****//
 	var Topics = {};
@@ -16,7 +16,9 @@ simplicity.factory('Topics', ['$q', '$stateParams', 'Crime', 'Development', 'Pro
 		'zoning' : Zoning,
 		'streetmaintenance' : StreetMaintenance,
 		'addresslist' : AddressList,
-		'owner' : Owner
+		'owner' : Owner,
+		'ownermailinglist' : OwnerMailingList,
+		'addressmailinglist' : AddressMailingList
 	};
 
 
