@@ -1,12 +1,12 @@
-simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simplicityBackend', 'COLORS',
+simplicity.factory('AddressMailingList', ['$q', '$stateParams', 'AddressCache', 'simplicityBackend', 'COLORS',
   function($q, $stateParams, AddressCache, simplicityBackend, COLORS){   
 
-    var AddressList = {};
+    var AddressMailingList = {};
 
     var topicProperties = {
-      'name' : 'addresslist',
-      'title' : 'Address List',
-      'plural' : 'address lists',
+      'name' : 'addressmailinglist',
+      'title' : 'Address Mailing List',
+      'plural' : 'address mailing lists',
       'searchForText' : 'a street or a neighborhood',
       'position' : 8,
       'downloadable' : true,
@@ -49,16 +49,16 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
       'tableViewTemplate' : 'topics/topic-components/address-list/address-list.table.view.html',
       'listViewTemplate' : 'topics/topic-components/address-list/address-list.view.html',
       'defaultView' : 'simple',
-      'iconClass' : 'flaticon-purchase1',
+      'iconClass' : 'flaticon-email20',
       'linkTopics' : ['property'],
       'questions' : {
-        'topic' :  'Do you want a list of addresses?',
-        'street_name' : 'Do you want a list of addresses along this street?',
-        'neighborhood' :  'Do you want a list of addresses in this neighborhood?'
+        'topic' :  'Do you want a mailing lists?',
+        'street_name' : 'Do you want a mailing list of addresses for residents along this street?',
+        'neighborhood' :  'Do you want a mailing list of addresses for residents in this neighborhood?'
       }
     };
 
-    AddressList.build = function(){
+    AddressMailingList.build = function(){
       var q = $q.defer();
 
       var addressCache = AddressCache.get();
@@ -69,13 +69,16 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
           .then(function(addressResults){
               var addressFeaturesArray = [];
               for (var i = 0; i < addressResults.features.length; i++) {
-                if(addressCache.inTheCity[addressResults.features[i].properties.civicaddress_id]){
-                  addressResults.features[i].properties.isincity = addressCache.inTheCity[addressResults.features[i].properties.civicaddress_id];
-                }else{
-                  addressResults.features[i].properties.isincity = false;
-                }
+                var propObj = {
+                  'objectid' : addressResults.features[i].properties.objectid,
+                  'street_number' : addressResults.features[i].properties.street_number,
+                  'street_name' : addressResults.features[i].properties.street_name,
+                  'street_type' : addressResults.features[i].properties.street_type,
+                  'unit_number' : addressResults.features[i].properties.unit_number,
+                  'zip_code' : addressResults.features[i].properties.zip_code
+                };
                 
-                addressResults.features[i].properties.color = '035096';
+                addressResults.features[i].properties = propObj;
 
                 addressFeaturesArray.push(addressResults.features[i]);
               }
@@ -92,7 +95,17 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
           .then(function(addressResults){
             var addressFeaturesArray = [];
               for (var i = 0; i < addressResults.features.length; i++) {
-                addressResults.features[i].properties.color = '035096';
+                var propObj = {
+                  'objectid' : addressResults.features[i].properties.objectid,
+                  'street_number' : addressResults.features[i].properties.street_number,
+                  'street_name' : addressResults.features[i].properties.street_name,
+                  'street_type' : addressResults.features[i].properties.street_type,
+                  'unit_number' : addressResults.features[i].properties.unit_number,
+                  'zip_code' : addressResults.features[i].properties.zip_code
+                };
+                
+                addressResults.features[i].properties = propObj;
+
                 addressFeaturesArray.push(addressResults.features[i]);
               }
               var geojson = {
@@ -108,15 +121,15 @@ simplicity.factory('AddressList', ['$q', '$stateParams', 'AddressCache', 'simpli
       return q.promise;
     };
 
-    AddressList.getTopicProperties = function(){
+    AddressMailingList.getTopicProperties = function(){
       return topicProperties;
     };
 
     //****Return the factory object****//
-    return AddressList; 
+    return AddressMailingList; 
 
     
-}]); //END AddressList factory function
+}]); //END AddressMailingList factory function
 
 
 

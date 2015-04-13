@@ -59,7 +59,7 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
         'list' : {'label' : 'Details View', 'template' : 'topics/topic-components/street-maintenance/street.maintenance.list.view.html'},
       },
       'defaultView' : 'list',
-      'iconClass' : 'flaticon-location38',
+      'iconClass' : 'flaticon-shovel1',
       'linkTopics' : ['property'],
       'questions' : {
         'topic' :  'Do you want to know who is responsible for maintaining a street?',

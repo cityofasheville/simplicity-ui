@@ -1,45 +1,17 @@
-simplicity.factory('Owner', ['$http', '$location', '$q', '$filter', '$stateParams', 'AddressCache', 'simplicityBackend', 'COLORS', 'CODELINKS',
+simplicity.factory('OwnerMailingList', ['$http', '$location', '$q', '$filter', '$stateParams', 'AddressCache', 'simplicityBackend', 'COLORS', 'CODELINKS',
   function($http, $location, $q, $filter, $stateParams, AddressCache, simplicityBackend, COLORS, CODELINKS){   
 
-    var Owner = {};
+    var OwnerMailingList = {};
 
 
     var topicProperties = {
-      'name' : 'owner',
-      'plural' : 'owners',
-      'title' : 'Owner',
+      'name' : 'ownermailinglist',
+      'plural' : 'owners mailing list',
+      'title' : 'Owner Mailing List',
       'searchForText' : 'an address, street, owner, or PIN',
       'position' : 9,
       'downloadable' : true,
       'searchby' : {
-        'address' : {
-          'params' : {
-            'type' : null,
-            'timeframe' : null,
-            'extent' : null,
-            'centermap' : null,
-            'view' : 'details',
-            'validViews' : ['details', 'map']
-          },
-          'prepositions' : {
-            'searchby' : 'at',
-          },
-          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
-        },
-        'google_places' : {
-          'params' : {
-            'type' : null,
-            'timeframe' : null,
-            'extent' : null,
-            'centermap' : null,
-            'view' : 'details',
-            'validViews' : ['details', 'map']
-          },
-          'prepositions' : {
-            'searchby' : 'at',
-          },
-          'headerTemplate' : 'topics/topic-headers/topic.header.at.html',
-        },
         'street_name' : {
           'params' : {
             'type' : null,
@@ -74,24 +46,20 @@ simplicity.factory('Owner', ['$http', '$location', '$q', '$filter', '$stateParam
         'details' : {'label' : 'Details View', 'template' : 'topics/topic-components/owner/owner.details.view.html'},
         'list' : {'label' : 'List View', 'template' : 'topics/topic-components/owner/owner.list.view.html'},
       },
-      'iconClass' : 'flaticon-purchase1',
+      'iconClass' : 'flaticon-email20',
       'linkTopics' : ['crime', 'trash', 'recycling'],
       'questions' : {
-        'topic' : "Do you want to know about property owners' addresses?",
-        'address' : "Do you want to know the property owner's address at this address?",
-        'street_name' : "Do you want a list of property owners' addresses along this street?",
-        'pinnum' : "Do you want to know the property owner's address for this PIN?",
-        'neighborhood' : "Do you want a list of property owners' addresses in this neighborhood?"
+        'topic' : "Do you want a mailing list of property owners?",
+        'street_name' : "Do you want a mailing list of property owners' addresses along this street?",
+        'neighborhood' : "Do you want a mailing list of property owners' addresses in this neighborhood?"
       }
     };
-
-    //<div>Icons made by <a href="http://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a>, <a href="http://www.flaticon.com/authors/ocha" title="OCHA">OCHA</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a>             is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC BY 3.0</a></div>
 
 
     //We need to use the pinnum to lookup property information 
     //We can access the pinnum by cross-referencing the cividaddress id or centerline id in the xref table
     //WE can acess the civicaddress id from the stateParams
-    Owner.build = function(){
+    OwnerMailingList.build = function(){
       var addressCache = AddressCache.get();
       var pinnum2civicaddressid = AddressCache.pinnum2civicaddressid();
       var q = $q.defer();
@@ -153,16 +121,16 @@ simplicity.factory('Owner', ['$http', '$location', '$q', '$filter', '$stateParam
       return q.promise;
     };//END owner function
 
-    Owner.getTopicProperties = function(){
+    OwnerMailingList.getTopicProperties = function(){
       return topicProperties;
     };
 
 
     //****Return the factory object****//
-    return Owner; 
+    return OwnerMailingList; 
 
     
-}]); //END Owner factory function
+}]); //END OwnerMailingList factory function
 
 
 
