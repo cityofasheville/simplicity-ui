@@ -1429,17 +1429,6 @@ simplicity.controller('AppCtrl', ['$scope', '$location', function ($scope, $loca
         }
     });	
 }]);
-simplicity.controller('MainCtrl', ['$scope', '$state', '$stateParams', '$location', '$http', '$timeout',
-  function ($scope, $state, $stateParams, $location, $http, $timeout) {
-
-
-    $scope.goHome = function(){
-    	$location.path('');
-    };
-
-
-
-}]);
 simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeout', 'simplicityBackend', 'Topics',
  function ($scope, $stateParams, $state, $timeout, simplicityBackend, Topics) {
     var getType = function(unformattedType){
@@ -1579,6 +1568,17 @@ simplicity.controller('SearchCtrl', ['$scope', '$stateParams', '$state', '$timeo
         
     };
 
+
+
+
+}]);
+simplicity.controller('MainCtrl', ['$scope', '$state', '$stateParams', '$location', '$http', '$timeout',
+  function ($scope, $state, $stateParams, $location, $http, $timeout) {
+
+
+    $scope.goHome = function(){
+    	$location.path('');
+    };
 
 
 
@@ -2610,7 +2610,7 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
             'type' : null,
             'timeframe' : 'last-year',
             'extent' : null,
-            'defaultView' : 'summary',
+            'view' : 'summary',
             'validViews' : ['summary', 'list', 'map']
           },
           'prepositions' : {
@@ -2685,6 +2685,7 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
       var addressCache = AddressCache.get();
 
       if(addressCache || $stateParams.searchby === 'neighborhood'){
+        console.log('neighborhood');
         var queryValues = {};
         if ($stateParams.searchby === 'neighborhood') {
           queryValues = {
@@ -2693,6 +2694,7 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
           };
           simplicityBackend.simplicityQuery('crimes', queryValues)
             .then(function(crimes){
+              console.log(crimes);
                 q.resolve(formatCrimeData(crimes));
             });
         }else{
@@ -2802,7 +2804,7 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
             'type' : null,
             'timeframe' : 'last-year',
             'extent' : null,
-            'defaultView' : 'summary',
+            'view' : 'summary',
             'validViews' : ['summary', 'list', 'map']
           },
           'prepositions' : {
