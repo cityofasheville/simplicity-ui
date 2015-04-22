@@ -55,7 +55,7 @@ angular.module('simplicity.frontend.config', [])
         'Homicide' : 'The willful (nonnegligent) killing of one human being by another.',
         'Larceny' : 'The unlawful taking or stealing of property without the use of force, violence, or fraud.',
         'Larceny of Motor Vehicle' : 'The unlawful taking or stealing of a motor vehicle, including attempts.',
-        'Rape' : 'The carnal knowledge of a female forcibly and against her will.',
+        'Rape' : 'Penetration or oral penetration, no matter how slight, without the consent of the victim',
         'Robbery' : 'The taking or attempting to take anything of value by force or threat.',
         'Vandalism' : 'The malicious destruction, injury, disfigurement or defacement of real or personal property.'
       },
