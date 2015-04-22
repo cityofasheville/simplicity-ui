@@ -2,30 +2,30 @@
 angular.module('simplicity.frontend.config', [])
   .constant('COLORS', {
     'crime' : {
-      'Aggravated Assault' : 'FF0000',
-      'Burglary' : 'FFF000',
-      'Drug Arrest' : 'FFA500',
-      'Homicide' : 'FFFFF0',
-      'Larceny' : '00FF00',
-      'Larceny of Motor Vehicle' : '000080',
-      'Rape' : '0000FF',
-      'Robbery' : 'FF00FF',
-      'Vandalism' : '7FFFD4'
+      'Aggravated Assault' : '#FF0000',
+      'Burglary' : '#FFF000',
+      'Drug Arrest' : '#FFA500',
+      'Homicide' : '#FFFFF0',
+      'Larceny' : '#00FF00',
+      'Larceny of Motor Vehicle' : '#000080',
+      'Rape' : '#0000FF',
+      'Robbery' : '#FF00FF',
+      'Vandalism' : '#7FFFD4'
     },
     'development' : {
-        'Conditional Use Permit':'FF0000',
-        'Conditional Zoning Permit':'FFF000',
-        'Planning Level I':'0000FF',
-        'Planning Level II':'7FFFD4',
-        'Planning Level III':'00FFFF',
-        'Planning Signage Plan':'000080'
+        'Conditional Use Permit':'#FF0000',
+        'Conditional Zoning Permit':'#FFF000',
+        'Planning Level I':'#0000FF',
+        'Planning Level II':'#7FFFD4',
+        'Planning Level III':'#00FFFF',
+        'Planning Signage Plan':'#000080'
     },
     'streetmaintenance' : {
-      'CITY OF ASHEVILLE' : {'color' : 'FF0000'},
-      'PRIVATE' : {'color' : 'FFF000'},
-      'UNKNOWN' : {'color' : 'FFA500'},
-      'NCDOT' : {'color' : '00FF00'},
-      'NATIONAL PARK SERVICE' : {'color' : '000080'}
+      'CITY OF ASHEVILLE' : {'color' : '#FF0000'},
+      'PRIVATE' : {'color' : '#FFF000'},
+      'UNKNOWN' : {'color' : '#FFA500'},
+      'NCDOT' : {'color' : '#00FF00'},
+      'NATIONAL PARK SERVICE' : {'color' : '#000080'}
     }
   })
   //The extent values are in feet

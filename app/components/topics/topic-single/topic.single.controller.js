@@ -241,7 +241,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
             if(feature.geometry.type === "Point"){
                 return L.circleMarker(latlng, {
                   radius: 10,
-                  fillColor: "#"+feature.properties.color,
+                  fillColor: feature.properties.color,
                   color: "#7f8c8d",
                   weight: 2,
                   opacity: 1,
@@ -256,7 +256,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
               return style;
             }else if(feature.geometry.type === "LineString"){
                 return {
-                  color: "#"+feature.properties.color,
+                  color: feature.properties.color,
                   weight: 8,
                   opacity: 0.7,
                 };
@@ -447,6 +447,10 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
       }
       $scope.filterText = type;
     };
+
+    $scope.changeColor = function(color){
+      return {'color' : color};
+    }
 
 
     $scope.openDownloadModal = function(){
