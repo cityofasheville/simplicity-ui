@@ -14,7 +14,7 @@
     <tbody>
       <tr ng-repeat = "(key, value) in topic.summary.table">
         <td ng-click = "filterBy(key)" style = "cursor : pointer">
-          <i class="fa fa-circle" style = "color: #{{value.color}}"></i> {{key}}
+          <i class="fa fa-circle" ng-style = "changeColor(value.color)"></i> {{key}}
           <br>
           <p class = 'text-muted'>{{value.description}}</p>
         </td>
