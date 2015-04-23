@@ -10,9 +10,9 @@ angular.module('simplicity.http', [])
         //use $q promises to handle the http request asynchronously
         var q = $q.defer();
 
-        options.callback = 'JSON_CALLBACK';
+        //options.callback = 'JSON_CALLBACK';
         //make http request
-        $http({method : 'JSONP', url : url, params : options, cache : true})
+        $http({method : 'GET', url : url, params : options, cache : true})
           //callbacks
           .success(function(data, status, headers, config){
             if(data.error){

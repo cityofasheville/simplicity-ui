@@ -63,7 +63,7 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
             'type' : null,
             'timeframe' : 'last-year',
             'extent' : null,
-            'defaultView' : 'summary',
+            'view' : 'summary',
             'validViews' : ['summary', 'list', 'map']
           },
           'prepositions' : {

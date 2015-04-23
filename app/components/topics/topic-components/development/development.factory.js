@@ -63,7 +63,7 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
             'type' : null,
             'timeframe' : 'last-year',
             'extent' : null,
-            'defaultView' : 'summary',
+            'view' : 'summary',
             'validViews' : ['summary', 'list', 'map']
           },
           'prepositions' : {

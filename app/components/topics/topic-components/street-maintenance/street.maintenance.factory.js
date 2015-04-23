@@ -58,7 +58,6 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
         'map' : {'label' : 'Map View', 'template' : null},
         'list' : {'label' : 'Details View', 'template' : 'topics/topic-components/street-maintenance/street.maintenance.list.view.html'},
       },
-      'defaultView' : 'list',
       'iconClass' : 'flaticon-shovel1',
       'linkTopics' : ['property'],
       'questions' : {
