@@ -1,8 +1,13 @@
 <div class = "list-item-panel col-xs-12">          
   <h1 class="col-xs-6">{{topicProperties.title}}</h1>
-  <div class="col-xs-6">
+  
+  <div class="col-xs-6 visible-md visible-lg">
       <a style = "padding : 10px" class = "pull-right text-center" ng-if = "topicProperties.downloadable" ng-click = "openDownloadModal()"><i class="fa fa-download"></i><br>Download</a>
       <a style = "padding : 10px" class = "pull-right text-center" title = "Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a>    
+  </div>
+  <div class="col-xs-6 visible-xs visible-sm">
+      <a style = "padding : 10px; font-size : 10px" class = "pull-right text-center" ng-if = "topicProperties.downloadable" ng-click = "openDownloadModal()"><i class="fa fa-download"></i><br>Download</a>
+      <a style = "padding : 10px; font-size : 10px" class = "pull-right text-center" title = "Email of link to this page" href="mailto:?subject={{emailSubject}}&body={{emailBodyText}}"><i class="fa fa-envelope-o text-center"></i><br>Email</a>    
   </div>
 
   <form class="form-horizontal col-xs-12">
