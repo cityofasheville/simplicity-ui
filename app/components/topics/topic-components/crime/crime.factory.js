@@ -10,6 +10,7 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
       'searchForText' : 'an address, street, or neighborhood',
       'position' : 2,
       'downloadable' : true,
+      'inTheCityOnly' : true,
       'searchby' : {
         'address' : {
           'params' : {
@@ -105,7 +106,7 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
       for (var i = 0; i < crimes.features.length; i++) {
         //set color by offense
         crimes.features[i].properties.color = COLORS.crime[crimes.features[i].properties.offense]; 
-        crimes.features[i].properties.description = DESCRIPTIONS.crime[crimes.features[i].properties.offense]; 
+        crimes.features[i].properties.typeDescription = DESCRIPTIONS.crime[crimes.features[i].properties.offense]; 
         //build a summary object
         if(filteredFeaturesSummary.table[crimes.features[i].properties.offense] === undefined){
 

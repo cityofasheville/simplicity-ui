@@ -10,6 +10,7 @@ simplicity.factory('StreetMaintenance', ['$q', '$stateParams', 'AddressCache', '
       'searchForText' : 'an address or a street',
       'position' : 7,
       'downloadable' : true,
+      'inTheCityOnly' : false,
       'searchby' : {
         'address' : {
           'params' : {
