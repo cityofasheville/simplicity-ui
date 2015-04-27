@@ -61,11 +61,18 @@
     </div>
     <p ng-show = "errorMessage.show" class="text-danger">{{errorMessage.message}}</p>
   </div>
-  <div ng-show = "showTopicsLink" class = "col-xs-12 col-md-6 col-md-offset-3 text-center well" style = "margin-top : 60px; margin-bottom : 40px; background : #fff; border : 2px solid #ecf0f1">
-      <h4 class = "text-info">Not sure what you can find with SimpliCity?</h4>
-      <a href="#/topics/list"><h2>Click here to view topics</h2></a>
+  <div class="col-xs-12 col-lg-6 col-lg-offset-3 col-sm-10 col-sm-offset-1 text-center" style = "margin-top : 20px;">
+    <h5 class="text-muted">Check out SimpliCity in action below...</h5>
+    <div class="embed-responsive embed-responsive-16by9 ">
+
+      <iframe class = "embed-responsive-item" src="https://www.youtube.com/embed/Pdcmt00fcHY" frameborder="1px" allowfullscreen style = "border : 1px solid #2780E3"></iframe>
+    </div>  
+    
   </div>
-  <div class = "col-xs-12" style = "margin-top : 50px">
+  <div ng-show = "showTopicsLink" class = "col-xs-12 col-md-6 col-md-offset-3 text-center" style = "margin-top : 20px">
+      <a href="#/topics/list">Not sure what you are looking for? Click here to view topics</a>
+  </div>
+  <div class = "col-xs-12" style = "margin-top : 20px">
     <h4 class="text-primary text-center">
       Brought to you by the 
       <a href="http://www.ashevillenc.gov/" target = "_blank">City of Asheville </a>
