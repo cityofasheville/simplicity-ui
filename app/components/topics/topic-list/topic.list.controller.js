@@ -11,6 +11,9 @@ simplicity.controller('TopicListCtrl', ['$scope', '$stateParams', '$state', 'Top
 
     //you can't have more tha
     $scope.heading = 'Topics for ';
+    $scope.inTheCity = null;
+    $scope.loading = false;
+    $scope.anAddress = false;
     
     if($stateParams.searchtext){
       $scope.searchText = $stateParams.searchtext;
@@ -22,9 +25,7 @@ simplicity.controller('TopicListCtrl', ['$scope', '$stateParams', '$state', 'Top
 
     $scope.topics = Topics.getTopics($stateParams);
     
-    $scope.inTheCity = false;
-    $scope.loading = false;
-    $scope.anAddress = false;
+    
     if($stateParams.searchby === 'address'){
       $scope.anAddress = true;
       $scope.loading = true;
