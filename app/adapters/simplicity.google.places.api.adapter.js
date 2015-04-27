@@ -35,8 +35,8 @@ angular.module('simplicity.google.place.api.adapter', [])
             }
             var googleResults = {
               'groupOrder' : 0,
-              'iconClass' : 'fa-google',
-              'label' : 'Google Places',
+              'iconClass' : 'fa-dot-circle-o',
+              'label' : 'Places',
               'name' : 'google_places',
               'offset' : 3,
               'results' : formattedResults

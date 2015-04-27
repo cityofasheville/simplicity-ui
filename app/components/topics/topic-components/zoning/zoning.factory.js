@@ -10,6 +10,7 @@ simplicity.factory('Zoning', ['$q', '$stateParams', 'AddressCache', 'simplicityB
       'searchForText' : 'an address',
       'position' : 6,
       'downloadable' : false,
+      'inTheCityOnly' : true,
       'searchby' : {
         'address' : {
           'params' : {

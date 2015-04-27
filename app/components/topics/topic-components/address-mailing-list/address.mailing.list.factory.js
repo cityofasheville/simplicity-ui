@@ -10,6 +10,7 @@ simplicity.factory('AddressMailingList', ['$q', '$stateParams', 'AddressCache', 
       'searchForText' : 'a street or a neighborhood',
       'position' : 8,
       'downloadable' : true,
+      'inTheCityOnly' : false,
       'searchby' : {
         'street_name' : {
           'params' : {

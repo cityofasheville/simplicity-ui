@@ -10,6 +10,7 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
       'searchForText' : 'an address, street, or neighborhood',
       'position' : 3, 
       'downloadable' : true,
+      'inTheCityOnly' : true,
       'searchby' : {
         'address' : {
           'params' : {
@@ -106,7 +107,7 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
       
         //set color by record_type
         development.features[i].properties.color = COLORS.development[development.features[i].properties.record_type];    
-        development.features[i].properties.description = DESCRIPTIONS.development[development.features[i].properties.record_type];       
+        development.features[i].properties.typeDescription = DESCRIPTIONS.development[development.features[i].properties.record_type];       
         //build a summary object
         if(filteredFeaturesSummary.table[development.features[i].properties.record_type] === undefined){
 
@@ -117,6 +118,7 @@ simplicity.factory('Development', ['$http', '$location', '$q', '$filter', '$stat
         }
         if(development.features[i].properties.record_comments){
           development.features[i].properties.commentsArray = development.features[i].properties.record_comments.split('[NEXT-COMMENT]');
+          development.features[i].properties.commentsArray.splice(0, 1);
         }
         filterdFeaturesArray.push(development.features[i]);
           

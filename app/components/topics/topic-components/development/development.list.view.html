@@ -5,10 +5,18 @@
     <h4 class = "text-muted text-center"><strong>Try expanding the time frame or extent of your search.</strong></h4>
   </div>
 <div ng-repeat = "feature in topic.features | orderBy:'-properties.thedate' | filter:filterText" class="col-xs-12 list-item-panel" style = "margin-bottom : 20px">
-	<h3 class = 'text-center text-muted'><strong>{{feature.properties.record_type}}</strong></h3>
-	<h3 class = 'text-center'>{{feature.properties.address}}</h3>
-	<a ng-if = "stateParams.view !== 'map'" ng-click = "onChangeMapCenter(feature.properties, feature.properties.longitude, feature.properties.latitude)"><p class="text-center">Zoom to this development on the map</p></a>
-	<p class = "text-muted text-center">{{feature.properties.description}}</p>
+	<h4 class="col-sm-6 text-center">
+		<strong class = "text-muted">Record Name</strong>
+		<p>{{feature.properties.record_name}}</p>
+	</h4>
+	<h4 class="col-sm-6 text-center">
+		<strong class = "text-muted">Record Type</strong>
+		<p>{{feature.properties.record_type}}</p>
+	</h4>
+	<p ng-if = "stateParams.view === 'map'" class = 'text-center text-muted'>{{feature.properties.address}}</p>
+	
+	<a ng-if = "stateParams.view !== 'map'" ng-click = "onChangeMapCenter(feature.properties, feature.properties.longitude, feature.properties.latitude)"><p class="text-center">{{feature.properties.address}}</p></a>
+	<h3 class = 'text-center'>{{feature.properties.description}}</h3>
 
 	<div class="col-xs-12">
 		<h4 class="col-xs-12 col-sm-4 text-center">
@@ -25,43 +33,34 @@
 		</h4>
 	</div>
 
-	<div class = "col-xs-12 list-item-panel" ng-init = 'showMore = false' ng-show = 'showMore'>
+
 		<div class="col-xs-12">
-			<h4 class="col-sm-6 text-center">
+			<h4 class="col-sm-4 text-center">
 				<strong class = "text-muted">Record Id</strong>
 				<p>{{feature.properties.record_id}}</p>
 			</h4>
-			<h4 class="col-sm-6 text-center">
+			<h4 class="col-sm-4 text-center">
 				<strong class = "text-muted">License Number</strong>
 				<p>{{feature.properties.license_number}}</p>
 			</h4>
-		</div>
-		<div class="col-xs-12">
-			<h4 class="col-sm-6 text-center">
-				<strong class = "text-muted">Record Name</strong>
-				<p>{{feature.properties.record_name}}</p>
-			</h4>
-			<h4 class="col-sm-6 text-center">
+			<h4 class="col-sm-4 text-center">
 				<strong class = "text-muted">Business Name</strong>
 				<p>{{feature.properties.business_name}}</p>
 			</h4>
 		</div>
-		<div class = "col-xs-12" ng-init = 'showComments = false' ng-show = 'showComments'>
-			<h4><strong class = "text-muted">Comments</strong></h4>
-			<ul class="list-group" style = "overflow : scroll; margin-bottom : 20px">
-				<li class = "list-group-item list-item-panel" style = "margin : 5px" ng-repeat = "comment in feature.properties.commentsArray">{{comment}}</li>
-			</ul>
+		<div ng-if = "feature.properties.commentsArray.length > 0">
+			<div class = "col-xs-12" ng-init = 'showComments = false' ng-show = 'showComments'>
+				<h4><strong class = "text-muted">Comments</strong></h4>
+				<ul class="list-group" style = "overflow : scroll; margin-bottom : 20px">
+					<li class = "list-group-item list-item-panel" style = "margin : 5px" ng-repeat = "comment in feature.properties.commentsArray">{{comment}}</li>
+				</ul>
+			</div>
+			<div class="col-xs-12" >
+				<a  ng-click = "showComments = !showComments">
+					<h4 class = 'text-center' ng-if = '!showComments'>Show Comments</h4>
+					<h4 class = 'text-center' ng-if = 'showComments'>Hide Comments</h4>
+				</a>
+			</div>
 		</div>
-		<div class="col-xs-12">
-			<a  ng-click = "showComments = !showComments">
-				<h4 class = 'text-center' ng-if = '!showComments'>Show Comments</h4>
-				<h4 class = 'text-center' ng-if = 'showComments'>Hide Comments</h4>
-			</a>
-		</div>
-	</div>
-	<a  ng-click = "showMore = !showMore">
-		<h4 class = 'text-center' ng-if = '!showMore'>Show More</h4>
-		<h4 class = 'text-center' ng-if = 'showMore'>Show Less</h4>
-	</a>
 </div>
 </div>

@@ -11,6 +11,7 @@ simplicity.factory('Owner', ['$http', '$location', '$q', '$filter', '$stateParam
       'searchForText' : 'an address, street, owner, or PIN',
       'position' : 9,
       'downloadable' : true,
+      'inTheCityOnly' : false,
       'searchby' : {
         'address' : {
           'params' : {

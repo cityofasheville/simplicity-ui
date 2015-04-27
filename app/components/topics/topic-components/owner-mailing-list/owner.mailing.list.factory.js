@@ -11,6 +11,7 @@ simplicity.factory('OwnerMailingList', ['$http', '$location', '$q', '$filter', '
       'searchForText' : 'an address, street, owner, or PIN',
       'position' : 9,
       'downloadable' : true,
+      'inTheCityOnly' : false,
       'searchby' : {
         'street_name' : {
           'params' : {
