@@ -22,7 +22,7 @@
     <i class="fa fa-lg fa-times-circle text-danger"></i> 
     <strong>It's not in the city!</strong>
   </h3>
-  <div class="list-group" style = "margin-top : 20px" ng-if = "inTheCity">
+  <div class="list-group" style = "margin-top : 20px" ng-if = "inTheCity === true || inTheCity === null">
     <a class="row list-group-item list-item-panel" href = '{{topic.linkTo}}' style = "margin-bottom : 5px" ng-repeat = "topic in topics |orderBy:'position'" analytics-category="'Topic'" analytics-label="{{topic.title}}" analytics-event="{{topic.question}}">
       <!-- mobile -->
       <span class="visible-xs col-xs-8"><p class="text-primary text-center"> {{topic.question}}</p></span>
@@ -33,7 +33,7 @@
       <h4 class="col-sm-1 hidden-xs"><i  class="fa fa-2x fa-chevron-right text-primary pull-right"></i></h4>
     </a>
   </div>
-  <div class="list-group" style = "margin-top : 20px" ng-if = "!inTheCity">
+  <div class="list-group" style = "margin-top : 20px" ng-if = "inTheCity === false">
     <a class="row list-group-item list-item-panel" href = '{{topic.linkTo}}' ng-if = "!topic.inTheCityOnly" style = "margin-bottom : 5px" ng-repeat = "topic in topics |orderBy:'position'" analytics-category="'Topic'" analytics-label="{{topic.title}}" analytics-event="{{topic.question}}">
       <!-- mobile -->
       <span class="visible-xs col-xs-8"><p class="text-primary text-center"> {{topic.question}}</p></span>
