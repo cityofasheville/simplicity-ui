@@ -152,8 +152,17 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
         }else{
           if(addressCache.crime){ 
             if(addressCache.crime[Number($stateParams.extent)]){
+              var stringOfCrimeIds = '';
+
+              for (var i = 0; i < addressCache.crime[$stateParams.extent].length; i++) {
+                if(i === 0){
+                  stringOfCrimeIds = stringOfCrimeIds + "'" + addressCache.crime[$stateParams.extent][i] + "'";
+                }else{
+                  stringOfCrimeIds = stringOfCrimeIds + ",'" + addressCache.crime[$stateParams.extent][i] + "'";
+                }         
+              }
               queryValues = {
-                'crimeIds' : addressCache.crime[Number($stateParams.extent)],
+                'crimeIds' : stringOfCrimeIds,
                 'time' : timeExpression,
               };
               simplicityBackend.simplicityQuery('crimes', queryValues)

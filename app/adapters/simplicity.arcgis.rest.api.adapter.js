@@ -10,7 +10,7 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
      //  \___|_|  |_|_| |_| |_|\___||___/                           
     'crimes' : {
       'address' : {
-        'sqlArray' : ['pid in (', 'crimeIds', ') and thedate >', 'time'],
+        'sqlArray' : ['idnum in (', 'crimeIds', ') and thedate >', 'time'],
         'sqlParamName' : 'where',
         'queryParams' : {
           'where' : '',
@@ -19,7 +19,7 @@ angular.module('simplicity.arcgis.rest.api.adapter', [])
         }
       },
       'street_name' : {
-        'sqlArray' : ['pid in (', 'crimeIds', ') and thedate >', 'time'],
+        'sqlArray' : ['idnum in (', 'crimeIds', ') and thedate >', 'time'],
         'sqlParamName' : 'where',
         'queryParams' : {
           'where' : '',
