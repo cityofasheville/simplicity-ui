@@ -355,7 +355,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
 
     if($stateParams.mapcenter && $stateParams.mapcenter !== null){
       var mapCenterArray = $stateParams.mapcenter.split(',');
-      console.log(mapCenterArray);
+
       L.marker([Number(mapCenterArray[3]), Number(mapCenterArray[1])]).addTo(map);
     }
 
@@ -375,6 +375,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
         Topics.buildTopic()
           .then(function(topic){
             $scope.topic = topic;
+    
             $scope.loading = false;
             if(topic.searchGeojson){
               addSearchGeoJsonToMap(topic.searchGeojson).addTo(map);
@@ -450,7 +451,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
 
     $scope.changeColor = function(color){
       return {'color' : color};
-    }
+    };
 
 
     $scope.openDownloadModal = function(){
@@ -551,5 +552,15 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
     }
   };
 
+
+  $scope.citizenServiceRequestData = {};
+  $scope.openCitizenServiceRequestModal = function(itemDetails){
+    $scope.citizenServiceRequestData = itemDetails;
+    $('#citizenServiceRequestModal').modal({'backdrop' : false});
+  };
+
+  $scope.closeCitizenServiceRequestModal = function(){
+    $state.transitionTo('main.topics.topic', $stateParams, {'reload' : true});
+  };
 
 }]);
