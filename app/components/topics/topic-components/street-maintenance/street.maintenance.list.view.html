@@ -33,15 +33,9 @@
       Click here to contact the maintenance authority
     </h4>
   </a>
-  <a ng-if = "feature.properties.street_responsibility_citizen_service_requests.brand !== null" target = "_blank" href="{{feature.properties.street_responsibility_citizen_service_requests.url}}">
-    <h4 class = "text-center" style = "margin-botton : 20px">
-      Or make a citizen service request using 
-    </h4>
-    <div class="col-xs-12 text-center" style = "margin-bottom : 20px">
-      <button class="btn btn-primary">{{feature.properties.street_responsibility_citizen_service_requests.brand}}</button>
-    </div>
-    
-  </a>
+  <div class="col-xs-12 text-center" style = "margin-bottom : 20px">
+    <button class="btn btn-success" ng-click = "openCitizenServiceRequestModal(feature.properties)">Report with the {{feature.properties.street_responsibility_citizen_service_requests.brand}}</button>
+  </div>
   </div>
 
 

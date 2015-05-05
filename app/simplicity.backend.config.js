@@ -164,7 +164,204 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
       return simplicityBackend; 
 
     
-    }]); //END simplicityBackend factory function
+    }]) //END simplicityBackend factory function
+    .directive('simplicityCitizenServiceRequestForm', ['$http', '$q', 'simplicityHttp', '$stateParams', function($http, $q, simplicityHttp, $stateParams){
+        return {
+
+        restrict: 'A',
+        //Defines the scope object for the directive 
+        scope:{
+          topic : '= simplicityCitizenServiceRequestForm',
+        },
+
+        replace : true,
+        //Template for the directive
+        templateUrl: 'citizen-service-request/request-form.html',
+        controller : ['$scope', 'simplicityHttp', '$stateParams', function($scope, simplicityHttp, $stateParams){
+
+  
+          //base url for public stuff api
+          var baseUrl = 'https://www.publicstuff.com/api/2.0/';
+          var iframeBaseUrl = "https://iframe.publicstuff.com/#?client_id=819";
+
+          //Submitting action states
+          $scope.submitting = false;
+          $scope.submitted = false;
+          $scope.submittedWithSuccess = false;
+
+          //Containers
+          $scope.requestTypeOptions = [];
+          $scope.citizenRequestType = {};
+          $scope.citizenRequestTitle = "";
+          $scope.requestTypeFields = [];
+          $scope.requestedId = "";
+          $scope.followUpUrl = "";
+
+          var requestTypeUrl = baseUrl + "requesttypes_list";
+
+
+          var checkRequired = function(truthyValue){
+            if(truthyValue === 0){
+              return false;
+            }else{
+              return true;
+            }
+          };
+
+          var buildOptions = function(options){
+       
+            if(options.length === 0){
+              return options;
+            }
+
+            var formattedOptions = [];
+
+            for (var i = 0; i < options.length; i++) {
+              formattedOptions.push({'value' : options[i].option.name, 'label' : options[i].option.name});
+            }
+
+            return formattedOptions;
+          };
+
+          //Get available request types
+          var requestTypeParams = {
+            'client_id' : 819,
+            'return_type' : 'json'
+          };
+          simplicityHttp.get(requestTypeUrl, requestTypeParams)
+          .then(function(httpResults){
+            var requestTypesArray = [];
+            for (var i = 0; i < httpResults.response.request_types.length; i++) {
+
+              requestTypesArray.push({'value' : httpResults.response.request_types[i].request_type, 'label' : httpResults.response.request_types[i].request_type.name});
+            }
+            $scope.requestTypeOptions = requestTypesArray;
+          });
+
+          $scope.onChangeRequestType = function(requestType){
+    
+            $scope.requestTypeFields = [];
+
+            if(requestType.value.disable_title === 0){
+              var requestTypeTitle = {
+                'name' : 'title', 
+                'label' : '', 
+                'description' : '', 
+                'type' : 'hidden', 
+                'options' : [],
+                'value' : requestType.value.name,
+                'required' : true
+              };
+              $scope.requestTypeFields.push(requestTypeTitle);
+            }
+            if(requestType.value.require_address === 1){
+              var requestTypeAddress = {
+                'name' : 'address', 
+                'label' : 'Address', 
+                'description' : '', 
+                'type' : 'hidden', 
+                'options' : [],
+                'value' : $stateParams.searchtext,
+                'required' : true
+              };
+              $scope.requestTypeFields.push(requestTypeAddress);
+            }
+            if(requestType.value.disable_description === 0){
+              var requestTypeDescription = {
+                'name' : 'description', 
+                'label' : 'Description', 
+                'description' : 'Anything else that we should know about the issue?', 
+                'type' : 'textarea', 
+                'value' : '',
+                'options' : [],
+                'required' : true
+              };
+              $scope.requestTypeFields.push(requestTypeDescription);
+            }
+            if(requestType.value.has_custom_fields === 1){
+              for (var i = 0; i < requestType.value.custom_fields.length; i++) {
+  
+                  var requestTypeCustomField = {
+                    'name' : 'custom_field_' + requestType.value.custom_fields[i].custom_field.id, 
+                    'label' : requestType.value.custom_fields[i].custom_field.name, 
+                    'description' : requestType.value.custom_fields[i].custom_field.description, 
+                    'type' : requestType.value.custom_fields[i].custom_field.type, 
+                    'options' : buildOptions(requestType.value.custom_fields[i].custom_field.options),
+                    'value' : '',
+                    'required' : checkRequired(requestType.value.custom_fields[i].custom_field.required)
+                  };
+                  $scope.requestTypeFields.push(requestTypeCustomField);
+              }
+              
+            }
+          };
+
+          $scope.submitCitizenServiceRequest = function(){
+            
+            var q = $q.defer();
+            $scope.submitting = true;
+
+            var valuesToPost = {
+              'return_type' : 'json',
+              'space_id' : 3737,
+              'request_type_id' : $scope.citizenRequestType.value.id,
+              'latitude' : $scope.topic.center_y,
+              'longitude' : $scope.topic.center_x,
+              'client_id' : 819
+            };
+
+            //add form field values to post obj
+            for (var i = 0; i < $scope.requestTypeFields.length; i++) {
+              if($scope.requestTypeFields[i].type === 'singleselect'){
+                valuesToPost[$scope.requestTypeFields[i].name] = $scope.requestTypeFields[i].value.value;
+              }else if($scope.requestTypeFields[i].type === 'multiselect'){
+                var multiSelectArray = [];
+                for (var x = 0; x < $scope.requestTypeFields[i].value.length; x++) {
+                  multiSelectArray.push($scope.requestTypeFields[i].value[x].value);
+                }
+                valuesToPost[$scope.requestTypeFields[i].name] = JSON.stringify(multiSelectArray);
+              }else{
+                valuesToPost[$scope.requestTypeFields[i].name] = $scope.requestTypeFields[i].value;
+              }
+            }
+
+
+            //build a string of the url
+            var submitRequestUrl = baseUrl + "request_submit?";
+
+            for(var prop in valuesToPost){
+              submitRequestUrl = submitRequestUrl + prop + "=" + valuesToPost[prop] + "&";
+            }
+
+            submitRequestUrl = submitRequestUrl.slice(0, -1);
+
+            //make post request
+            $http({method : 'POST', url : submitRequestUrl, data : {}, cache : false, headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}})
+              //callbacks
+              .success(function(data, status, headers, config){
+                if(data.response.status.type === 'error'){
+                  $scope.submitting = false;
+                  $scope.submitted = true;
+                  $scope.submittedWithSuccess = false;
+                }else{
+                  $scope.submitting = false;
+                  $scope.submitted = true;
+                  $scope.submittedWithSuccess = true;
+                  $scope.requestedId = data.response.request_id;
+                  $scope.followUpUrl = iframeBaseUrl + "&request_id=" + data.response.request_id;
+                  $scope.requestTypeFields = [];
+                  q.resolve(data);
+                }
+              })
+              .error(function(error){
+                  console.log('Error posting to public stuff.');
+                  console.log(error);
+              });
+            return q.promise;
+          };
+        }]
+      };
+}]);
 
 
 

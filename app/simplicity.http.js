@@ -30,6 +30,7 @@ angular.module('simplicity.http', [])
         return q.promise;
       };//END queryBackend function
 
+
       //builds query params from a queryTemplate defined in a adapter file (eg. simplicity.arcgis.rest.api.adapter.js)
       //and an object of queryValues to inject into the queryTemplate
       simplicityHttp.buildQueryParams = function(queryTemplate, queryValues){
