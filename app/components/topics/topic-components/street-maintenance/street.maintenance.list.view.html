@@ -34,7 +34,8 @@
     </h4>
   </a>
   <div class="col-xs-12 text-center" style = "margin-bottom : 20px">
-    <button class="btn btn-success" ng-click = "openCitizenServiceRequestModal(feature.properties)">Report with the {{feature.properties.street_responsibility_citizen_service_requests.brand}}</button>
+
+    <button ng-if = "feature.properties.street_responsibility_citizen_service_requests.report === true" class="btn btn-success" ng-click = "openCitizenServiceRequestModal(feature.properties)">Report with the {{feature.properties.street_responsibility_citizen_service_requests.brand}}</button>
   </div>
   </div>
 

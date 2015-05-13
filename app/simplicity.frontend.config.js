@@ -76,11 +76,11 @@ angular.module('simplicity.frontend.config', [])
       'NATIONAL PARK SERVICE' : 'http://www.nps.gov/blri/contacts.htm'
     })
   .constant('STREET_MAINTENANCE_CITIZEN_SERVICE_REQUESTS', {
-      'NCDOT' : {'brand' : null, 'url' : null},
-      'CITY OF ASHEVILLE' : {'brand' : "The Asheville App", 'url' : 'http://www.ashevillenc.gov/Departments/ITServices/OnlineServices/CitizenServiceRequests.aspx'},
-      'PRIVATE' : {'brand' : null, 'url' : null},
-      'UNKNOWN' : {'brand' : null, 'url' : null},
-      'NATIONAL PARK SERVICE' : {'brand' : null, 'url' : null},
+      'NCDOT' : {'report' : false, 'brand' : null},
+      'CITY OF ASHEVILLE' : {'report' : true, 'brand' : "The Asheville App"},
+      'PRIVATE' : {'report' : false, 'brand' : null},
+      'UNKNOWN' : {'report' : false, 'brand' : null},
+      'NATIONAL PARK SERVICE' : {'report' : false, 'brand' : null}
     })
   //These are the correct zoning code links for asheville, the ones in the database are wrong
   .constant('CODELINKS', {
