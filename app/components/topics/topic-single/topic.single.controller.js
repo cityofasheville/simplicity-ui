@@ -468,7 +468,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
 
     $scope.downloadCsv = function(downloadType, topic){
 
-      var csvString =  'data:text/csv;charset=utf-8,';
+      var csvString =  'data:text/text;charset=utf-8,';
       if(downloadType === 'summary'){
         csvString += 'Type, Count' + '\n';
         for(var key in topic.summary.table){

@@ -238,12 +238,12 @@
         </div>
         <div class="modal-body">
           <div ng-if= "stateParams.topic === 'property' || stateParams.topic === 'owner' || stateParams.topic === 'ownermailinglist' || stateParams.topic === 'zoning' || stateParams.topic === 'addresslist' || stateParams.topic === 'addressmailinglist' || stateParams.topic === 'streetmaintenance'">
-            <button class="btn btn-primary col-xs-12" ng-click = "downloadCsv('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">{{topicProperties.title}} Details CSV <i class="fa fa-download"></i></button>
+            <a download = "download.csv" class="btn btn-primary col-xs-12" ng-click = "downloadCsv('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">{{topicProperties.title}} Details CSV <i class="fa fa-download"></i></a>
             <button class="btn btn-primary col-xs-12" style = "margin-top : 5px" ng-click = "downloadGeoJson('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">{{topicProperties.title}} Details GeoJson <i class="fa fa-download"></i></button>
           </div>
           <div ng-if = "stateParams.topic === 'crime' || stateParams.topic === 'development'">
-            <button class="btn btn-primary col-xs-12" ng-click = "downloadCsv('summary', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="summary" analytics-event="{{stateParams.topic}}">Summary Table <i class="fa fa-download"></i></button>
-            <button class="btn btn-primary col-xs-12" style = "margin-top : 3px" ng-click = "downloadCsv('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Detailed records <i class="fa fa-download"></i></button>
+            <a download = "download.csv" class="btn btn-primary col-xs-12" ng-click = "downloadCsv('summary', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="summary" analytics-event="{{stateParams.topic}}">Summary Table <i class="fa fa-download"></i></a>
+            <a download = "download.csv" class="btn btn-primary col-xs-12" style = "margin-top : 3px" ng-click = "downloadCsv('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">Detailed records <i class="fa fa-download"></i></a>
             <button class="btn btn-primary col-xs-12" style = "margin-top : 3px" ng-click = "downloadGeoJson('complete', topic)" analytics-on ="click"  analytics-category="Download" analytics-label="complete" analytics-event="{{stateParams.topic}}">{{topicProperties.title}} Details GeoJson <i class="fa fa-download"></i></button>
             <p class = "text-muted text-center">based on selected filters</p>
           </div>
