@@ -1,5 +1,5 @@
-simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParams', 'AddressCache', 'simplicityBackend', 'TimeFrame', 'COLORS', 'DESCRIPTIONS',
-  function($http, $location, $q, $filter, $stateParams, AddressCache, simplicityBackend, TimeFrame, COLORS, DESCRIPTIONS){   
+simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParams', 'AddressCache', 'simplicityBackend', 'TimeFrame', 'COLORS', 'DESCRIPTIONS', 'simplicityArcGisRestApiAdapter', 'simplicityHttp',
+  function($http, $location, $q, $filter, $stateParams, AddressCache, simplicityBackend, TimeFrame, COLORS, DESCRIPTIONS, simplicityArcGisRestApiAdapter, simplicityHttp){   
 
     var Crime = {};
 
@@ -91,6 +91,65 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
     };
 
 
+    var makeAStringOfIds = function(a){
+      
+      var q = $q.defer();
+      var stringOfCrimeIds = '';
+      for (var i = 0; i < a.length; i++) {
+
+        if(i === 0){
+          stringOfCrimeIds = stringOfCrimeIds + "'" + a[i] + "'";
+        }else{
+          stringOfCrimeIds = stringOfCrimeIds + ",'" + a[i] + "'";
+        }         
+      }
+
+      q.resolve( stringOfCrimeIds);
+      return q.promise;
+    };
+
+
+    var makeSingleRequest = function(a){
+      var q = $q.defer();
+
+      
+      makeAStringOfIds(a)
+        .then(function(stringOfCrimeIds){
+          
+          //var timeExpression = "'2014-5-22'";
+          var time = new Date(TimeFrame.get($stateParams.timeframe));
+          var timeExpression = simplicityBackend.formatTimeForQuery(time);
+          var queryValues = {
+            'crimeIds' : stringOfCrimeIds,
+            'time' : timeExpression,
+          };
+          
+          simplicityBackend.simplicityQuery('crimes', queryValues)
+            .then(function(data){
+              q.resolve(data);
+            })
+
+        });
+
+        return q.promise;
+    }
+
+
+    var makeMultipleRequests = function(arrayOfArraysContainingCrimeIds){    
+       
+      var queryParamsArray = [];
+  
+      for (var i = 0; i < arrayOfArraysContainingCrimeIds.length; i++) {
+        queryParamsArray.push(makeSingleRequest(arrayOfArraysContainingCrimeIds[i]));
+        
+        if(queryParamsArray.length === arrayOfArraysContainingCrimeIds.length){
+          return $q.all(queryParamsArray);
+        }
+      };
+      
+    }
+
+
     var formatCrimeData = function(crimes){
       var addressCache = AddressCache.get();
 
@@ -152,23 +211,56 @@ simplicity.factory('Crime', ['$http', '$location', '$q', '$filter', '$stateParam
         }else{
           if(addressCache.crime){ 
             if(addressCache.crime[Number($stateParams.extent)]){
-              var stringOfCrimeIds = '';
+              if(addressCache.crime[$stateParams.extent].length < 150){
+                var stringOfCrimeIds = '';
 
-              for (var i = 0; i < addressCache.crime[$stateParams.extent].length; i++) {
-                if(i === 0){
-                  stringOfCrimeIds = stringOfCrimeIds + "'" + addressCache.crime[$stateParams.extent][i] + "'";
-                }else{
-                  stringOfCrimeIds = stringOfCrimeIds + ",'" + addressCache.crime[$stateParams.extent][i] + "'";
-                }         
+                for (var i = 0; i < addressCache.crime[$stateParams.extent].length; i++) {
+                  if(i === 0){
+                    stringOfCrimeIds = stringOfCrimeIds + "'" + addressCache.crime[$stateParams.extent][i] + "'";
+                  }else{
+                    stringOfCrimeIds = stringOfCrimeIds + ",'" + addressCache.crime[$stateParams.extent][i] + "'";
+                  }         
+                }
+                queryValues = {
+                  'crimeIds' : stringOfCrimeIds,
+                  'time' : timeExpression,
+                };
+                simplicityBackend.simplicityQuery('crimes', queryValues)
+                  .then(function(crimes){
+                      q.resolve(formatCrimeData(crimes));
+                  });
+              }else{
+
+                //There could be a lot of crimeIds, so split then into batches of 150
+                //this should keep the url length below 2000
+                var crimeIds = addressCache.crime[$stateParams.extent];
+                var crimeIdsContainerArray = [];
+
+                while(crimeIds.length >= 150){
+                  var arraySection = crimeIds.splice(0, 150);
+                  crimeIdsContainerArray.push(arraySection);
+                }
+
+                crimeIdsContainerArray.push(crimeIds);
+
+                makeMultipleRequests(crimeIdsContainerArray)
+                  .then(function(multipleRequestsResults){
+                    //Combine all the requests into one geojson object
+                    var combinedGeoJson = {
+                      'features' : [],
+                      'type' : "FeatureCollection"
+                    }
+                    for (var m = 0; m < multipleRequestsResults.length; m++) {
+                      for (var f = 0; f < multipleRequestsResults[m].features.length; f++) {
+                        combinedGeoJson.features.push(multipleRequestsResults[m].features[f]);
+                      };
+                      
+                    };
+                    q.resolve(formatCrimeData(combinedGeoJson) ); 
+                    
+                    
+                  });
               }
-              queryValues = {
-                'crimeIds' : stringOfCrimeIds,
-                'time' : timeExpression,
-              };
-              simplicityBackend.simplicityQuery('crimes', queryValues)
-                .then(function(crimes){
-                    q.resolve(formatCrimeData(crimes));
-                });
             }else{
               q.resolve(formatCrimeData({'features' : []}));
             }

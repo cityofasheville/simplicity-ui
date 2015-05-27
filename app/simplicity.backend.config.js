@@ -80,16 +80,49 @@ angular.module('simplicity.backend.config', ['simplicity.arcgis.rest.api.adapter
       simplicityBackend.simplicityQuery = function(table, queryValues){
         var q = $q.defer();
 
+        //var queryTemplate = QUERIES[table][$stateParams.searchby];
+        var queryTemplate = {};
+
+        angular.copy(QUERIES[table][$stateParams.searchby], queryTemplate);
+        //var queryParams = simplicityHttp.buildQueryParams(queryTemplate, queryValues);
+        simplicityHttp.buildQueryParams(queryTemplate, queryValues)
+          .then(function(queryParams){
+            simplicityHttp.get(TABLES[table].url, queryParams)
+              .then(function(httpResults){
+                //should I check the dataApi property here? or only allow one dataApi for all tables
+                //if I allow multiple dataApis, I won't be able to inject adapters as a generic simplicityAdapter
+                q.resolve(simplicityAdapter.formatHttpResults(httpResults));
+              });
+          })
+        
+
+        return q.promise;
+      };
+
+      var getQueryConstant = function(table){
+        var q = $q.defer();
         var queryTemplate = QUERIES[table][$stateParams.searchby];
-        var queryParams = simplicityHttp.buildQueryParams(queryTemplate, queryValues);
+        
+          q.resolve(queryTemplate)
+                
+        return q.promise;
+      }
 
-        simplicityHttp.get(TABLES[table].url, queryParams)
-          .then(function(httpResults){
-            //should I check the dataApi property here? or only allow one dataApi for all tables
-            //if I allow multiple dataApis, I won't be able to inject adapters as a generic simplicityAdapter
-            q.resolve(simplicityAdapter.formatHttpResults(httpResults));
-          });
+      simplicityBackend.simplicityQuerySpecial = function(table, queryValues){
+        var q = $q.defer();
 
+        var queryTemplate = {};
+
+        angular.copy(QUERIES[table][$stateParams.searchby], queryTemplate);
+
+        simplicityHttp.buildQueryParamsAndMakeGetRequest(queryTemplate, queryValues)
+          .then(function(data){
+            q.resolve(simplicityAdapter.formatHttpResults( data));
+          })
+          
+        //var queryParams = simplicityHttp.buildQueryParams(queryTemplate, queryValues);
+        
+        
         return q.promise;
       };
 
