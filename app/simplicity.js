@@ -2,13 +2,17 @@
 var simplicity = angular.module('simplicity', ['angulartics', 'angulartics.google.analytics', 'simplicity.frontend.config', 'simplicity.backend.config', 'ui.router', 'ngAnimate']);
  
 //Configure application states and routes
-simplicity.config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
+simplicity.config(function ($stateProvider, $urlRouterProvider, $httpProvider, $compileProvider) {
     
     $urlRouterProvider.when('/topics', '/topics/list');
     $urlRouterProvider.when('', '/search');
     $urlRouterProvider.when('/', '/search');
     $urlRouterProvider.when('/a-zA-Z0-9/', '');
     $urlRouterProvider.otherwise('/search');
+
+   
+    $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|data|mailto|chrome-extension):/);
+
 
     //define states
     $stateProvider
