@@ -363,118 +363,24 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
     $scope.emailSubject = "";
     $scope.emailBodyText = "";
 
-    //  _   _                _   _     _           _             _                                   _   _     _             
-    // | | | | ___ _   _    | |_| |__ (_)___   ___| |_ __ _ _ __| |_ ___    _____   _____ _ __ _   _| |_| |__ (_)_ __   __ _ 
-    // | |_| |/ _ \ | | |   | __| '_ \| / __| / __| __/ _` | '__| __/ __|  / _ \ \ / / _ \ '__| | | | __| '_ \| | '_ \ / _` |
-    // |  _  |  __/ |_| |_  | |_| | | | \__ \ \__ \ || (_| | |  | |_\__ \ |  __/\ V /  __/ |  | |_| | |_| | | | | | | | (_| |
-    // |_| |_|\___|\__, ( )  \__|_| |_|_|___/ |___/\__\__,_|_|   \__|___/  \___| \_/ \___|_|   \__, |\__|_| |_|_|_| |_|\__, |
-    //             |___/|/                                                                     |___/                   |___/ 
-
-    AddressCache.query()
-      .then(function(data){
-        Topics.buildTopic()
-          .then(function(topic){
-            $scope.topic = topic;
-    
-            $scope.loading = false;
-            if(topic.searchGeojson){
-              addSearchGeoJsonToMap(topic.searchGeojson).addTo(map);
-            }
-            if(topic.overlays){
-              var overlayLayer = addOverlayGeoJsonToMap(topic.overlays, {'fillOpacity' : 1,'opacity' : 1});
-            }
-            if(topic.features){
-              if($stateParams.type !== null || $stateParams.type !== 'null'){
-                var filteredTopic = $filter('filter')(topic.features, $stateParams.type, true);
-                addGeoJsonToMap(filteredTopic);
-              }else{
-                addGeoJsonToMap(topic);
-              }             
-            }
-
-
-            //EMAIL FORMATTING
-
-            var emailTopic = "";
-
-            if($scope.topic.features !== undefined){
-              if($scope.topic.features.length > 1){
-                emailTopic = $scope.topicProperties.plural;
-              }else{
-                emailTopic = "the " + $scope.topicProperties.title;
-              }
-            }else{
-              emailTopic = $scope.topicProperties.title;
-            }
-            
-
-            $scope.emailSearchBy = "";
-
-            if($scope.topicProperties.searchby[$stateParams.searchby].prepositions.timeframe){
-              $scope.emailSearchBy = $scope.emailSearchBy + " " + $scope.topicProperties.searchby[$stateParams.searchby].prepositions.timeframe + " " + $scope.timeframeOptions[$scope.timeframeOptionIndex].label;
-            }
-
-            if($scope.topicProperties.searchby[$stateParams.searchby].prepositions.extent){
-              $scope.emailSearchBy = $scope.emailSearchBy + " " + $scope.topicProperties.searchby[$stateParams.searchby].prepositions.extent + " " + $scope.extentOptions[$scope.extentOptionIndex].label;
-            }
-
-            if($scope.topicProperties.searchby[$stateParams.searchby].prepositions.searchby){
-              $scope.emailSearchBy = $scope.emailSearchBy + " " + $scope.topicProperties.searchby[$stateParams.searchby].prepositions.searchby + " " + $stateParams.searchtext;
-            }
 
 
 
-            $scope.emailSubject = "SimpliCity data for " + emailTopic + $scope.emailSearchBy;
-
-            $scope.emailBodyText ="City of Asheville's SimpliCity: city data simplified%0D%0A%0D%0AClick the link below to view your data.%0D%0A%0D%0A<" + escape(window.location) + ">";
-                    
-          });
-      });
 
 
-    $scope.goToTopics = function(){
-      $state.go('main.topics.list', {'searchtext' : $stateParams.searchtext, 'searchby' : $stateParams.searchby, 'id' : $stateParams.id});
-    };
-
-    $scope.filterBy = function(type){
-
-      if($stateParams.view === 'summary'){
-        updateStateParamsAndReloadState('type', type);
-        updateStateParamsAndReloadState('view', 'list');
-      }else if($stateParams.view === 'map' || $stateParams.view === 'list'){
-        updateStateParamsAndReloadState('type', type);
-      }else{
-        //do nothing
-      }
-      $scope.filterText = type;
-    };
-
-    $scope.changeColor = function(color){
-      return {'color' : color};
-    };
-
-
-    $scope.openDownloadModal = function(){
-      $('#downloadModal').modal({'backdrop' : false});
-    };
-
-    $scope.downloadGeoJson = function(downloadType, topic){
-      var jsonString =  'data:text/json;charset=utf-8,';
-      var json = JSON.stringify(topic);
-      jsonString = jsonString + json;
-      var encodedUri = encodeURI(jsonString);
-      window.open(encodedUri);
-    };
-
-    $scope.downloadCsv = function(downloadType, topic){
+    var generateCsvForDownload = function(downloadType, topic){
 
       var csvString =  'data:text/text;charset=utf-8,';
+
       if(downloadType === 'summary'){
         csvString += 'Type, Count' + '\n';
         for(var key in topic.summary.table){
           var summaryItemString = key + ',' + topic.summary.table[key].count;
           csvString += summaryItemString + '\n';
         }
+        var encodedUri = encodeURI(csvString);
+        
+        return encodedUri;
       }else if (downloadType === 'complete'){
         var headerArray = [];
         
@@ -543,14 +449,132 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
                 rowArray.push('NULL');
               }
             }
-        
+          
+          }
+          csvString += rowArray.join(',') + '\n';
+        }
+
+        var encodedUri = encodeURI(csvString);
+        //window.open(encodedUri);
+        return encodedUri;
       }
-      csvString += rowArray.join(',') + '\n';
-      }
-      var encodedUri = encodeURI(csvString);
+    };
+
+    $scope.openDownloadModal = function(){
+      $('#downloadModal').modal({'backdrop' : false});
+    };
+
+    $scope.downloadGeoJson = function(downloadType, topic){
+      var jsonString =  'data:text/json;charset=utf-8,';
+      var json = JSON.stringify(topic);
+      jsonString = jsonString + json;
+      var encodedUri = encodeURI(jsonString);
       window.open(encodedUri);
-    }
-  };
+    };
+
+    $scope.summaryCsvDataUrl = "";
+    $scope.completeCsvDataUrl = "";
+
+    //  _   _                _   _     _           _             _                                   _   _     _             
+    // | | | | ___ _   _    | |_| |__ (_)___   ___| |_ __ _ _ __| |_ ___    _____   _____ _ __ _   _| |_| |__ (_)_ __   __ _ 
+    // | |_| |/ _ \ | | |   | __| '_ \| / __| / __| __/ _` | '__| __/ __|  / _ \ \ / / _ \ '__| | | | __| '_ \| | '_ \ / _` |
+    // |  _  |  __/ |_| |_  | |_| | | | \__ \ \__ \ || (_| | |  | |_\__ \ |  __/\ V /  __/ |  | |_| | |_| | | | | | | | (_| |
+    // |_| |_|\___|\__, ( )  \__|_| |_|_|___/ |___/\__\__,_|_|   \__|___/  \___| \_/ \___|_|   \__, |\__|_| |_|_|_| |_|\__, |
+    //             |___/|/                                                                     |___/                   |___/ 
+
+    AddressCache.query()
+      .then(function(data){
+        Topics.buildTopic()
+          .then(function(topic){
+            $scope.topic = topic;
+            
+    
+            $scope.loading = false;
+            if(topic.searchGeojson){
+              addSearchGeoJsonToMap(topic.searchGeojson).addTo(map);
+            }
+            if(topic.overlays){
+              var overlayLayer = addOverlayGeoJsonToMap(topic.overlays, {'fillOpacity' : 1,'opacity' : 1});
+            }
+            if(topic.features){
+              if($stateParams.type !== null || $stateParams.type !== 'null'){
+                var filteredTopic = $filter('filter')(topic.features, $stateParams.type, true);
+                addGeoJsonToMap(filteredTopic);
+              }else{
+                addGeoJsonToMap(topic);
+              }             
+            }
+
+            if ($stateParams.topic === 'crime' || $stateParams.topic === 'development') {
+              $scope.summaryCsvDataUrl = generateCsvForDownload('summary', $scope.topic);
+              $scope.completeCsvDataUrl = generateCsvForDownload('complete', $scope.topic);
+              console.log($scope.summaryCsvDataUrl);
+            }else{
+              $scope.completeCsvDataUrl = generateCsvForDownload('complete', $scope.topic);
+            }
+
+
+            //EMAIL FORMATTING
+
+            var emailTopic = "";
+
+            if($scope.topic.features !== undefined){
+              if($scope.topic.features.length > 1){
+                emailTopic = $scope.topicProperties.plural;
+              }else{
+                emailTopic = "the " + $scope.topicProperties.title;
+              }
+            }else{
+              emailTopic = $scope.topicProperties.title;
+            }
+            
+
+            $scope.emailSearchBy = "";
+
+            if($scope.topicProperties.searchby[$stateParams.searchby].prepositions.timeframe){
+              $scope.emailSearchBy = $scope.emailSearchBy + " " + $scope.topicProperties.searchby[$stateParams.searchby].prepositions.timeframe + " " + $scope.timeframeOptions[$scope.timeframeOptionIndex].label;
+            }
+
+            if($scope.topicProperties.searchby[$stateParams.searchby].prepositions.extent){
+              $scope.emailSearchBy = $scope.emailSearchBy + " " + $scope.topicProperties.searchby[$stateParams.searchby].prepositions.extent + " " + $scope.extentOptions[$scope.extentOptionIndex].label;
+            }
+
+            if($scope.topicProperties.searchby[$stateParams.searchby].prepositions.searchby){
+              $scope.emailSearchBy = $scope.emailSearchBy + " " + $scope.topicProperties.searchby[$stateParams.searchby].prepositions.searchby + " " + $stateParams.searchtext;
+            }
+
+
+
+            $scope.emailSubject = "SimpliCity data for " + emailTopic + $scope.emailSearchBy;
+
+            $scope.emailBodyText ="City of Asheville's SimpliCity: city data simplified%0D%0A%0D%0AClick the link below to view your data.%0D%0A%0D%0A<" + escape(window.location) + ">";
+                    
+          });
+      });
+
+
+    $scope.goToTopics = function(){
+      $state.go('main.topics.list', {'searchtext' : $stateParams.searchtext, 'searchby' : $stateParams.searchby, 'id' : $stateParams.id});
+    };
+
+    $scope.filterBy = function(type){
+
+      if($stateParams.view === 'summary'){
+        updateStateParamsAndReloadState('type', type);
+        updateStateParamsAndReloadState('view', 'list');
+      }else if($stateParams.view === 'map' || $stateParams.view === 'list'){
+        updateStateParamsAndReloadState('type', type);
+      }else{
+        //do nothing
+      }
+      $scope.filterText = type;
+    };
+
+    $scope.changeColor = function(color){
+      return {'color' : color};
+    };
+
+
 
 
   $scope.citizenServiceRequestData = {};
