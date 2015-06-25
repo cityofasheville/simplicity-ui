@@ -254,7 +254,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
           style: function (feature) {
             if(style){
               return style;
-            }else if(feature.geometry.type === "LineString"){
+            }else if(feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString"){
                 return {
                   color: feature.properties.color,
                   weight: 8,
