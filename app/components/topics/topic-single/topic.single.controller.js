@@ -584,6 +584,20 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
   };
 
   $scope.closeCitizenServiceRequestModal = function(){
+    $('#citizenServiceRequestModal').modal('hide');
+    $('#detailsModal').modal('hide');
+    $('body').css({
+          'overflow' : 'auto'
+        });
+        $('#map').css({
+          'height' : '400px',
+          'width' : '100%',
+          'position' : 'relative',
+        });
+         $('.leaflet-control-expand-map-interior').removeClass('leaflet-control-collapse');
+        $('.leaflet-control-expand-map-interior').addClass('leaflet-control-expand');
+        mapExpanded = !mapExpanded;
+    map.invalidateSize();
     $state.transitionTo('main.topics.topic', $stateParams, {'reload' : true});
   };
 
