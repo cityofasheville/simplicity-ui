@@ -225,6 +225,15 @@ gulp.task('images', ['clean:dev', 'clean:dist'],function () {
     .pipe(size());
 });
 
+//Copies images while flattening directory stucture
+gulp.task('logo', ['clean:dev', 'clean:dist'],function () {
+  return gulp.src('app/*.png')
+    .pipe(flatten())
+    .pipe(gulp.dest('dev'))
+    .pipe(gulp.dest('dist'))
+    .pipe(size());
+});
+
 //Copies favicon while flattening directory stucture
 gulp.task('favicon', ['clean:dev', 'clean:dist'],function () {
   return gulp.src('app/favicon.ico')
@@ -235,7 +244,7 @@ gulp.task('favicon', ['clean:dev', 'clean:dist'],function () {
 });
 
 //Injects dev CSS and JS depenencies into index.html as script and link tags
-gulp.task('inject:dev', ['fonts', 'favicon', 'images', 'copy-indexes', 'styles', 'js', 'js-assets'], function(){
+gulp.task('inject:dev', ['fonts', 'favicon', 'images', 'logo', 'copy-indexes', 'styles', 'js', 'js-assets'], function(){
 	var sources = gulp.src(['dev/*.js', 'dev/*.css'], {read: false});
 	return gulp.src('dev/index.html')
 		.pipe(inject(sources, {relative: true}))
@@ -243,7 +252,7 @@ gulp.task('inject:dev', ['fonts', 'favicon', 'images', 'copy-indexes', 'styles',
 });
 
 //Injects dist CSS and JS depenencies into index.html as script and link tags
-gulp.task('inject:dist', [ 'fonts', 'favicon', 'images','copy-indexes', 'styles', 'js', 'js-assets'], function(){
+gulp.task('inject:dist', [ 'fonts', 'favicon', 'images', 'logo','copy-indexes', 'styles', 'js', 'js-assets'], function(){
 	var sources = gulp.src(['dist/*.js', 'dist/*.css'], {read: false});
 	return gulp.src('dist/index.html')
 		.pipe(inject(sources, {relative: true}))
