@@ -128,6 +128,26 @@ angular.module('simplicity.frontend.config', [])
       'URD' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-25URREDI',
       'UV' : 'https://www.municode.com/library/nc/asheville/codes/code_of_ordinances?nodeId=PTIICOOR_CH7DE_ARTVIIIGEUSDI_S7-8-23URVIDI',
     })
+  .constant('EXEMPTION_TYPES', {
+      'EX1':	'CONT. CARE RET CTR',                     
+      'BLD':	'BUILDERS INVENTORY EXEMPTION',
+      'EX2':	'POLLUTION ABATEMENT',      
+      'EX3':	'DAV/VETERANS/LODGES',      
+      'EX4':	'MEDICAL CARE BONDS',       
+      'EX5':	'OTHER EXCLUSIONS',         
+      'EXA':	'HOMES FOR AGED,SICK',      
+      'EXC':	'CHARITABLE',               
+      'EXE':	'NON GOV. EDUCATION',       
+      'EXH':	'CHARITABLE HOSPITAL',      
+      'EXL':	'LOW INCOME HOUSING',       
+      'EXM':	'EXEMPT/GOVERNMENT',        
+      'EXO':	'OTHER EXEMPTIONS',         
+      'EXP':	'PROTECT NATURAL AREA',     
+      'EXR':	'RELIGIOUS EDUCATION',      
+      'EXS':	'SCIEN/LIT/CULTURAL',       
+      'HIS':	'HISTORICAL',
+      'RXM':	'EXEMPT/RELIGIOUS USE',     
+    })
   .factory('TimeFrame', [
     function(){
 

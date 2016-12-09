@@ -113,11 +113,11 @@
     </div>
     <div class="col-xs-12 list-item-panel">
       <h4>Other Details</h4>
-      <p class = "col-sm-6" ng-if= "feature.properties.exempt === null">
+      <p class = "col-sm-6" ng-if= "feature.properties.exempt === ''">
         Tax exempt : <span>NO</span>
       </p>
-          <p  class = "col-sm-6"ng-if= "feature.properties.exempt !== null">
-            Tax exempt : <span>YES</span>
+          <p  class = "col-sm-6"ng-if= "feature.properties.exempt !== ''">
+            Tax exempt : <span>{{exemptionTypes[feature.properties.exempt]}}</span>
           </p>
           <p  class = "col-sm-6"ng-if= "feature.properties.improved === 'Y'">
             Improved : 

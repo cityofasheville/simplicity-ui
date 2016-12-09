@@ -1,5 +1,5 @@
-simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$filter', '$location', 'Topics', 'AddressCache', 'SELECT_OPTIONS',
- function ($scope, $stateParams, $state, $filter, $location, Topics, AddressCache, SELECT_OPTIONS) {
+simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$filter', '$location', 'Topics', 'AddressCache', 'SELECT_OPTIONS', 'EXEMPTION_TYPES',
+ function ($scope, $stateParams, $state, $filter, $location, Topics, AddressCache, SELECT_OPTIONS, EXEMPTION_TYPES) {
 
     //****Private variables and methods*****//
 
@@ -600,5 +600,7 @@ simplicity.controller('TopicSingleCtrl', ['$scope', '$stateParams', '$state', '$
     map.invalidateSize();
     $state.transitionTo('main.topics.topic', $stateParams, {'reload' : true});
   };
+
+  $scope.exemptionTypes = EXEMPTION_TYPES;
 
 }]);
